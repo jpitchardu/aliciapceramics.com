@@ -5,22 +5,253 @@
   --foreground: #171717;
 }
 
-@theme inline {
+
+@theme {
+  /* Content paths for Tailwind to scan */
+  --content: "./src/**/*.{html,js,jsx,ts,tsx}", "./components/**/*.{html,js,jsx,ts,tsx}";
+  
+  /* Enable dark mode with class strategy
+  --dark-mode: class; */
+
+  /* Brand Colors */
+  --color-clay-50: #fef2f2;
+  --color-clay-100: #fee2e2;
+  --color-clay-200: #fecaca;
+  --color-clay-300: #fca5a5;
+  --color-clay-400: #f87171;
+  --color-clay-500: #ef4444;
+  --color-clay-600: #dc2626; /* Primary clay red */
+  --color-clay-700: #b91c1c;
+  --color-clay-800: #991b1b;
+  --color-clay-900: #7f1d1d;
+
+  --color-sky-50: #f0f9ff;
+  --color-sky-100: #e0f2fe;
+  --color-sky-200: #bae6fd;
+  --color-sky-300: #93c5fd; /* Primary sky blue */
+  --color-sky-400: #60a5fa;
+  --color-sky-500: #3b82f6;
+  --color-sky-600: #2563eb;
+  --color-sky-700: #1d4ed8;
+  --color-sky-800: #1e40af;
+  --color-sky-900: #1e3a8a;
+
+  --color-warm-gray-50: #fafaf9;
+  --color-warm-gray-100: #f7f5f3; /* Primary warm gray */
+  --color-warm-gray-200: #e7e5e4;
+  --color-warm-gray-300: #d6d3d1;
+  --color-warm-gray-400: #a8a29e;
+  --color-warm-gray-500: #78716c;
+  --color-warm-gray-600: #57534e;
+  --color-warm-gray-700: #44403c;
+  --color-warm-gray-800: #292524;
+  --color-warm-gray-900: #1c1917;
+
+  --color-cream: #fefefe;
+  --color-cream-dark: #fafafa;
+
+  --color-charcoal: #1a1a1a;
+  --color-charcoal-light: #2d2d2d;
+
+  --color-accent-orange: #fb923c;
+  --color-accent-orange-dark: #f97316;
+
+  /* Dark mode specific colors */
+  --color-dark-bg: #0a0a0a;
+  --color-dark-surface: #1a1a1a;
+  --color-dark-surface-light: #2a2a2a;
+  --color-dark-border: #333333;
+
+  /* Background and foreground */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Font Families */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-geist-sans: var(--font-geist-sans);
+  --font-geist-mono: var(--font-geist-mono);
+
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;
+  --line-height-xs: 1rem;
+  --font-size-sm: 0.875rem;
+  --line-height-sm: 1.25rem;
+  --font-size-base: 1rem;
+  --line-height-base: 1.5rem;
+  --font-size-lg: 1.125rem;
+  --line-height-lg: 1.75rem;
+  --font-size-xl: 1.25rem;
+  --line-height-xl: 1.75rem;
+  --font-size-2xl: 1.5rem;
+  --line-height-2xl: 2rem;
+  --font-size-3xl: 1.875rem;
+  --line-height-3xl: 2.25rem;
+  --font-size-4xl: 2.25rem;
+  --line-height-4xl: 2.5rem;
+
+  /* Spacing */
+  --spacing-18: 4.5rem;
+  --spacing-88: 22rem;
+  --spacing-120: 30rem;
+
+  /* Border Radius */
+  --radius-sm: 0.3125rem; /* 5px */
+  --radius: 0.375rem;
+  --radius-md: 1rem; /* 16px */
+  --radius-lg: 1.25rem; /* 20px */
+  --radius-xl: 1.5rem; /* 24px */
+  --radius-2xl: 1.875rem; /* 30px */
+  --radius-3xl: 3.125rem; /* 50px */
+
+  /* Box Shadows */
+  --shadow-soft: 0 6px 25px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.08);
+  --shadow-colored: 0 10px 30px rgba(147, 197, 253, 0.3);
+  --shadow-clay: 0 10px 30px rgba(220, 38, 38, 0.4);
+  --shadow-dark-soft: 0 6px 25px rgba(0, 0, 0, 0.3);
+  --shadow-dark-medium: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-dark-heavy: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow-dark-colored: 0 10px 30px rgba(147, 197, 253, 0.2);
+
+  /* Backdrop Blur */
+  --blur-xs: 2px;
+  --blur-xl: 20px;
+
+  /* Transition Duration */
+  --duration-2000: 2000ms;
+  --duration-3000: 3000ms;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Custom Animations */
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -50px) scale(1.1); }
+  50% { transform: translate(-30px, 30px) scale(0.9); }
+  75% { transform: translate(50px, 20px) scale(1.05); }
+}
+
+@keyframes subtleRotate {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(calc(100vh + 50px)) rotate(360deg);
+  }
+}
+
+/* Custom Animation Classes */
+@layer utilities {
+  .animate-float {
+    animation: float 20s ease-in-out infinite;
+  }
+  
+  .animate-float-slow {
+    animation: float 25s ease-in-out infinite;
+  }
+  
+  .animate-float-fast {
+    animation: float 15s ease-in-out infinite;
+  }
+  
+  .animate-subtle-rotate {
+    animation: subtleRotate 8s ease-in-out infinite;
+  }
+  
+  .animate-slide-in {
+    animation: slideIn 0.5s ease forwards;
+  }
+  
+  .animate-pop-in {
+    animation: popIn 0.6s ease;
+  }
+  
+  .animate-bounce {
+    animation: bounce 0.5s ease;
+  }
+  
+  .animate-shake {
+    animation: shake 0.5s ease;
+  }
+  
+  .animate-spin {
+    animation: spin 0.8s linear infinite;
+  }
+  
+  .animate-fall {
+    animation: fall linear infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+/* Background Gradients */
+@layer utilities {
+  .bg-gradient-primary {
+    background-image: linear-gradient(135deg, #DC2626 0%, #fb923c 50%, #93C5FD 100%);
+  }
+  
+  .bg-gradient-secondary {
+    background-image: linear-gradient(45deg, #93C5FD, #DC2626);
+  }
+  
+  .bg-gradient-dark {
+    background-image: linear-gradient(135deg, #991b1b 0%, #ea580c 50%, #60a5fa 100%);
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  
+  .bg-blur {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
 }
 
 body {
-  background: var(--background);
+  /* background: var(--background); */
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }

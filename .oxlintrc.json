@@ -1,0 +1,31 @@
+{
+  "plugins": ["react", "unicorn", "typescript", "oxc", "nextjs"],
+  "rules": {
+    "eqeqeq": "error",
+    "no-unused-vars": "error",
+    "no-debugger": "warn",
+    "no-console": "warn",
+    "react/jsx-no-undef": "error",
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off",
+    "typescript/no-unused-vars": "error"
+  },
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "out/",
+    "build/",
+    "dist/",
+    "*.min.js"
+  ]
+}
