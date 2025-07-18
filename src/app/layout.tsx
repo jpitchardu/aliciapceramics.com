@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import FloatingBall from "./_components/FloatingBall";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,6 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased`}>
+        <FloatingBall />
         <div className="flex justify-center items-center h-screen radius-xl">
           {children}
         </div>
