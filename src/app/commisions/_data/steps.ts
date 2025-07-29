@@ -32,11 +32,19 @@ export type IconSelectFormField = {
   required: true;
 };
 
+export type OptionCardFormField = {
+  _type: "option-card";
+  label: string;
+  image: string;
+  sizes?: string[];
+};
+
 export type FormField =
   | TextInputFormField
   | TextareaFormField
   | SelectFormField
-  | IconSelectFormField;
+  | IconSelectFormField
+  | OptionCardFormField;
 
 export type CommisionRequestFormStep = {
   title: string;
@@ -81,43 +89,43 @@ export const COMMISION_REQUEST_FORM_STEPS: CommisionRequestFormStep[] = [
     body: "choose the type of piece that calls to your space",
     fields: [
       {
-        _type: "icon-select",
-        required: true,
-        options: [
-          {
-            label: "tumbler",
-            icon: "☕",
-          },
-          {
-            label: "matcha bowl",
-            icon: "🍵",
-          },
-          {
-            label: "mug",
-            icon: "🍵",
-          },
-          {
-            label: "mug",
-            icon: "🍵",
-          },
-          {
-            label: "mug",
-            icon: "🍵",
-          },
-        ],
+        _type: "option-card",
+        label: "matcha bowl",
+        image: "/icons/matcha_bowl.png",
       },
       {
-        _type: "input",
-        label: "how many pieces are you looking for?",
-        placeholder: "1",
-        type: "number",
-        required: true,
+        _type: "option-card",
+        label: "mug w handle",
+        image: "/icons/mug_with_handle.png",
+        sizes: ["8 oz", "12 oz", "16 oz"],
       },
       {
-        _type: "select",
-        label: "what is the size of the piece?",
-        options: ["8oz", "16oz", "24oz", "32oz", "40oz"],
-        required: true,
+        _type: "option-card",
+        label: "tumbler",
+        image: "/icons/tumbler.png",
+        sizes: ["8 oz", "12 oz", "16 oz"],
+      },
+      {
+        _type: "option-card",
+        label: "mug w/o handle",
+        image: "/icons/mug_without_handle.png",
+        sizes: ["8 oz", "12 oz", "16 oz"],
+      },
+      {
+        _type: "option-card",
+        label: "trinket dish",
+        image: "/icons/trinket_dish.png",
+      },
+
+      {
+        _type: "option-card",
+        label: "dinnerware",
+        image: "/icons/plate.png",
+      },
+      {
+        _type: "option-card",
+        label: "something else",
+        image: "/icons/vase.png",
       },
     ],
   },

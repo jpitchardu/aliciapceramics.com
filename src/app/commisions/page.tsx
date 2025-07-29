@@ -19,7 +19,7 @@ export default function CommisionsPage() {
     setStep(step - 1);
   }, [step]);
   return (
-    <div className="relative w-96 mh-m bg-earth-form  rounded-3xl p-8 shadow-xl  flex flex-col items-start justify-start overflow-hidden">
+    <div className="relative max-h-9/10 w-96 mh-m bg-earth-form  rounded-3xl py-8 shadow-xl  flex flex-col items-start justify-start overflow-hidden">
       <ProgressBar currentStep={step} totalSteps={maxSteps} />
       <FormPage step={step} />
       <FormFooter

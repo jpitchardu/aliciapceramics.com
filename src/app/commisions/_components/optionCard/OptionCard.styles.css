@@ -1,0 +1,113 @@
+.option-card {
+  background: var(--color-pink-hover);
+  border: 2px solid transparent;
+  border-radius: var(--radius-aliciap);
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-aliciap);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.card-controls {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+  overflow: hidden;
+}
+
+.card-controls.expanded {
+  grid-template-rows: 1fr;
+}
+
+.card-controls-content {
+  min-height: 0; /* Critical for CSS Grid animation */
+  padding: 0 6px; /* Hidden when collapsed */
+  transition: padding 0.3s ease;
+}
+
+.card-controls.expanded .card-controls-content {
+  /* padding: 12px 14px; Visible padding when expanded */
+}
+
+
+.option-card.expanded {
+  border-color: var(--color-pink-border);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgb(0 0 0 / 0.1);
+}
+
+
+.option-card-heading {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content:start;
+  gap: 6px;
+}
+
+.option-card-title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  gap: 6px;
+  flex-grow: 1;
+}
+
+.option-card-image {
+  object-fit: contain;
+}
+
+.option-card-title {
+  color: var(--color-earth-dark);
+}
+
+.option-card-subtitle {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--color-earth-dark);
+}
+
+/* Auto-sizing controls grid */
+.option-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: end;
+  width: 100%;
+}
+
+/* Auto-sizing input variant */
+.aliciap-input-auto {
+  background: var(--color-pink-input);
+  border: 2px solid transparent;
+  border-radius: var(--radius-aliciap);
+  font-size: 12px;
+  color: var(--color-earth-dark);
+  transition: var(--transition-aliciap);
+  padding: 8px 12px;
+  border-radius: var(--radius-aliciap-xl);
+  outline: none;
+  font-family: var(--font-family-body);
+  width: 100%;
+
+}
+
+.aliciap-input-auto:focus {
+  background: var(--color-white-focus);
+  border-color: var(--color-pink-border);
+  box-shadow: var(--shadow-aliciap);
+}
+
+.aliciap-input-auto:hover:not(:focus) {
+  background: rgb(225 175 161 / 0.3);
+}
+

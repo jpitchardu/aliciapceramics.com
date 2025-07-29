@@ -208,6 +208,19 @@
   font-family: var(--font-family-body);
 }
 
+.aliciap-input.sm {
+  background: var(--color-pink-input);
+  border: 2px solid transparent;
+  border-radius: var(--radius-aliciap);
+  font-size: 12px;
+  color: var(--color-earth-dark);
+  transition: var(--transition-aliciap);
+  padding: 8px 12px;
+  width: min;
+  border-radius: var(--radius-aliciap-xl);
+}
+
+
 .aliciap-input:focus {
   background: var(--color-white-focus);
   border-color: var(--color-pink-border);
@@ -258,6 +271,28 @@
   text-decoration: none;
   outline: none;
   min-width: 120px;
+}
+
+.aliciap-radio-button{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  margin: 0; 
+  font-size: 12px;
+  border-radius: var(--radius-aliciap-xl);
+  cursor: pointer;
+  transition: var(--transition-aliciap);
+  text-decoration: none;
+  outline: none;
+  min-width: fit-content;
+}
+
+.aliciap-radio-button:hover {
+  background: var(--color-pink-border);
+  color: var(--color-earth-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-aliciap-lg);
 }
 
 .aliciap-btn-sm {
@@ -325,7 +360,7 @@
   padding: 16px 10px;
   text-align: center;
   cursor: pointer;
-  transition: var(--transition-aliciap);
+  /* transition: var(--transition-aliciap); */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -333,7 +368,7 @@
   position: relative;
   overflow: hidden;
 }
-
+   
 .pottery-option:hover {
   border-color: var(--color-pink-border);
   transform: translateY(-2px);

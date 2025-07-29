@@ -33,7 +33,7 @@ export default function IconSelect({
             onClick={() => handleSelect(option.label)}
           >
             <span className="pottery-icon">{option.icon}</span>
-            <span className="potteery-label">{option.label}</span>
+            <span className="pottery-label font-label">{option.label}</span>
           </button>
         ))}
       </div>
