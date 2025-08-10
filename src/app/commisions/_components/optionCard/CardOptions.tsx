@@ -1,11 +1,10 @@
-import { CardOptionsFormField } from "@/app/commisions/_data/steps";
 import { useCallback, useState } from "react";
-import { OptionCard } from "./OptionCard";
+import { Option, OptionCard } from "./OptionCard";
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
-import { Piece, SizeOption } from "@/models/Pieces";
+import { isSizedPiece, PieceOrderDetail } from "@/models/Pieces";
 
-type CardOptionsProps = CardOptionsFormField & {
-  onAddToOrder: () => void;
+type CardOptionsProps = {
+  options: Option[];
 };
 
 export function CardOptions({ options }: CardOptionsProps) {
@@ -21,22 +20,23 @@ export function CardOptions({ options }: CardOptionsProps) {
   );
 
   const handleAddToOrder = useCallback(
-    (pieceDetail: {
-      type: Piece["type"];
-      quantity: number;
-      size: SizeOption["value"];
-      comments?: string;
-    }) => {
+    (pieceDetail: PieceOrderDetail) => {
       setExpandedCardId(null);
       dispatchOrderChange({
         type: "add-piece-detail",
         payload: {
-          pieceDetail: {
-            type: pieceDetail.type,
-            quantity: pieceDetail.quantity,
-            size: pieceDetail.size,
-            comments: pieceDetail.comments,
-          },
+          pieceDetail: isSizedPiece(pieceDetail)
+            ? {
+                type: pieceDetail.type,
+                quantity: pieceDetail.quantity,
+                comments: pieceDetail.comments,
+                size: pieceDetail.size,
+              }
+            : {
+                type: pieceDetail.type,
+                quantity: pieceDetail.quantity,
+                comments: pieceDetail.comments,
+              },
         },
       });
     },

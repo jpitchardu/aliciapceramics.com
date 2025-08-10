@@ -75,7 +75,7 @@ const piecesConfigByType: {
   [K in Piece["type"]]: PieceConfig<Extract<Piece, { type: K }>>;
 } = {
   "mug-with-handle": {
-    label: "Mug W Handle",
+    label: "Mug W/ Handle",
     icon: "/icons/mug_with_handle.png",
     sized: true,
   },
@@ -121,6 +121,14 @@ export function getAllPieceTypes(): readonly Piece["type"][] {
   return Object.keys(piecesConfigByType) as Piece["type"][];
 }
 
-export function getAllSizes(): readonly SizeOption[] {
-  return sizeOptions;
+export function getAllSizes(): SizeOption[] {
+  return [...sizeOptions];
+}
+
+export function isSizedPiece(
+  piece: Piece
+): piece is MugWithHandle | MugWithoutHandle | Tumbler {
+  return ["mug-with-handle", "mug-without-handle", "tumbler"].includes(
+    piece.type
+  );
 }

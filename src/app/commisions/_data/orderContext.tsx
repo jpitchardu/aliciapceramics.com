@@ -6,7 +6,7 @@ import { EMPTY_ORDER, Order } from "@/models/Order";
 type AddClientInfoAction = {
   type: "add-client-info";
   payload: {
-    client: Order["client"];
+    client: Partial<Order["client"]>;
   };
 };
 
@@ -63,7 +63,7 @@ const orderReducer = (order: Order, action: OrderAction) => {
       1;
       return {
         ...order,
-        client: action.payload.client,
+        client: { ...order.client, ...action.payload.client },
       };
     case "add-piece-detail":
       return {

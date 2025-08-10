@@ -2,24 +2,32 @@ import Image from "next/image";
 import "./OptionCard.styles.css";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import { CardOptionsFormField } from "@/app/commisions/_data/steps";
-import { Piece, SizeOption } from "@/models/Pieces";
+import {
+  getAllSizes,
+  Piece,
+  PieceOrderDetail,
+  SizeOption,
+} from "@/models/Pieces";
 
-type OptionCardProps = CardOptionsFormField["options"][number] & {
+export type Option = {
+  id: Piece["type"];
+  label: string;
+  image: string;
+  designIdeasPlaceholder: string;
+  sizes?: string[];
+};
+
+type OptionCardProps = Option & {
   isExpanded: boolean;
   onExpand: (id: string) => void;
-  onAddToOrder: (pieceDetail: {
-    type: Piece["type"];
-    quantity: number;
-    size: SizeOption["value"];
-    comments?: string;
-  }) => void;
+  onAddToOrder: (pieceDetail: PieceOrderDetail) => void;
 };
 
 export function OptionCard({
   label,
   image,
   sizes,
+  designIdeasPlaceholder,
   isExpanded,
   id,
   onExpand,
@@ -28,7 +36,7 @@ export function OptionCard({
   const cardRef = useRef<HTMLDivElement>(null);
 
   const [quantity, setQuantity] = useState(1);
-  const [size, setSize] = useState<string>();
+  const [selectedSize, setSelectedSize] = useState<SizeOption["label"]>();
   const [comments, setComments] = useState<string>();
 
   const handleQuantityChange = useCallback(
@@ -40,7 +48,8 @@ export function OptionCard({
 
   const handleSizeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSize(e.target.value);
+      console.log(e.target.value);
+      setSelectedSize(e.target.value as SizeOption["label"]);
     },
     []
   );
@@ -56,10 +65,10 @@ export function OptionCard({
     onAddToOrder({
       type: id,
       quantity,
-      size: size as unknown as SizeOption["value"],
+      size: getAllSizes().find((size) => size.label === selectedSize)!.value,
       comments,
     });
-  }, [id, onAddToOrder, quantity, size, comments]);
+  }, [onAddToOrder, id, quantity, selectedSize, comments]);
 
   const handleExpand = useCallback(() => {
     onExpand(id);
@@ -72,6 +81,8 @@ export function OptionCard({
       cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [isExpanded]);
+
+  console.log(selectedSize);
 
   return (
     <div
@@ -119,12 +130,22 @@ export function OptionCard({
                       {sizes.map((size) => (
                         <label
                           key={size}
-                          className="aliciap-radio-button aliciap-btn-primary flex-grow"
+                          htmlFor={`${id}-${size}`}
+                          className={clsx(
+                            "aliciap-radio-button",
+                            "flex-grow",
+                            selectedSize === size &&
+                              "aliciap-radio-button-checked"
+                          )}
                         >
                           <input
+                            name={`${id}-size`}
+                            id={`${id}-${size}`}
+                            required
                             type="radio"
                             value={size}
                             className="sr-only"
+                            checked={selectedSize === size}
                             onChange={handleSizeChange}
                           />
                           <span>{size}</span>
@@ -150,11 +171,11 @@ export function OptionCard({
             </div>
             <div className="flex flex-col gap-1 w-full items-start  ">
               <legend className="text-sm font-label text-earth-dark">
-                Comments
+                Describe your ideal piece(s)
               </legend>
               <textarea
                 className="aliciap-textarea w-full aliciap-input"
-                placeholder="comments"
+                placeholder={designIdeasPlaceholder}
                 onChange={handleCommentsChange}
               />
             </div>

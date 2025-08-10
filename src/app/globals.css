@@ -286,13 +286,14 @@
   text-decoration: none;
   outline: none;
   min-width: fit-content;
+  background: var(--color-earth-dark);
+  color: var(--color-earth-form);
 }
 
-.aliciap-radio-button:hover {
-  background: var(--color-pink-border);
+
+.aliciap-radio-button-checked {
+  background: var(--color-blue-border);
   color: var(--color-earth-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-aliciap-lg);
 }
 
 .aliciap-btn-sm {
@@ -360,6 +361,8 @@
   min-width: fit-content;
   width: fit-content;
   max-width: fit-content;
+  height: fit-content;
+  max-height: fit-content;
 }
 
 /* Pottery Selection */
