@@ -32,11 +32,14 @@ export type IconSelectFormField = {
   required: true;
 };
 
-export type OptionCardFormField = {
-  _type: "option-card";
-  label: string;
-  image: string;
-  sizes?: string[];
+export type CardOptionsFormField = {
+  _type: "card-options";
+  options: {
+    id: string;
+    label: string;
+    image: string;
+    sizes?: string[];
+  }[];
 };
 
 export type FormField =
@@ -44,7 +47,7 @@ export type FormField =
   | TextareaFormField
   | SelectFormField
   | IconSelectFormField
-  | OptionCardFormField;
+  | CardOptionsFormField;
 
 export type CommisionRequestFormStep = {
   title: string;
@@ -89,43 +92,48 @@ export const COMMISION_REQUEST_FORM_STEPS: CommisionRequestFormStep[] = [
     body: "choose the type of piece that calls to your space",
     fields: [
       {
-        _type: "option-card",
-        label: "matcha bowl",
-        image: "/icons/matcha_bowl.png",
-      },
-      {
-        _type: "option-card",
-        label: "mug w handle",
-        image: "/icons/mug_with_handle.png",
-        sizes: ["8 oz", "12 oz", "16 oz"],
-      },
-      {
-        _type: "option-card",
-        label: "tumbler",
-        image: "/icons/tumbler.png",
-        sizes: ["8 oz", "12 oz", "16 oz"],
-      },
-      {
-        _type: "option-card",
-        label: "mug w/o handle",
-        image: "/icons/mug_without_handle.png",
-        sizes: ["8 oz", "12 oz", "16 oz"],
-      },
-      {
-        _type: "option-card",
-        label: "trinket dish",
-        image: "/icons/trinket_dish.png",
-      },
+        _type: "card-options",
+        options: [
+          {
+            id: "matcha-bowl",
+            label: "matcha bowl",
+            image: "/icons/matcha_bowl.png",
+          },
+          {
+            id: "mug-with-handle",
+            label: "mug w handle",
+            image: "/icons/mug_with_handle.png",
+            sizes: ["8 oz", "12 oz", "16 oz"],
+          },
+          {
+            id: "tumbler",
+            label: "tumbler",
+            image: "/icons/tumbler.png",
+            sizes: ["8 oz", "12 oz", "16 oz"],
+          },
+          {
+            id: "mug-without-handle",
+            label: "mug w/o handle",
+            image: "/icons/mug_without_handle.png",
+            sizes: ["8 oz", "12 oz", "16 oz"],
+          },
+          {
+            id: "trinket-dish",
+            label: "trinket dish",
+            image: "/icons/trinket_dish.png",
+          },
 
-      {
-        _type: "option-card",
-        label: "dinnerware",
-        image: "/icons/plate.png",
-      },
-      {
-        _type: "option-card",
-        label: "something else",
-        image: "/icons/vase.png",
+          {
+            id: "dinnerware",
+            label: "dinnerware",
+            image: "/icons/plate.png",
+          },
+          {
+            id: "something-else",
+            label: "something else",
+            image: "/icons/vase.png",
+          },
+        ],
       },
     ],
   },

@@ -3,7 +3,7 @@ import { COMMISION_REQUEST_FORM_STEPS, FormField } from "../_data/steps";
 import { TextArea } from "./TextArea";
 import { Select } from "@/app/commisions/_components/Select";
 import IconSelect from "@/app/commisions/_components/IconSelect";
-import { OptionCard } from "@/app/commisions/_components/optionCard/OptionCard";
+import { CardOptions } from "@/app/commisions/_components/optionCard/CardOptions";
 
 type FormPageProps = {
   step: number;
@@ -52,7 +52,7 @@ function getComponent(field: FormField): React.ReactNode {
       return <Select key={field.label} {...field} onChange={() => {}} />;
     case "icon-select":
       return <IconSelect key={field.label} {...field} onChange={() => {}} />;
-    case "option-card":
-      return <OptionCard key={field.label} {...field} onChange={() => {}} />;
+    case "card-options":
+      return <CardOptions {...field} onAddToOrder={() => {}} />;
   }
 }

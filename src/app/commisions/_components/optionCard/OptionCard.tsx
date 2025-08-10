@@ -1,18 +1,37 @@
 import Image from "next/image";
 import "./OptionCard.styles.css";
-import { useState } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import clsx from "clsx";
-import { OptionCardFormField } from "@/app/commisions/_data/steps";
+import { CardOptionsFormField } from "@/app/commisions/_data/steps";
 
-type OptionCardProps = OptionCardFormField & {
-  onChange: (value: string) => void;
+type OptionCardProps = CardOptionsFormField["options"][number] & {
+  isExpanded: boolean;
+  onExpand: (id: string) => void;
+  onAddToOrder: () => void;
 };
 
-export function OptionCard({ label, image, sizes }: OptionCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const handleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
+export function OptionCard({
+  label,
+  image,
+  sizes,
+  isExpanded,
+  id,
+  onExpand,
+  onAddToOrder,
+}: OptionCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleExpand = useCallback(() => {
+    onExpand(id);
+  }, [onExpand, id]);
+
+  useLayoutEffect(() => {
+    if (!isExpanded) return;
+
+    if (cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [isExpanded]);
 
   return (
     <div
@@ -40,6 +59,7 @@ export function OptionCard({ label, image, sizes }: OptionCardProps) {
       </button>
       <div
         id="card-content-bowls"
+        ref={cardRef}
         className={clsx(
           "card-controls",
           "w-full",
@@ -77,6 +97,7 @@ export function OptionCard({ label, image, sizes }: OptionCardProps) {
                 <legend className="text-sm font-label text-earth-dark">
                   Quantity
                 </legend>
+
                 <input
                   type="number"
                   className="aliciap-input-auto"
@@ -96,6 +117,12 @@ export function OptionCard({ label, image, sizes }: OptionCardProps) {
                 onChange={() => {}}
               />
             </div>
+            <button
+              className="aliciap-btn aliciap-btn-md aliciap-btn-primary w-full"
+              onClick={onAddToOrder}
+            >
+              Add to order
+            </button>
           </fieldset>
         </div>
       </div>
