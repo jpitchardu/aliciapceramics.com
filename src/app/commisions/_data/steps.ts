@@ -1,3 +1,4 @@
+import { Piece } from "@/models/Pieces";
 import { HTMLInputTypeAttribute } from "react";
 
 export type TextInputFormField = {
@@ -34,8 +35,9 @@ export type IconSelectFormField = {
 
 export type CardOptionsFormField = {
   _type: "card-options";
+  label: string;
   options: {
-    id: string;
+    id: Piece["type"];
     label: string;
     image: string;
     sizes?: string[];
@@ -93,6 +95,7 @@ export const COMMISION_REQUEST_FORM_STEPS: CommisionRequestFormStep[] = [
     fields: [
       {
         _type: "card-options",
+        label: "what are you looking for?",
         options: [
           {
             id: "matcha-bowl",
@@ -129,7 +132,7 @@ export const COMMISION_REQUEST_FORM_STEPS: CommisionRequestFormStep[] = [
             image: "/icons/plate.png",
           },
           {
-            id: "something-else",
+            id: "other",
             label: "something else",
             image: "/icons/vase.png",
           },

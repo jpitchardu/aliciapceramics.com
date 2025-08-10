@@ -1,107 +1,33 @@
 import { ActionDispatch, createContext, useContext, useReducer } from "react";
-import z from "zod";
 import invariant from "tiny-invariant";
-
-const mugWithoutHandleSchema = z
-  .object({
-    type: z.literal("without-handle"),
-    size: z.enum(["8 oz", "12 oz", "16 oz"]),
-  })
-  .brand("mug-without-handle");
-
-const mugWithHandleSchema = z
-  .object({
-    type: z.literal("with-handle"),
-    size: z.enum(["8 oz", "12 oz", "16 oz"]),
-  })
-  .brand("mug-with-handle");
-
-const tumblerSchema = z
-  .object({
-    type: z.literal("tumbler"),
-    size: z.enum(["8 oz", "12 oz", "16 oz"]),
-  })
-  .brand("tumbler");
-
-const matchaBowlSchema = z
-  .object({
-    type: z.literal("matcha-bowl"),
-  })
-  .brand("matcha-bowl");
-
-const dinnerwareSchema = z
-  .object({
-    type: z.literal("dinnerware"),
-  })
-  .brand("dinnerware");
-
-const trinketDishSchema = z
-  .object({
-    type: z.literal("trinket-dish"),
-  })
-  .brand("trinket-dish");
-
-const somethingElseSchema = z
-  .object({
-    type: z.literal("something-else"),
-  })
-  .brand("something-else");
-
-const pieceSchema = z.discriminatedUnion("type", [
-  mugWithoutHandleSchema,
-  mugWithHandleSchema,
-  tumblerSchema,
-  matchaBowlSchema,
-  dinnerwareSchema,
-  trinketDishSchema,
-  somethingElseSchema,
-]);
-
-const pieceDetailSchema = z.object({
-  ...pieceSchema,
-  quantity: z.number().min(1),
-  comments: z.string().optional(),
-});
-
-type PieceDetail = z.infer<typeof pieceDetailSchema>;
-
-const clientSchema = z.object({
-  email: z.email(),
-  name: z.string(),
-  phone: z.string(),
-});
-
-type Client = z.infer<typeof clientSchema>;
-
-const orderSchema = z.object({
-  client: clientSchema,
-  pieceDetails: z.array(pieceDetailSchema),
-  description: z.string(),
-  inspiration: z.string(),
-  specialConsiderations: z.string(),
-  timeline: z.date(),
-});
-
-type Order = z.infer<typeof orderSchema>;
+import { PieceOrderDetail } from "@/models/Pieces";
+import { EMPTY_ORDER, Order } from "@/models/Order";
 
 type AddClientInfoAction = {
   type: "add-client-info";
   payload: {
-    client: Client;
+    client: Order["client"];
   };
 };
 
-type AddPieceAction = {
+type AddPieceDetailAction = {
   type: "add-piece-detail";
   payload: {
-    pieceDetail: PieceDetail;
+    pieceDetail: PieceOrderDetail;
   };
 };
 
-type AddVisionAction = {
-  type: "add-vision";
+type RemovePieceDetailAction = {
+  type: "remove-piece-detail";
   payload: {
-    vision: string;
+    id: PieceOrderDetail["id"];
+  };
+};
+
+type AddDescriptionAction = {
+  type: "add-description";
+  payload: {
+    description: string;
     timeline: Date;
   };
 };
@@ -116,26 +42,14 @@ type AddInspirationAction = {
 
 type OrderAction =
   | AddClientInfoAction
-  | AddPieceAction
-  | AddVisionAction
-  | AddInspirationAction;
+  | AddPieceDetailAction
+  | AddDescriptionAction
+  | AddInspirationAction
+  | RemovePieceDetailAction;
 
 export type OrderContext = {
   order: Order;
   dispatchOrderChange: ActionDispatch<[action: OrderAction]>;
-};
-
-const EMPTY_ORDER: Order = {
-  client: {
-    email: "",
-    name: "",
-    phone: "",
-  },
-  pieceDetails: [],
-  description: "",
-  inspiration: "",
-  specialConsiderations: "",
-  timeline: new Date(),
 };
 
 const OrderContext = createContext<OrderContext>({
@@ -154,12 +68,18 @@ const orderReducer = (order: Order, action: OrderAction) => {
     case "add-piece-detail":
       return {
         ...order,
-        pieceDetails: [...order.pieceDetails, action.payload.pieceDetail],
+        pieceDetails: [
+          ...order.pieceDetails,
+          {
+            ...action.payload.pieceDetail,
+            id: `${action.payload.pieceDetail.type}-${Date.now()}`,
+          },
+        ],
       };
-    case "add-vision":
+    case "add-description":
       return {
         ...order,
-        vision: action.payload.vision,
+        description: action.payload.description,
         timeline: action.payload.timeline,
       };
     case "add-inspiration":
@@ -167,6 +87,13 @@ const orderReducer = (order: Order, action: OrderAction) => {
         ...order,
         inspiration: action.payload.inspiration,
         specialConsiderations: action.payload.specialConsiderations,
+      };
+    case "remove-piece-detail":
+      return {
+        ...order,
+        pieceDetails: order.pieceDetails.filter(
+          (detail) => detail.id !== action.payload.id
+        ),
       };
     default:
       invariant(false, "Invalid order action");

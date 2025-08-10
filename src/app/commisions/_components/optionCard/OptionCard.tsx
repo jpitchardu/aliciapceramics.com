@@ -1,13 +1,19 @@
 import Image from "next/image";
 import "./OptionCard.styles.css";
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { CardOptionsFormField } from "@/app/commisions/_data/steps";
+import { Piece, SizeOption } from "@/models/Pieces";
 
 type OptionCardProps = CardOptionsFormField["options"][number] & {
   isExpanded: boolean;
   onExpand: (id: string) => void;
-  onAddToOrder: () => void;
+  onAddToOrder: (pieceDetail: {
+    type: Piece["type"];
+    quantity: number;
+    size: SizeOption["value"];
+    comments?: string;
+  }) => void;
 };
 
 export function OptionCard({
@@ -20,6 +26,40 @@ export function OptionCard({
   onAddToOrder,
 }: OptionCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const [quantity, setQuantity] = useState(1);
+  const [size, setSize] = useState<string>();
+  const [comments, setComments] = useState<string>();
+
+  const handleQuantityChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setQuantity(Number(e.target.value));
+    },
+    []
+  );
+
+  const handleSizeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSize(e.target.value);
+    },
+    []
+  );
+
+  const handleCommentsChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setComments(e.target.value);
+    },
+    []
+  );
+
+  const handleAddToOrder = useCallback(() => {
+    onAddToOrder({
+      type: id,
+      quantity,
+      size: size as unknown as SizeOption["value"],
+      comments,
+    });
+  }, [id, onAddToOrder, quantity, size, comments]);
 
   const handleExpand = useCallback(() => {
     onExpand(id);
@@ -85,6 +125,7 @@ export function OptionCard({
                             type="radio"
                             value={size}
                             className="sr-only"
+                            onChange={handleSizeChange}
                           />
                           <span>{size}</span>
                         </label>
@@ -102,7 +143,7 @@ export function OptionCard({
                   type="number"
                   className="aliciap-input-auto"
                   placeholder="quantity"
-                  onChange={() => {}}
+                  onChange={handleQuantityChange}
                   min={1}
                 />
               </div>
@@ -114,12 +155,12 @@ export function OptionCard({
               <textarea
                 className="aliciap-textarea w-full aliciap-input"
                 placeholder="comments"
-                onChange={() => {}}
+                onChange={handleCommentsChange}
               />
             </div>
             <button
               className="aliciap-btn aliciap-btn-md aliciap-btn-primary w-full"
-              onClick={onAddToOrder}
+              onClick={handleAddToOrder}
             >
               Add to order
             </button>

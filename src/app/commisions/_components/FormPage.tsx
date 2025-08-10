@@ -4,6 +4,9 @@ import { TextArea } from "./TextArea";
 import { Select } from "@/app/commisions/_components/Select";
 import IconSelect from "@/app/commisions/_components/IconSelect";
 import { CardOptions } from "@/app/commisions/_components/optionCard/CardOptions";
+import { useOrderContext } from "@/app/commisions/_data/orderContext";
+import Image from "next/image";
+import { getConfigByPieceType } from "@/models/Pieces";
 
 type FormPageProps = {
   step: number;
@@ -12,8 +15,12 @@ type FormPageProps = {
 export default function FormPage({ step }: FormPageProps) {
   const stepData = COMMISION_REQUEST_FORM_STEPS[step];
 
+  const { order, dispatchOrderChange } = useOrderContext();
+
+  const pieceDetails = order.pieceDetails;
+
   return (
-    <div className={`w-full flex flex-col flex-1 min-h-0`}>
+    <div className={`w-full flex flex-col flex-1 min-h-0 gap-2`}>
       <div className="flex-shrink-0 px-8">
         <h2 className="font-heading text-2xl mb-1 text-earth-dark">
           {stepData.title}
@@ -21,6 +28,34 @@ export default function FormPage({ step }: FormPageProps) {
         <p className="font-body text-sm mb-4 text-earth-dark">
           {stepData.body}
         </p>
+      </div>
+      <div className="flex flex-row gap-2 px-8 flex-wrap">
+        {pieceDetails.map((detail) => (
+          <button
+            key={detail.type}
+            className="aliciap-btn aliciap-btn-sm aliciap-btn-pill flex flex-row gap-2 flex-shrink-1"
+            onClick={() => {
+              dispatchOrderChange({
+                type: "remove-piece-detail",
+                payload: { id: detail.id },
+              });
+            }}
+          >
+            <Image
+              src={getConfigByPieceType(detail.type).icon}
+              alt={getConfigByPieceType(detail.type).label}
+              className="option-card-image inline w-1/4 h-auto"
+              width={30}
+              height={30}
+            />
+            <span className="aliciap-text-md, font-body text-ellipsis overflow-hidden whitespace-nowrap">
+              {getConfigByPieceType(detail.type).label}
+            </span>
+            <span className="aliciap-text-sm bg-(--color-stone-disabled) rounded-full px-2 py-1">
+              {detail.quantity}x
+            </span>
+          </button>
+        ))}
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="pt-4 space-y-4 px-8">
@@ -53,6 +88,8 @@ function getComponent(field: FormField): React.ReactNode {
     case "icon-select":
       return <IconSelect key={field.label} {...field} onChange={() => {}} />;
     case "card-options":
-      return <CardOptions {...field} onAddToOrder={() => {}} />;
+      return (
+        <CardOptions key={field.label} {...field} onAddToOrder={() => {}} />
+      );
   }
 }
