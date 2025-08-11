@@ -1,10 +1,12 @@
 "use client";
 
 import clsx from "clsx";
-import { SelectFormField } from "../_data/steps";
 import { ChangeEventHandler, useCallback, useState } from "react";
 
-type SelectProps = SelectFormField & {
+type SelectProps = {
+  label: string;
+  options: string[];
+  required: boolean;
   onChange: ChangeEventHandler<HTMLSelectElement>;
 };
 export function Select({ label, options, required, onChange }: SelectProps) {

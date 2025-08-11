@@ -524,6 +524,28 @@
   animation: var(--animate-spin);
 }
 
+.aliciap-checkbox {
+  appearance: none;
+  width: 18px; 
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  max-width: 18px;
+  max-height: 18px;
+  border: 2px solid var(--color-earth-dark);
+  border-radius: 2px;
+  background: var(--color-earth-bg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 80% 80%;
+}
+
+.aliciap-checkbox:checked {
+  background-color: var(--color-pink-border);
+  border-color: var(--color-pink-border);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="none" stroke="%230d0d0d" stroke-width="3" d="M4 10l3 3 9-9"/></svg>');
+}
+
 /* Animation Classes */
 .form-stage {
   animation: var(--animate-fade-in);

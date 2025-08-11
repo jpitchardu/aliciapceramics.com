@@ -1,8 +1,12 @@
-import { IconSelectFormField } from "@/app/commisions/_data/steps";
 import clsx from "clsx";
 import { useState } from "react";
 
-type IconSelectProps = IconSelectFormField & {
+type IconSelectProps = {
+  label: string;
+  options: {
+    label: string;
+    icon: React.ReactNode;
+  }[];
   onChange: (value: string) => void;
 };
 export default function IconSelect({

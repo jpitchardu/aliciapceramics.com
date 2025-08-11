@@ -48,7 +48,6 @@ export function OptionCard({
 
   const handleSizeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      console.log(e.target.value);
       setSelectedSize(e.target.value as SizeOption["label"]);
     },
     []
@@ -81,8 +80,6 @@ export function OptionCard({
       cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [isExpanded]);
-
-  console.log(selectedSize);
 
   return (
     <div

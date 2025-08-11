@@ -1,8 +1,5 @@
 import { TextInput } from "@/app/commisions/_components/TextInput";
-import { FormField } from "@/app/commisions/_data/steps";
 import { TextArea } from "@/app/commisions/_components/TextArea";
-import { Select } from "@/app/commisions/_components/Select";
-import IconSelect from "@/app/commisions/_components/IconSelect";
 
 const stepData = {
   title: "your vision",
@@ -53,15 +50,13 @@ export function AddOrderDetailsFormStep() {
   );
 }
 
-function getComponent(field: FormField): React.ReactNode {
+function getComponent(
+  field: (typeof stepData.fields)[number]
+): React.ReactNode {
   switch (field._type) {
     case "input":
       return <TextInput key={field.label} {...field} onChange={() => {}} />;
     case "textarea":
       return <TextArea key={field.label} {...field} onChange={() => {}} />;
-    case "select":
-      return <Select key={field.label} {...field} onChange={() => {}} />;
-    case "icon-select":
-      return <IconSelect key={field.label} {...field} onChange={() => {}} />;
   }
 }

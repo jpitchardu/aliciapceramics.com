@@ -4,12 +4,9 @@ import { FormFooter } from "@/app/commisions/_components/FormFooter";
 import FormPage from "@/app/commisions/_components/FormPage";
 import { ProgressBar } from "@/app/commisions/_components/ProgressBar";
 import { OrderProvider } from "@/app/commisions/_data/orderContext";
-import { COMMISION_REQUEST_FORM_STEPS } from "@/app/commisions/_data/steps";
 import { useCallback, useState } from "react";
 
 export default function CommisionsPage() {
-  const maxSteps = COMMISION_REQUEST_FORM_STEPS.length;
-
   const [step, setStep] = useState(0);
 
   const handleNext = useCallback(() => {
@@ -22,12 +19,12 @@ export default function CommisionsPage() {
 
   return (
     <OrderProvider>
-      <div className="relative  w-96 mh-m bg-earth-form  max-h-[90svh] h-[640px]  rounded-3xl py-8 shadow-xl  flex flex-col items-start justify-start overflow-hidden">
-        <ProgressBar currentStep={step} totalSteps={maxSteps} />
+      <div className="relative  w-96 mh-m bg-earth-form  max-h-[100svh] h-[900px]  rounded-3xl py-8 shadow-xl  flex flex-col items-start justify-start overflow-hidden">
+        <ProgressBar currentStep={step} totalSteps={4} />
         <FormPage step={step} />
         <FormFooter
           canGoBack={step > 0}
-          canGoNext={step < maxSteps - 1}
+          canGoNext={step < 3}
           onNext={handleNext}
           onBack={handleBack}
         />

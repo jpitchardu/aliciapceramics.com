@@ -1,10 +1,12 @@
 "use client";
 
 import { ChangeEventHandler, useCallback, useState } from "react";
-import { TextareaFormField } from "../_data/steps";
 import clsx from "clsx";
 
-type TextAreaProps = TextareaFormField & {
+type TextAreaProps = {
+  label: string;
+  placeholder: string;
+  required: boolean;
   onChange: ChangeEventHandler<HTMLTextAreaElement>;
 };
 
