@@ -64,9 +64,9 @@ export function OptionCard({
     onAddToOrder({
       type: id,
       quantity,
-      size: getAllSizes().find((size) => size.label === selectedSize)!.value,
+      size: getAllSizes().find((size) => size.label === selectedSize)?.value,
       comments,
-    });
+    } as PieceOrderDetail);
   }, [onAddToOrder, id, quantity, selectedSize, comments]);
 
   const handleExpand = useCallback(() => {

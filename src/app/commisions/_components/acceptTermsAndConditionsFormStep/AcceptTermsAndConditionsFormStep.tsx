@@ -1,3 +1,4 @@
+import { OrderSummary } from "@/app/commisions/_components/orderSummary/OrderSummary";
 import { DollarIcon } from "@/ui/icons/DollarIcon";
 import { LightbulbIcon } from "@/ui/icons/LightBulbIcon";
 import { StarIcon } from "@/ui/icons/StartIcon";
@@ -25,6 +26,7 @@ export function AcceptTermsAndConditionsFormStep() {
         </h2>
         <p className="font-body text-sm  text-earth-dark">{stepData.body}</p>
       </div>
+      <OrderSummary />
       <div className="flex-1 min-h-0 overflow-y-scroll flex flex-col gap-4">
         <div className="px-8 flex flex-col gap-4">
           <div className="flex flex-row ">

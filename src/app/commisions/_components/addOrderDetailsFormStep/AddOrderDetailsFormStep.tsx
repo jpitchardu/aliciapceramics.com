@@ -1,5 +1,6 @@
-import { TextInput } from "@/app/commisions/_components/TextInput";
-import { TextArea } from "@/app/commisions/_components/TextArea";
+import { TextInput } from "@/ui/TextInput";
+import { TextArea } from "@/ui/TextArea";
+import { OrderSummary } from "@/app/commisions/_components/orderSummary/OrderSummary";
 
 const stepData = {
   title: "your vision",
@@ -34,19 +35,20 @@ const stepData = {
 
 export function AddOrderDetailsFormStep() {
   return (
-    <>
+    <div className="flex-shrink-0 gap-4 max-h-full flex flex-col">
       <div className="flex-shrink-0 px-8">
         <h2 className="font-heading text-2xl mb-1 text-earth-dark">
           {stepData.title}
         </h2>
         <p className="font-body text-sm  text-earth-dark">{stepData.body}</p>
       </div>
+      <OrderSummary />
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="pt-4 space-y-4 px-8">
           {stepData.fields.map((field) => getComponent(field))}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -1,7 +1,8 @@
-import { TextInput } from "@/app/commisions/_components/TextInput";
+import { TextInput } from "@/ui/TextInput";
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
 
 import { Order } from "@/models/Order";
+import { OrderSummary } from "@/app/commisions/_components/orderSummary/OrderSummary";
 
 const stepData = {
   title: "let's get some info",
@@ -51,7 +52,7 @@ export function ClientDetailsFormStep() {
           {stepData.body}
         </p>
       </div>
-
+      <OrderSummary />
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="pt-4 space-y-4 px-8">
           {stepData.fields.map((field) => (

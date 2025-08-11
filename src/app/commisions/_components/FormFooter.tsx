@@ -1,6 +1,8 @@
 type FormFooterProps = {
   backLabel?: string;
   nextLabel?: string;
+  lastStepLabel?: string;
+  isLastStep?: boolean;
   canGoBack?: boolean;
   canGoNext?: boolean;
   onBack?: () => void;
@@ -10,6 +12,8 @@ type FormFooterProps = {
 export const FormFooter = ({
   backLabel = "back",
   nextLabel = "continue →",
+  lastStepLabel = "order",
+  isLastStep,
   canGoBack,
   canGoNext,
   onBack,
@@ -31,7 +35,7 @@ export const FormFooter = ({
         onClick={onNext}
         disabled={!canGoNext}
       >
-        {nextLabel}
+        {isLastStep ? lastStepLabel : nextLabel}
       </button>
     ) : null}
   </div>
