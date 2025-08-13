@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { Option, OptionCard } from "./OptionCard";
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
-import { isSizedPiece, PieceOrderDetail } from "@/models/Pieces";
+import { PieceOrderDetail } from "@/models/Pieces";
 
 type CardOptionsProps = {
   options: Option[];
@@ -25,18 +25,7 @@ export function CardOptions({ options }: CardOptionsProps) {
       dispatchOrderChange({
         type: "add-piece-detail",
         payload: {
-          pieceDetail: isSizedPiece(pieceDetail)
-            ? {
-                type: pieceDetail.type,
-                quantity: pieceDetail.quantity,
-                comments: pieceDetail.comments,
-                size: pieceDetail.size,
-              }
-            : {
-                type: pieceDetail.type,
-                quantity: pieceDetail.quantity,
-                comments: pieceDetail.comments,
-              },
+          pieceDetail,
         },
       });
     },

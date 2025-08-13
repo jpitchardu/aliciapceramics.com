@@ -2,17 +2,12 @@ import Image from "next/image";
 import "./OptionCard.styles.css";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import {
-  getAllSizes,
-  Piece,
-  PieceOrderDetail,
-  SizeOption,
-} from "@/models/Pieces";
+import { Piece, PieceOrderDetail, SizeOption } from "@/models/Pieces";
 
 export type Option = {
   id: Piece["type"];
   label: string;
-  image: string;
+  icon: string;
   designIdeasPlaceholder: string;
   sizes?: string[];
 };
@@ -25,7 +20,7 @@ type OptionCardProps = Option & {
 
 export function OptionCard({
   label,
-  image,
+  icon,
   sizes,
   designIdeasPlaceholder,
   isExpanded,
@@ -36,8 +31,8 @@ export function OptionCard({
   const cardRef = useRef<HTMLDivElement>(null);
 
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState<SizeOption["label"]>();
-  const [comments, setComments] = useState<string>();
+  const [selectedSize, setSelectedSize] = useState<SizeOption>();
+  const [description, setDescription] = useState<string>("");
 
   const handleQuantityChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,26 +43,29 @@ export function OptionCard({
 
   const handleSizeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSelectedSize(e.target.value as SizeOption["label"]);
+      setSelectedSize(e.target.value as SizeOption);
     },
     []
   );
 
   const handleCommentsChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setComments(e.target.value);
+      setDescription(e.target.value);
     },
     []
   );
 
   const handleAddToOrder = useCallback(() => {
+    setSelectedSize(undefined);
+    setDescription("");
+    setQuantity(1);
     onAddToOrder({
       type: id,
       quantity,
-      size: getAllSizes().find((size) => size.label === selectedSize)?.value,
-      comments,
-    } as PieceOrderDetail);
-  }, [onAddToOrder, id, quantity, selectedSize, comments]);
+      size: selectedSize!,
+      description,
+    });
+  }, [onAddToOrder, id, quantity, selectedSize, description]);
 
   const handleExpand = useCallback(() => {
     onExpand(id);
@@ -95,7 +93,7 @@ export function OptionCard({
         onClick={handleExpand}
       >
         <Image
-          src={image}
+          src={icon}
           alt="bowls"
           className="option-card-image inline w-1/4 h-auto"
           width={100}
@@ -163,6 +161,7 @@ export function OptionCard({
                   placeholder="quantity"
                   onChange={handleQuantityChange}
                   min={1}
+                  value={quantity}
                 />
               </div>
             </div>
@@ -171,9 +170,11 @@ export function OptionCard({
                 Describe your ideal piece(s)
               </legend>
               <textarea
+                required
                 className="aliciap-textarea w-full aliciap-input"
                 placeholder={designIdeasPlaceholder}
                 onChange={handleCommentsChange}
+                value={description}
               />
             </div>
             <button

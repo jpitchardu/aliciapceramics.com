@@ -32,11 +32,6 @@
   transition: padding 0.3s ease;
 }
 
-.card-controls.expanded .card-controls-content {
-  /* padding: 12px 14px; Visible padding when expanded */
-}
-
-
 .option-card.expanded {
   border-color: var(--color-pink-border);
   transform: translateY(-2px);

@@ -1,119 +1,134 @@
-const sizeOptions = [
-  {
-    _tag: "size",
-    label: "8 oz",
-    value: 8,
-  },
-  {
-    _tag: "size",
-    label: "10 oz",
-    value: 10,
-  },
-  {
-    _tag: "size",
-    label: "12 oz",
-    value: 12,
-  },
-] as const;
+import { z } from "zod";
 
-export type SizeOption = (typeof sizeOptions)[number];
+// const sizesConfig = {
+//   "8": {
+//     label: "8 oz",
+//   },
+//   "10": {
+//     label: "10 oz",
+//   },
+//   "12": {
+//     label: "12 oz",
+//   },
+// } as const;
 
-type MugWithHandle = {
-  type: "mug-with-handle";
-  size: SizeOption["value"];
-};
+const SizeOptions = {
+  eightOunces: "8",
+  tenOunces: "10",
+  twelveOunces: "12",
+} as const;
 
-type MugWithoutHandle = {
-  type: "mug-without-handle";
-  size: SizeOption["value"];
-};
+export type SizeOption = (typeof SizeOptions)[keyof typeof SizeOptions];
 
-type Tumbler = {
-  type: "tumbler";
-  size: SizeOption["value"];
-};
+const mugWithHandleSchema = z.object({
+  type: z.literal("mug-with-handle"),
+  size: z.enum(Object.values(SizeOptions)),
+});
 
-type MatchaBowl = {
-  type: "matcha-bowl";
-};
+const mugWithoutHandleSchema = z.object({
+  type: z.literal("mug-without-handle"),
+  size: z.enum(Object.values(SizeOptions)),
+});
 
-type TrinketDish = {
-  type: "trinket-dish";
-};
+const tumblerSchema = z.object({
+  type: z.literal("tumbler"),
+  size: z.enum(Object.values(SizeOptions)),
+});
 
-type Dinnerware = {
-  type: "dinnerware";
-};
+const matchaBowlSchema = z.object({
+  type: z.literal("matcha-bowl"),
+});
 
-type Other = {
-  type: "other";
-};
+const trinketDishSchema = z.object({
+  type: z.literal("trinket-dish"),
+});
 
-export type Piece =
-  | MugWithHandle
-  | MugWithoutHandle
-  | Tumbler
-  | MatchaBowl
-  | TrinketDish
-  | Dinnerware
-  | Other;
+const dinnerwareSchema = z.object({
+  type: z.literal("dinnerware"),
+});
 
-export type PieceOrderDetail = Piece & {
-  id?: string;
-  quantity: number;
-  comments?: string;
-};
+const otherSchema = z.object({
+  type: z.literal("other"),
+});
 
-type PieceConfig<T extends Piece> = {
+const pieceSchema = z.discriminatedUnion("type", [
+  mugWithHandleSchema,
+  mugWithoutHandleSchema,
+  tumblerSchema,
+  matchaBowlSchema,
+  trinketDishSchema,
+  dinnerwareSchema,
+  otherSchema,
+]);
+
+export type Piece = z.infer<typeof pieceSchema>;
+
+const pieceOrderDetailSchema = pieceSchema.and(
+  z.object({
+    quantity: z.number(),
+    description: z.string(),
+  })
+);
+
+export type PieceOrderDetail = z.infer<typeof pieceOrderDetailSchema>;
+
+type PieceConfig = {
   label: string;
   icon: string;
-} & (T extends MugWithHandle | MugWithoutHandle | Tumbler
-  ? { sized: true }
-  : { sized: false });
-
-const piecesConfigByType: {
-  [K in Piece["type"]]: PieceConfig<Extract<Piece, { type: K }>>;
-} = {
-  "mug-with-handle": {
-    label: "Mug W/ Handle",
-    icon: "/icons/mug_with_handle.png",
-    sized: true,
-  },
-  "mug-without-handle": {
-    label: "Mug W/O Handle",
-    icon: "/icons/mug_without_handle.png",
-    sized: true,
-  },
-  tumbler: {
-    label: "Tumbler",
-    icon: "/icons/tumbler.png",
-    sized: true,
-  },
-  "matcha-bowl": {
-    label: "Matcha Bowl",
-    icon: "/icons/matcha_bowl.png",
-    sized: false,
-  },
-  "trinket-dish": {
-    label: "Trinket Dish",
-    icon: "/icons/trinket_dish.png",
-    sized: false,
-  },
-  dinnerware: {
-    label: "Dinnerware",
-    icon: "/icons/plate.png",
-    sized: false,
-  },
-  other: {
-    label: "Other",
-    icon: "/icons/vase.png",
-    sized: false,
-  },
+  sizes: SizeOption[];
 };
 
-export function getConfigByPieceType<T extends Piece["type"]>(
-  type: T
-): PieceConfig<Extract<Piece, { type: T }>> {
+const piecesConfigByType: Record<Piece["type"], PieceConfig> = {
+  "mug-with-handle": {
+    label: "mug w/ handle",
+    icon: "/icons/mug_with_handle.png",
+    sizes: [
+      SizeOptions.eightOunces,
+      SizeOptions.tenOunces,
+      SizeOptions.twelveOunces,
+    ],
+  },
+  "mug-without-handle": {
+    label: "mug w/o handle",
+    icon: "/icons/mug_without_handle.png",
+    sizes: [
+      SizeOptions.eightOunces,
+      SizeOptions.tenOunces,
+      SizeOptions.twelveOunces,
+    ],
+  },
+  tumbler: {
+    label: "tumbler",
+    icon: "/icons/tumbler.png",
+    sizes: [
+      SizeOptions.eightOunces,
+      SizeOptions.tenOunces,
+      SizeOptions.twelveOunces,
+    ],
+  },
+  "matcha-bowl": {
+    label: "matcha bowl",
+    icon: "/icons/matcha_bowl.png",
+    sizes: [],
+  },
+  "trinket-dish": {
+    label: "trinket dish",
+    icon: "/icons/trinket_dish.png",
+    sizes: [],
+  },
+  dinnerware: {
+    label: "dinnerware",
+    icon: "/icons/plate.png",
+    sizes: [],
+  },
+  other: {
+    label: "other",
+    icon: "/icons/vase.png",
+    sizes: [],
+  },
+} as const;
+
+export function getConfigByPieceType(type: Piece["type"]): PieceConfig {
   return piecesConfigByType[type];
 }
 
@@ -121,14 +136,9 @@ export function getAllPieceTypes(): readonly Piece["type"][] {
   return Object.keys(piecesConfigByType) as Piece["type"][];
 }
 
-export function getAllSizes(): SizeOption[] {
-  return [...sizeOptions];
-}
-
-export function isSizedPiece(
-  piece: Piece
-): piece is MugWithHandle | MugWithoutHandle | Tumbler {
-  return ["mug-with-handle", "mug-without-handle", "tumbler"].includes(
-    piece.type
+export function isSizedPiece(piece: Piece): piece is Piece & { size: number } {
+  return (
+    ["mug-with-handle", "mug-without-handle", "tumbler"].includes(piece.type) &&
+    "size" in piece
   );
 }
