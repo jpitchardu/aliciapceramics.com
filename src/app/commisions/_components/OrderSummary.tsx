@@ -1,5 +1,5 @@
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
-import { getConfigByPieceType } from "@/models/Pieces";
+import { getConfigByPieceType } from "@/models/Piece";
 import clsx from "clsx";
 import Image from "next/image";
 import { useCallback, useState } from "react";
@@ -7,7 +7,10 @@ import { useCallback, useState } from "react";
 export function OrderSummary() {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
-  const { order, dispatchOrderChange } = useOrderContext();
+  const {
+    orderFormState: { order },
+    dispatchOrderChange,
+  } = useOrderContext();
 
   const handleRemovePieceDetail = useCallback(
     (id: string) => {

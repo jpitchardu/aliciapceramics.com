@@ -1,7 +1,7 @@
 import { ActionDispatch, createContext, useContext, useReducer } from "react";
 import invariant from "tiny-invariant";
-import { PieceOrderDetail } from "@/models/Pieces";
-import { EMPTY_ORDER, Order } from "@/models/Order";
+import { PieceOrderDetail } from "@/models/Piece";
+import { getEmptyOrder, Order, orderSchema } from "@/models/Order";
 
 type AddClientInfoAction = {
   type: "add-client-info";
@@ -10,101 +10,131 @@ type AddClientInfoAction = {
   };
 };
 
-type AddPieceDetailAction = {
+type AddPieceOrderDetailAction = {
   type: "add-piece-detail";
   payload: {
-    pieceDetail: PieceOrderDetail;
+    pieceOrderDetail: PieceOrderDetail;
   };
 };
 
-type RemovePieceDetailAction = {
+type RemovePieceOrderDetailAction = {
   type: "remove-piece-detail";
   payload: {
     id: PieceOrderDetail["id"];
   };
 };
 
-type AddDescriptionAction = {
-  type: "add-description";
-  payload: {
-    description: string;
-    timeline: Date;
-  };
-};
-
-type AddInspirationAction = {
-  type: "add-inspiration";
-  payload: {
+type AddOrderDetailsAction = {
+  type: "add-order-details";
+  payload: Partial<{
     inspiration: string;
     specialConsiderations: string;
-  };
+    timeline: Date;
+  }>;
 };
 
+type AcceptTermsAndConditionsAction = {
+  type: "accept-terms-and-conditions";
+  payload: {
+    consent: boolean;
+  };
+};
 type OrderAction =
   | AddClientInfoAction
-  | AddPieceDetailAction
-  | AddDescriptionAction
-  | AddInspirationAction
-  | RemovePieceDetailAction;
+  | AddPieceOrderDetailAction
+  | AddOrderDetailsAction
+  | RemovePieceOrderDetailAction
+  | AcceptTermsAndConditionsAction;
 
 export type OrderContext = {
-  order: Order;
+  orderFormState: OrderFormState;
   dispatchOrderChange: ActionDispatch<[action: OrderAction]>;
 };
 
 const OrderContext = createContext<OrderContext>({
-  order: EMPTY_ORDER,
+  orderFormState: {
+    order: getEmptyOrder(),
+    isOrderValid: false,
+  },
   dispatchOrderChange: () => {},
 });
 
-const orderReducer = (order: Order, action: OrderAction) => {
+type OrderFormState = {
+  order: Order;
+  isOrderValid: boolean;
+};
+
+const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
+  let newOrder: Order;
+
   switch (action.type) {
     case "add-client-info":
-      1;
-      return {
+      newOrder = {
         ...order,
         client: { ...order.client, ...action.payload.client },
       };
+      break;
     case "add-piece-detail":
-      return {
+      newOrder = {
         ...order,
         pieceDetails: [
           ...order.pieceDetails,
           {
-            ...action.payload.pieceDetail,
-            id: `${action.payload.pieceDetail.type}-${Date.now()}`,
+            ...action.payload.pieceOrderDetail,
+            id: `${action.payload.pieceOrderDetail.type}-${Date.now()}`,
           },
         ],
       };
-    case "add-description":
-      return {
+      break;
+    case "add-order-details":
+      newOrder = {
         ...order,
-        description: action.payload.description,
-        timeline: action.payload.timeline,
+        ...action.payload,
       };
-    case "add-inspiration":
-      return {
-        ...order,
-        inspiration: action.payload.inspiration,
-        specialConsiderations: action.payload.specialConsiderations,
-      };
+      break;
     case "remove-piece-detail":
-      return {
+      newOrder = {
         ...order,
         pieceDetails: order.pieceDetails.filter(
           (detail) => detail.id !== action.payload.id
         ),
       };
+      break;
+    case "accept-terms-and-conditions":
+      newOrder = {
+        ...order,
+        consent: action.payload.consent,
+      };
+      break;
     default:
       invariant(false, "Invalid order action");
   }
+
+  const parseResult = orderSchema.safeParse(newOrder);
+
+  if (process.env.NODE_ENV === "development" && !parseResult.success) {
+    console.error(parseResult.error);
+  }
+
+  return {
+    order: newOrder,
+    isOrderValid: parseResult.success && parseResult.data.consent,
+  };
 };
 
 export function OrderProvider({ children }: { children: React.ReactNode }) {
-  const [order, dispatch] = useReducer(orderReducer, EMPTY_ORDER);
+  const [order, dispatch] = useReducer(orderReducer, {
+    order: getEmptyOrder(),
+    isOrderValid: false,
+  });
 
   return (
-    <OrderContext.Provider value={{ order, dispatchOrderChange: dispatch }}>
+    <OrderContext.Provider
+      value={{
+        orderFormState: order,
+        dispatchOrderChange: dispatch,
+      }}
+    >
       {children}
     </OrderContext.Provider>
   );

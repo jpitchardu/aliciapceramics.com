@@ -1,8 +1,8 @@
-import { CardOptions } from "@/app/commisions/_components/optionCard/CardOptions";
-import { getConfigByPieceType } from "@/models/Pieces";
+import { CardOptions } from "./CardOptions";
+import { getConfigByPieceType } from "@/models/Piece";
 import { Option } from "@/app/commisions/_components/optionCard/OptionCard";
 
-import { OrderSummary } from "@/app/commisions/_components/orderSummary/OrderSummary";
+import { OrderSummary } from "@/app/commisions/_components/OrderSummary";
 
 const stepData = {
   title: "what are you looking for?",

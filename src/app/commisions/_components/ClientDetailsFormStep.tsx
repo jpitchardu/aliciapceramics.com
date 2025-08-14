@@ -2,7 +2,7 @@ import { TextInput } from "@/ui/TextInput";
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
 
 import { Order } from "@/models/Order";
-import { OrderSummary } from "@/app/commisions/_components/orderSummary/OrderSummary";
+import { OrderSummary } from "@/app/commisions/_components/OrderSummary";
 
 const stepData = {
   title: "let's get some info",
@@ -33,7 +33,10 @@ const stepData = {
 } as const;
 
 export function ClientDetailsFormStep() {
-  const { order, dispatchOrderChange } = useOrderContext();
+  const {
+    orderFormState: { order },
+    dispatchOrderChange,
+  } = useOrderContext();
 
   const handleChange = (path: keyof Order["client"], value: string) => {
     dispatchOrderChange({

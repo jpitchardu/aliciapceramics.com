@@ -1,7 +1,8 @@
-import { ClientDetailsFormStep } from "@/app/commisions/_components/clientDetailPage/ClientDetailsFormStep";
-import { AddPiecesFormStep } from "@/app/commisions/_components/addPiecesPage/AddPiecesFormStep";
-import { AddOrderDetailsFormStep } from "@/app/commisions/_components/addOrderDetailsFormStep/AddOrderDetailsFormStep";
-import { AcceptTermsAndConditionsFormStep } from "@/app/commisions/_components/acceptTermsAndConditionsFormStep/AcceptTermsAndConditionsFormStep";
+import { ClientDetailsFormStep } from "@/app/commisions/_components/ClientDetailsFormStep";
+import { AddPiecesFormStep } from "@/app/commisions/_components/AddPiecesFormStep";
+import { AddOrderDetailsFormStep } from "@/app/commisions/_components/AddOrderDetailsFormStep";
+import { AcceptTermsAndConditionsFormStep } from "@/app/commisions/_components/AcceptTermsAndConditionsFormStep";
+import { OrderConfirmedFormStep } from "@/app/commisions/_components/OrderConfirmedFormStep";
 
 type FormPageProps = {
   step: number;
@@ -39,5 +40,12 @@ export default function FormPage({ step }: FormPageProps) {
     );
   }
 
+  if (step === 4) {
+    return (
+      <div className={`w-full flex flex-col flex-1 min-h-0 gap-2`}>
+        <OrderConfirmedFormStep />
+      </div>
+    );
+  }
   return null;
 }

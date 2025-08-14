@@ -1,30 +1,29 @@
-import { OrderSummary } from "@/app/commisions/_components/orderSummary/OrderSummary";
+import { OrderSummary } from "@/app/commisions/_components/OrderSummary";
+import { useOrderContext } from "@/app/commisions/_data/orderContext";
 import { DollarIcon } from "@/ui/icons/DollarIcon";
 import { LightbulbIcon } from "@/ui/icons/LightBulbIcon";
 import { StarIcon } from "@/ui/icons/StartIcon";
+import { ChangeEvent } from "react";
 
-const stepData = {
-  title: "your pottery timeline",
-  body: "from conversation to creation in 4 simple steps",
-  fields: [
-    {
-      _type: "checkbox",
-      label: "I accept the terms and conditions",
-    },
-  ],
-  infoCard: {
-    title: "beware",
-    body: "Because of high demand, I'm not always able to finish a piece in the time frame you're looking for.",
-  },
-};
 export function AcceptTermsAndConditionsFormStep() {
+  const { dispatchOrderChange } = useOrderContext();
+
+  const handleConsentChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.checked;
+    dispatchOrderChange({
+      type: "accept-terms-and-conditions",
+      payload: { consent: value },
+    });
+  };
   return (
     <div className="flex-shrink-0 gap-4 max-h-full flex flex-col">
       <div className="px-8">
         <h2 className="font-heading text-2xl mb-1 text-earth-dark">
-          {stepData.title}
+          {"your pottery timeline"}
         </h2>
-        <p className="font-body text-sm  text-earth-dark">{stepData.body}</p>
+        <p className="font-body text-sm  text-earth-dark">
+          {"from conversation to creation in 4 simple steps"}
+        </p>
       </div>
       <OrderSummary />
       <div className="flex-1 min-h-0 overflow-y-scroll flex flex-col gap-4">
@@ -104,6 +103,7 @@ export function AcceptTermsAndConditionsFormStep() {
               type="checkbox"
               id="terms-and-conditions"
               className="aliciap-checkbox"
+              onChange={handleConsentChange}
             />
             <label
               htmlFor="terms-and-conditions"

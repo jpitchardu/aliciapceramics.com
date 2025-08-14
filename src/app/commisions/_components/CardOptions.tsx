@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
-import { Option, OptionCard } from "./OptionCard";
+import { Option, OptionCard } from "./optionCard/OptionCard";
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
-import { PieceOrderDetail } from "@/models/Pieces";
+import { PieceOrderDetail } from "@/models/Piece";
 
 type CardOptionsProps = {
   options: Option[];
@@ -20,12 +20,12 @@ export function CardOptions({ options }: CardOptionsProps) {
   );
 
   const handleAddToOrder = useCallback(
-    (pieceDetail: PieceOrderDetail) => {
+    (pieceOrderDetail: PieceOrderDetail) => {
       setExpandedCardId(null);
       dispatchOrderChange({
         type: "add-piece-detail",
         payload: {
-          pieceDetail,
+          pieceOrderDetail,
         },
       });
     },

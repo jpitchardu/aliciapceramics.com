@@ -6,6 +6,7 @@ import clsx from "clsx";
 type TextAreaProps = {
   label: string;
   placeholder: string;
+  value: string;
   required: boolean;
   onChange: ChangeEventHandler<HTMLTextAreaElement>;
 };
@@ -13,6 +14,7 @@ type TextAreaProps = {
 export function TextArea({
   label,
   placeholder,
+  value,
   required,
   onChange,
 }: TextAreaProps) {
@@ -50,6 +52,7 @@ export function TextArea({
         onChange={onChange}
         onFocus={onFocus}
         onBlur={onBlur}
+        value={value}
       />
     </div>
   );

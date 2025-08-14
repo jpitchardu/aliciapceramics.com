@@ -25,25 +25,25 @@
   --letter-spacing-button: 0.5px;
 
   /* Colors - Aliciap Ceramics Palette */
-  
+
   /* Earth tones - primary text and backgrounds */
   --color-earth-bg: #fbfaf9;
   --color-earth-form: #f0e7da;
   --color-earth-dark: #3d1900;
-  
+
   /* Pink system - input backgrounds and hover states */
   --color-pink-input: rgb(225 175 161 / 0.4);
   --color-pink-border: #e1afa1;
   --color-pink-hover: rgb(225 175 161 / 0.25);
-  
+
   /* Blue system - selection states and button hovers */
   --color-blue-selection: rgb(189 201 203 / 0.4);
   --color-blue-border: #bdc9cb;
   --color-blue-info: rgb(189 201 203 / 0.3);
-  
+
   /* Red system - focus and active states */
   --color-red-focus: #d62411;
-  
+
   /* Utility colors */
   --color-white-focus: rgb(255 255 255 / 0.95);
   --color-stone-disabled: #f1f3f4;
@@ -87,62 +87,86 @@
   --animate-shimmer: shimmer 1.5s ease-in-out infinite;
   --animate-bounce: bounce 0.6s ease-out;
   --animate-shake: shake 0.5s ease-in-out;
+
+  --animation-star-fall-1: star-fall 3s linear infinite;
+  --animation-star-fall-2: star-fall 3.5s linear infinite;
+  --animation-star-fall-3: star-fall 4s linear infinite;
+  --animation-star-fall-4: star-fall 5.5s linear infinite;
+  --animation-star-fall-5: star-fall 3.8s linear infinite;
 }
 
 /* Animation Keyframes */
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fade-in {
-  from { 
-    opacity: 0; 
-    transform: translateY(20px); 
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @keyframes slide-in-right {
-  from { 
-    opacity: 0; 
-    transform: translateX(30px); 
+  from {
+    opacity: 0;
+    transform: translateX(30px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateX(0); 
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
 @keyframes slide-in-left {
-  from { 
-    opacity: 0; 
-    transform: translateX(-30px); 
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateX(0); 
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: calc(200px + 100%) 0; }
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
 }
 
 @keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
-    transform: translate3d(0,0,0);
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translate3d(0, 0, 0);
   }
-  40%, 43% {
+  40%,
+  43% {
     transform: translate3d(0, -8px, 0);
   }
   70% {
@@ -154,9 +178,42 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-  20%, 40%, 60%, 80% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes star-fall {
+  0% {
+    top: -10%;
+    opacity: 0;
+    transform: rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 110%;
+    opacity: 0;
+    transform: rotate(360deg);
+  }
 }
 
 /* Typography Components */
@@ -220,7 +277,6 @@
   border-radius: var(--radius-aliciap-xl);
 }
 
-
 .aliciap-input:focus {
   background: var(--color-white-focus);
   border-color: var(--color-pink-border);
@@ -273,12 +329,12 @@
   min-width: 120px;
 }
 
-.aliciap-radio-button{
+.aliciap-radio-button {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 8px 12px;
-  margin: 0; 
+  margin: 0;
   font-size: 12px;
   border-radius: var(--radius-aliciap-xl);
   cursor: pointer;
@@ -289,7 +345,6 @@
   background: var(--color-earth-dark);
   color: var(--color-earth-form);
 }
-
 
 .aliciap-radio-button-checked {
   background: var(--color-blue-border);
@@ -337,7 +392,6 @@
   transform: translateY(-1px);
 }
 
-
 .aliciap-btn-primary:disabled {
   background: var(--color-stone-text);
   color: white;
@@ -381,7 +435,7 @@
   position: relative;
   overflow: hidden;
 }
-   
+
 .pottery-option:hover {
   border-color: var(--color-pink-border);
   transform: translateY(-2px);
@@ -495,9 +549,10 @@
 
 /* Loading States */
 .loading-skeleton {
-  background: linear-gradient(90deg, 
-    var(--color-stone-disabled) 25%, 
-    rgb(255 255 255 / 0.5) 37%, 
+  background: linear-gradient(
+    90deg,
+    var(--color-stone-disabled) 25%,
+    rgb(255 255 255 / 0.5) 37%,
     var(--color-stone-disabled) 63%
   );
   background-size: 400% 100%;
@@ -526,7 +581,7 @@
 
 .aliciap-checkbox {
   appearance: none;
-  width: 18px; 
+  width: 18px;
   height: 18px;
   min-width: 18px;
   min-height: 18px;
@@ -583,9 +638,10 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgb(225 175 161 / 0.2), 
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(225 175 161 / 0.2),
     transparent
   );
   transition: left 0.5s ease;

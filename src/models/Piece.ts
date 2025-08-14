@@ -53,7 +53,7 @@ export type Piece = z.infer<typeof pieceSchema>;
 
 export const pieceOrderDetailSchema = pieceSchema.and(
   z.object({
-    id: z.uuid().optional(),
+    id: z.string().optional(),
     quantity: z.number(),
     description: z.string(),
   })

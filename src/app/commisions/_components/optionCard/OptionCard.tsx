@@ -10,7 +10,7 @@ import {
   PieceOrderDetail,
   pieceOrderDetailSchema,
   SizeOption,
-} from "@/models/Pieces";
+} from "@/models/Piece";
 
 export type Option = {
   type: Piece["type"];
