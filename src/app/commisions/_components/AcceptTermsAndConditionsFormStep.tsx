@@ -6,7 +6,10 @@ import { StarIcon } from "@/ui/icons/StartIcon";
 import { ChangeEvent } from "react";
 
 export function AcceptTermsAndConditionsFormStep() {
-  const { dispatchOrderChange } = useOrderContext();
+  const {
+    dispatchOrderChange,
+    orderFormState: { order },
+  } = useOrderContext();
 
   const handleConsentChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.checked;
@@ -104,6 +107,7 @@ export function AcceptTermsAndConditionsFormStep() {
               id="terms-and-conditions"
               className="aliciap-checkbox"
               onChange={handleConsentChange}
+              checked={order.consent}
             />
             <label
               htmlFor="terms-and-conditions"

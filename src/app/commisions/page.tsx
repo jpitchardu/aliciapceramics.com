@@ -21,7 +21,6 @@ export default function CommisionsPage() {
     setStep(step - 1);
   }, [step]);
 
-  console.log(isOrderValid);
   const canGoNext = step < 3 || isOrderValid;
 
   return (

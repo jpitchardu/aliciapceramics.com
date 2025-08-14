@@ -72,6 +72,7 @@ const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
       newOrder = {
         ...order,
         client: { ...order.client, ...action.payload.client },
+        consent: false,
       };
       break;
     case "add-piece-detail":
@@ -84,12 +85,14 @@ const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
             id: `${action.payload.pieceOrderDetail.type}-${Date.now()}`,
           },
         ],
+        consent: false,
       };
       break;
     case "add-order-details":
       newOrder = {
         ...order,
         ...action.payload,
+        consent: false,
       };
       break;
     case "remove-piece-detail":
@@ -98,6 +101,7 @@ const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
         pieceDetails: order.pieceDetails.filter(
           (detail) => detail.id !== action.payload.id
         ),
+        consent: false,
       };
       break;
     case "accept-terms-and-conditions":
@@ -111,10 +115,6 @@ const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
   }
 
   const parseResult = orderSchema.safeParse(newOrder);
-
-  if (process.env.NODE_ENV === "development" && !parseResult.success) {
-    console.error(parseResult.error);
-  }
 
   return {
     order: newOrder,
