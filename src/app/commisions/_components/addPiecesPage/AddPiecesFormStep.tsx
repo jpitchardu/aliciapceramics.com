@@ -13,43 +13,43 @@ const stepData = {
       label: "what are you looking for?",
       options: [
         {
-          id: "matcha-bowl",
+          type: "matcha-bowl",
           designIdeasPlaceholder:
             "Traditional but with 'overpriced grass water' on the bottom",
           ...getConfigByPieceType("matcha-bowl"),
         },
         {
-          id: "mug-with-handle",
+          type: "mug-with-handle",
           ...getConfigByPieceType("mug-with-handle"),
           designIdeasPlaceholder:
             "Coffee mug with a tiny handle because I have small hands",
         },
         {
-          id: "tumbler",
+          type: "tumbler",
           ...getConfigByPieceType("tumbler"),
           designIdeasPlaceholder:
             "Covered in little crying faces that match my energy",
         },
         {
-          id: "mug-without-handle",
+          type: "mug-without-handle",
           ...getConfigByPieceType("mug-without-handle"),
           designIdeasPlaceholder:
             "A mug that says 'I'm not a morning person' in tiny letters on the bottom",
         },
         {
-          id: "trinket-dish",
+          type: "trinket-dish",
           ...getConfigByPieceType("trinket-dish"),
           designIdeasPlaceholder: "Shaped like a tiny bathtub for my jewelry",
         },
 
         {
-          id: "dinnerware",
+          type: "dinnerware",
           ...getConfigByPieceType("dinnerware"),
           designIdeasPlaceholder:
             "Plate with 'SERVING SIZE: LOL' printed around the rim",
         },
         {
-          id: "other",
+          type: "other",
           ...getConfigByPieceType("other"),
           designIdeasPlaceholder: "Vase shaped like my cat Milo (he's round)",
         },

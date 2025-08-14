@@ -36,10 +36,10 @@ export function CardOptions({ options }: CardOptionsProps) {
     <>
       {options.map((option) => (
         <OptionCard
-          key={option.id}
+          key={option.type}
           {...option}
           onAddToOrder={handleAddToOrder}
-          isExpanded={expandedCardId === option.id}
+          isExpanded={expandedCardId === option.type}
           onExpand={handleExpand}
         />
       ))}

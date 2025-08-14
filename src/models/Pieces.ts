@@ -1,17 +1,5 @@
 import { z } from "zod";
 
-// const sizesConfig = {
-//   "8": {
-//     label: "8 oz",
-//   },
-//   "10": {
-//     label: "10 oz",
-//   },
-//   "12": {
-//     label: "12 oz",
-//   },
-// } as const;
-
 const SizeOptions = {
   eightOunces: "8",
   tenOunces: "10",
@@ -63,8 +51,9 @@ const pieceSchema = z.discriminatedUnion("type", [
 
 export type Piece = z.infer<typeof pieceSchema>;
 
-const pieceOrderDetailSchema = pieceSchema.and(
+export const pieceOrderDetailSchema = pieceSchema.and(
   z.object({
+    id: z.uuid().optional(),
     quantity: z.number(),
     description: z.string(),
   })
@@ -136,9 +125,38 @@ export function getAllPieceTypes(): readonly Piece["type"][] {
   return Object.keys(piecesConfigByType) as Piece["type"][];
 }
 
-export function isSizedPiece(piece: Piece): piece is Piece & { size: number } {
-  return (
-    ["mug-with-handle", "mug-without-handle", "tumbler"].includes(piece.type) &&
-    "size" in piece
+export function isSizedPiece(
+  piece: Piece
+): piece is Extract<
+  Piece,
+  { type: "mug-with-handle" | "mug-without-handle" | "tumbler" }
+> {
+  return ["mug-with-handle", "mug-without-handle", "tumbler"].includes(
+    piece.type
   );
+}
+
+export function isSizedPieceType(
+  type: Piece["type"]
+): type is "mug-with-handle" | "mug-without-handle" | "tumbler" {
+  return ["mug-with-handle", "mug-without-handle", "tumbler"].includes(type);
+}
+
+export function getEmptyPieceOrderDetail(
+  type: Piece["type"]
+): PieceOrderDetail {
+  if (isSizedPieceType(type)) {
+    return {
+      type: type,
+      quantity: 1,
+      description: "",
+      size: getConfigByPieceType(type).sizes[0],
+    };
+  }
+
+  return {
+    type: type,
+    quantity: 1,
+    description: "",
+  };
 }

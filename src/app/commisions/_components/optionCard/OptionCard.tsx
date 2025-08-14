@@ -1,15 +1,20 @@
 import Image from "next/image";
 import "./OptionCard.styles.css";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useReducer, useRef } from "react";
 import clsx from "clsx";
-import { Piece, PieceOrderDetail, SizeOption } from "@/models/Pieces";
+import {
+  getConfigByPieceType,
+  getEmptyPieceOrderDetail,
+  isSizedPiece,
+  Piece,
+  PieceOrderDetail,
+  pieceOrderDetailSchema,
+  SizeOption,
+} from "@/models/Pieces";
 
 export type Option = {
-  id: Piece["type"];
-  label: string;
-  icon: string;
+  type: Piece["type"];
   designIdeasPlaceholder: string;
-  sizes?: string[];
 };
 
 type OptionCardProps = Option & {
@@ -18,58 +23,97 @@ type OptionCardProps = Option & {
   onAddToOrder: (pieceDetail: PieceOrderDetail) => void;
 };
 
+type PieceOrderDetailFormAction =
+  | { actionType: "setQuantity"; quantity: number }
+  | { actionType: "setSize"; size: SizeOption }
+  | { actionType: "setDescription"; description: string }
+  | { actionType: "reset" };
+
+type PieceOrderDetailFormState = {
+  valid: boolean;
+  pieceDetail: PieceOrderDetail;
+};
+
 export function OptionCard({
-  label,
-  icon,
-  sizes,
   designIdeasPlaceholder,
   isExpanded,
-  id,
+  type,
   onExpand,
   onAddToOrder,
 }: OptionCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState<SizeOption>();
-  const [description, setDescription] = useState<string>("");
+  const [formState, dispatchPieceDetail] = useReducer(
+    (
+      prevState: PieceOrderDetailFormState,
+      action: PieceOrderDetailFormAction
+    ) => {
+      const pieceDetail = pieceOrderDetailSchema.safeParse({
+        ...prevState.pieceDetail,
+        ...action,
+      });
+
+      if (action.actionType === "reset") {
+        return {
+          valid: false,
+          pieceDetail: getEmptyPieceOrderDetail(type),
+        };
+      }
+
+      return {
+        valid: pieceDetail.success,
+        pieceDetail: {
+          ...prevState.pieceDetail,
+          ...action,
+        },
+      };
+    },
+    {
+      valid: false,
+      pieceDetail: getEmptyPieceOrderDetail(type),
+    }
+  );
+
+  const pieceConfig = getConfigByPieceType(type);
 
   const handleQuantityChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setQuantity(Number(e.target.value));
+      dispatchPieceDetail({
+        actionType: "setQuantity",
+        quantity: Number(e.target.value),
+      });
     },
     []
   );
 
   const handleSizeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSelectedSize(e.target.value as SizeOption);
+      dispatchPieceDetail({
+        actionType: "setSize",
+        size: e.target.value as SizeOption,
+      });
     },
     []
   );
 
   const handleCommentsChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setDescription(e.target.value);
+      dispatchPieceDetail({
+        actionType: "setDescription",
+        description: e.target.value,
+      });
     },
     []
   );
 
   const handleAddToOrder = useCallback(() => {
-    setSelectedSize(undefined);
-    setDescription("");
-    setQuantity(1);
-    onAddToOrder({
-      type: id,
-      quantity,
-      size: selectedSize!,
-      description,
-    });
-  }, [onAddToOrder, id, quantity, selectedSize, description]);
+    dispatchPieceDetail({ actionType: "reset" });
+    onAddToOrder(formState.pieceDetail);
+  }, [onAddToOrder, formState.pieceDetail, dispatchPieceDetail]);
 
   const handleExpand = useCallback(() => {
-    onExpand(id);
-  }, [onExpand, id]);
+    onExpand(type);
+  }, [onExpand, type]);
 
   useLayoutEffect(() => {
     if (!isExpanded) return;
@@ -93,14 +137,16 @@ export function OptionCard({
         onClick={handleExpand}
       >
         <Image
-          src={icon}
+          src={pieceConfig.icon}
           alt="bowls"
           className="option-card-image inline w-1/4 h-auto"
           width={100}
           height={100}
         />
         <div className="option-card-title-container">
-          <div className="text-sm font-button text-earth-dark">{label}</div>
+          <div className="text-sm font-button text-earth-dark">
+            {pieceConfig.label}
+          </div>
         </div>
       </button>
       <div
@@ -116,31 +162,35 @@ export function OptionCard({
           <fieldset className="flex flex-col gap-4">
             <div className="flex items-end gap-4 w-full">
               <div className="flex flex-col gap-1 empty:hidden flex-1 items-start min-w-fit">
-                {sizes ? (
+                {isSizedPiece(formState.pieceDetail) ? (
                   <>
                     <legend className="text-sm font-label text-earth-dark">
                       Size
                     </legend>
                     <div className="flex flex-row gap-1">
-                      {sizes.map((size) => (
+                      {pieceConfig.sizes.map((size) => (
                         <label
                           key={size}
-                          htmlFor={`${id}-${size}`}
+                          htmlFor={`${type}-${size}`}
                           className={clsx(
                             "aliciap-radio-button",
                             "flex-grow",
-                            selectedSize === size &&
+                            isSizedPiece(formState.pieceDetail) &&
+                              formState.pieceDetail.size === size &&
                               "aliciap-radio-button-checked"
                           )}
                         >
                           <input
-                            name={`${id}-size`}
-                            id={`${id}-${size}`}
+                            name={`${type}-size`}
+                            id={`${type}-${size}`}
                             required
                             type="radio"
                             value={size}
                             className="sr-only"
-                            checked={selectedSize === size}
+                            checked={
+                              isSizedPiece(formState.pieceDetail) &&
+                              formState.pieceDetail.size === size
+                            }
                             onChange={handleSizeChange}
                           />
                           <span>{size}</span>
@@ -161,7 +211,7 @@ export function OptionCard({
                   placeholder="quantity"
                   onChange={handleQuantityChange}
                   min={1}
-                  value={quantity}
+                  value={formState.pieceDetail.quantity}
                 />
               </div>
             </div>
@@ -174,12 +224,13 @@ export function OptionCard({
                 className="aliciap-textarea w-full aliciap-input"
                 placeholder={designIdeasPlaceholder}
                 onChange={handleCommentsChange}
-                value={description}
+                value={formState.pieceDetail.description}
               />
             </div>
             <button
               className="aliciap-btn aliciap-btn-md aliciap-btn-primary w-full"
               onClick={handleAddToOrder}
+              disabled={!formState.valid}
             >
               Add to order
             </button>
