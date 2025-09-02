@@ -7,7 +7,7 @@ type FormStepPageProps = {
 };
 
 export function FormStepPage({ stepKey, children }: FormStepPageProps) {
-  const { isStepActive, currentStep } = useFormContext();
+  const { isStepActive } = useFormContext();
 
   if (!isStepActive(stepKey)) {
     return null;

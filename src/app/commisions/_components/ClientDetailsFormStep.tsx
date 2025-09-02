@@ -1,10 +1,9 @@
 import { TextInput } from "@/ui/TextInput";
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
 
-import { Order, orderClientSchema } from "@/models/Order";
+import { Order } from "@/models/Order";
 import { OrderSummary } from "@/app/commisions/_components/OrderSummary";
 import { Form } from "@/ui/form/Form";
-import { useFormContext } from "@/ui/form/FormContext";
 import z from "zod";
 
 const stepData = {
