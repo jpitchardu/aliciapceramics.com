@@ -1,8 +1,11 @@
+import { Form } from "@/ui/form/Form";
 import { StarRain } from "@/ui/StarRain";
+
+const stepKey = "order-confirmed";
 
 export function OrderConfirmedFormStep() {
   return (
-    <div className={`w-full flex flex-col flex-1 min-h-0 gap-2 px-8 h-full`}>
+    <Form.StepPage stepKey={stepKey}>
       <StarRain stars={10} />
       <div className="flex flex-col h-full items-center justify-center relative">
         <h2 className="font-heading text-2xl mb-1 text-earth-dark text-center">
@@ -12,6 +15,8 @@ export function OrderConfirmedFormStep() {
           I can't wait to create with you
         </p>
       </div>
-    </div>
+    </Form.StepPage>
   );
 }
+
+OrderConfirmedFormStep.stepKey = stepKey;

@@ -16,11 +16,11 @@ const STARS = [
 ] as const;
 
 const ANIMATIONS = [
-  "animate-(--animation-star-fall-1)",
-  "animate-(--animation-star-fall-2)",
-  "animate-(--animation-star-fall-3)",
-  "animate-(--animation-star-fall-4)",
-  "animate-(--animation-star-fall-5)",
+  "star-fall-1",
+  "star-fall-2",
+  "star-fall-3",
+  "star-fall-4",
+  "star-fall-5",
 ];
 
 type StarRainProps = {
@@ -41,15 +41,13 @@ export function StarRain({ stars }: StarRainProps) {
             color={getRandomPaletteColor()}
             style={
               {
-                "--left": left,
-                "--delay": delay,
+                left: left,
+                animationDelay: delay,
               } as React.CSSProperties
             }
             className={clsx(
               "absolute",
-              ANIMATIONS[index % ANIMATIONS.length],
-              "left-[var(--left)]",
-              "animation-delay-[var(--delay)]"
+              ANIMATIONS[index % ANIMATIONS.length]
             )}
           />
         );

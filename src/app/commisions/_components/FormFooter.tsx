@@ -20,7 +20,7 @@ export const FormFooter = ({
   onNext,
 }: FormFooterProps) => (
   <div className="flex justify-between mt- w-full px-8 pt-4">
-    {onBack ? (
+    {canGoBack ? (
       <button
         className="aliciap-btn aliciap-btn-secondary aliciap-btn-md font-button"
         onClick={onBack}

@@ -32,7 +32,6 @@ export function OrderSummary() {
         "flex-wrap",
         "gap-2",
         "w-full",
-        "px-8",
         "transition-all",
         "duration-300"
       )}

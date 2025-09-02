@@ -3,6 +3,9 @@ import { getConfigByPieceType } from "@/models/Piece";
 import { Option } from "@/app/commisions/_components/optionCard/OptionCard";
 
 import { OrderSummary } from "@/app/commisions/_components/OrderSummary";
+import { Form } from "@/ui/form/Form";
+import { useOrderContext } from "../_data/orderContext";
+import z from "zod";
 
 const stepData = {
   title: "what are you looking for?",
@@ -58,21 +61,29 @@ const stepData = {
   ],
 };
 
+const stepKey = "add-pieces" as const;
+
 export function AddPiecesFormStep() {
+  const {
+    orderFormState: { error },
+  } = useOrderContext();
+
+  const isValid = Boolean(
+    error && !z.treeifyError(error).properties?.pieceDetails?.errors
+  );
+
   return (
-    <div className="flex-shrink-0 gap-4 max-h-full flex flex-col">
-      <div className="flex-shrink-0 px-8">
-        <h2 className="font-heading text-2xl mb-1 text-earth-dark">
-          {stepData.title}
-        </h2>
-        <p className="font-body text-sm text-earth-dark">{stepData.body}</p>
-      </div>
+    <Form.StepPage stepKey={stepKey}>
+      <Form.Header title={stepData.title} description={stepData.body} />
       <OrderSummary />
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="space-y-4 px-8">
+        <div className="space-y-4">
           <CardOptions options={stepData.fields[0].options} />
         </div>
       </div>
-    </div>
+      <Form.Footer canGoNext={isValid} />
+    </Form.StepPage>
   );
 }
+
+AddPiecesFormStep.stepKey = stepKey;

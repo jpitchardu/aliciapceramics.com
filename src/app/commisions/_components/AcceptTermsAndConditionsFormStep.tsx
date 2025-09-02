@@ -1,14 +1,17 @@
 import { OrderSummary } from "@/app/commisions/_components/OrderSummary";
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
+import { Form } from "@/ui/form/Form";
 import { DollarIcon } from "@/ui/icons/DollarIcon";
 import { LightbulbIcon } from "@/ui/icons/LightBulbIcon";
 import { StarIcon } from "@/ui/icons/StartIcon";
 import { ChangeEvent } from "react";
 
+const stepKey = "accept-terms";
+
 export function AcceptTermsAndConditionsFormStep() {
   const {
     dispatchOrderChange,
-    orderFormState: { order },
+    orderFormState: { order, isOrderValid },
   } = useOrderContext();
 
   const handleConsentChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -18,19 +21,18 @@ export function AcceptTermsAndConditionsFormStep() {
       payload: { consent: value },
     });
   };
+
+  // <div className="flex-shrink-0 gap-4 max-h-full flex flex-col">
+
   return (
-    <div className="flex-shrink-0 gap-4 max-h-full flex flex-col">
-      <div className="px-8">
-        <h2 className="font-heading text-2xl mb-1 text-earth-dark">
-          {"your pottery timeline"}
-        </h2>
-        <p className="font-body text-sm  text-earth-dark">
-          {"from conversation to creation in 4 simple steps"}
-        </p>
-      </div>
+    <Form.StepPage stepKey={stepKey}>
+      <Form.Header
+        title="your pottery timeline"
+        description="from conversation to creation in 4 simple steps"
+      />
       <OrderSummary />
       <div className="flex-1 min-h-0 overflow-y-scroll flex flex-col gap-4">
-        <div className="px-8 flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <div className="flex flex-row ">
             <div className="flex flex-col gap-2 items-center">
               <span className="text-xl bg-(--color-red-focus) rounded-full p-2">
@@ -49,7 +51,7 @@ export function AcceptTermsAndConditionsFormStep() {
               <span className="text-xl bg-(--color-red-focus) rounded-full p-2">
                 ✏️
               </span>
-              <p className=" font-label text-earth-dark text-center">
+              <p className="font-label text-earth-dark text-center">
                 design together
               </p>
             </div>
@@ -103,9 +105,9 @@ export function AcceptTermsAndConditionsFormStep() {
           </div>
           <div className="bg-(--color-stone-disabled) rounded-lg p-4 flex flex-row items-center gap-2">
             <input
-              type="checkbox"
               id="terms-and-conditions"
               className="aliciap-checkbox"
+              type="checkbox"
               onChange={handleConsentChange}
               checked={order.consent}
             />
@@ -119,6 +121,9 @@ export function AcceptTermsAndConditionsFormStep() {
           </div>
         </div>
       </div>
-    </div>
+      <Form.Footer canGoNext={isOrderValid} nextLabel="let's do it" />
+    </Form.StepPage>
   );
 }
+
+AcceptTermsAndConditionsFormStep.stepKey = stepKey;

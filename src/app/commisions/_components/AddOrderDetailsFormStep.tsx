@@ -3,10 +3,14 @@ import { useOrderContext } from "@/app/commisions/_data/orderContext";
 import { TextInput } from "@/ui/TextInput";
 import { TextArea } from "@/ui/TextArea";
 import { ChangeEvent } from "react";
+import { Form } from "@/ui/form/Form";
+import z from "zod";
+
+const stepKey = "add-order-details";
 
 export function AddOrderDetailsFormStep() {
   const {
-    orderFormState: { order },
+    orderFormState: { order, error },
     dispatchOrderChange,
   } = useOrderContext();
 
@@ -36,19 +40,26 @@ export function AddOrderDetailsFormStep() {
     });
   };
 
+  const errors = error
+    ? {
+        inspiration: z.treeifyError(error)?.properties?.inspiration,
+        specialConsiderations:
+          z.treeifyError(error)?.properties?.specialConsiderations,
+        timeline: z.treeifyError(error)?.properties?.timeline,
+      }
+    : {};
+
+  const isValid = Object.values(errors).every((v) => !!v);
+
   return (
-    <div className="flex-shrink-0 gap-4 max-h-full flex flex-col">
-      <div className="flex-shrink-0 px-8">
-        <h2 className="font-heading text-2xl mb-1 text-earth-dark">
-          {"Your vision"}
-        </h2>
-        <p className="font-body text-sm  text-earth-dark">
-          {"help me understand the vibes"}
-        </p>
-      </div>
+    <Form.StepPage stepKey={stepKey}>
+      <Form.Header
+        title="Your vision"
+        description="help me understand the vibes"
+      />
       <OrderSummary />
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="pt-4 space-y-4 px-8">
+        <div className="pt-4 space-y-4">
           <div className=" w-full">
             <TextInput
               label="got inspiration?"
@@ -73,6 +84,9 @@ export function AddOrderDetailsFormStep() {
           />
         </div>
       </div>
-    </div>
+      <Form.Footer canGoNext={isValid} />
+    </Form.StepPage>
   );
 }
+
+AddOrderDetailsFormStep.stepKey = stepKey;

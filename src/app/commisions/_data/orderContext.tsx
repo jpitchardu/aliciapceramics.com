@@ -2,6 +2,8 @@ import { ActionDispatch, createContext, useContext, useReducer } from "react";
 import invariant from "tiny-invariant";
 import { PieceOrderDetail } from "@/models/Piece";
 import { getEmptyOrder, Order, orderSchema } from "@/models/Order";
+import z from "zod";
+import { parse } from "path";
 
 type AddClientInfoAction = {
   type: "add-client-info";
@@ -46,6 +48,12 @@ type OrderAction =
   | RemovePieceOrderDetailAction
   | AcceptTermsAndConditionsAction;
 
+type OrderFormState = {
+  order: Order;
+  isOrderValid: boolean;
+  error?: z.ZodError<Order>;
+};
+
 export type OrderContext = {
   orderFormState: OrderFormState;
   dispatchOrderChange: ActionDispatch<[action: OrderAction]>;
@@ -58,11 +66,6 @@ const OrderContext = createContext<OrderContext>({
   },
   dispatchOrderChange: () => {},
 });
-
-type OrderFormState = {
-  order: Order;
-  isOrderValid: boolean;
-};
 
 const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
   let newOrder: Order;
@@ -119,6 +122,7 @@ const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
   return {
     order: newOrder,
     isOrderValid: parseResult.success && parseResult.data.consent,
+    error: parseResult.error,
   };
 };
 
@@ -126,6 +130,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const [order, dispatch] = useReducer(orderReducer, {
     order: getEmptyOrder(),
     isOrderValid: false,
+    error: orderSchema.safeParse(getEmptyOrder()).error,
   });
 
   return (

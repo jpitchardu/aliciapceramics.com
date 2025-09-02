@@ -1,8 +1,11 @@
 import { TextInput } from "@/ui/TextInput";
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
 
-import { Order } from "@/models/Order";
+import { Order, orderClientSchema } from "@/models/Order";
 import { OrderSummary } from "@/app/commisions/_components/OrderSummary";
+import { Form } from "@/ui/form/Form";
+import { useFormContext } from "@/ui/form/FormContext";
+import z from "zod";
 
 const stepData = {
   title: "let's get some info",
@@ -32,9 +35,11 @@ const stepData = {
   ],
 } as const;
 
+const stepKey = "client-details" as const;
+
 export function ClientDetailsFormStep() {
   const {
-    orderFormState: { order },
+    orderFormState: { order, error },
     dispatchOrderChange,
   } = useOrderContext();
 
@@ -45,29 +50,30 @@ export function ClientDetailsFormStep() {
     });
   };
 
+  const isValid = !(error && z.treeifyError(error).properties?.client);
+
   return (
-    <div className={`w-full flex flex-col flex-1 min-h-0 gap-2`}>
-      <div className="flex-shrink-0 px-8">
-        <h2 className="font-heading text-2xl mb-1 text-earth-dark">
-          {stepData.title}
-        </h2>
-        <p className="font-body text-sm mb-4 text-earth-dark">
-          {stepData.body}
-        </p>
-      </div>
+    <Form.StepPage stepKey={stepKey}>
+      <Form.Header title={stepData.title} description={stepData.body} />
       <OrderSummary />
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="pt-4 space-y-4 px-8">
+        <div className="pt-4 space-y-4">
           {stepData.fields.map((field) => (
             <TextInput
               key={field.label}
-              {...field}
+              label={field.label}
+              placeholder={field.placeholder}
+              required={field.required}
+              type={field.type}
               value={order.client[field.path]}
               onChange={(e) => handleChange(field.path, e.target.value)}
             />
           ))}
         </div>
       </div>
-    </div>
+      <Form.Footer canGoNext={isValid} />
+    </Form.StepPage>
   );
 }
+
+ClientDetailsFormStep.stepKey = stepKey;
