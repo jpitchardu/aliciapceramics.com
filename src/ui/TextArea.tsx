@@ -41,7 +41,7 @@ export function TextArea({
             "text-earth-dark",
           ],
           isFocused && "label-focused",
-          required && "required"
+          required && "required",
         )}
       >
         {label}

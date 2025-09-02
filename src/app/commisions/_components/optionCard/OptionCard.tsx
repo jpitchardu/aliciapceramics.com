@@ -46,7 +46,7 @@ export function OptionCard({
   const [formState, dispatchPieceDetail] = useReducer(
     (
       prevState: PieceOrderDetailFormState,
-      action: PieceOrderDetailFormAction
+      action: PieceOrderDetailFormAction,
     ) => {
       const pieceDetail = pieceOrderDetailSchema.safeParse({
         ...prevState.pieceDetail,
@@ -71,7 +71,7 @@ export function OptionCard({
     {
       valid: false,
       pieceDetail: getEmptyPieceOrderDetail(type),
-    }
+    },
   );
 
   const pieceConfig = getConfigByPieceType(type);
@@ -83,7 +83,7 @@ export function OptionCard({
         quantity: Number(e.target.value),
       });
     },
-    []
+    [],
   );
 
   const handleSizeChange = useCallback(
@@ -93,7 +93,7 @@ export function OptionCard({
         size: e.target.value as SizeOption,
       });
     },
-    []
+    [],
   );
 
   const handleCommentsChange = useCallback(
@@ -103,7 +103,7 @@ export function OptionCard({
         description: e.target.value,
       });
     },
-    []
+    [],
   );
 
   const handleAddToOrder = useCallback(() => {
@@ -127,7 +127,7 @@ export function OptionCard({
     <div
       className={clsx(
         "option-card transition-all duration-300",
-        isExpanded ? "expanded" : ""
+        isExpanded ? "expanded" : "",
       )}
     >
       <button
@@ -155,7 +155,7 @@ export function OptionCard({
         className={clsx(
           "card-controls",
           "w-full",
-          isExpanded ? "card-controls expanded" : "card-controls"
+          isExpanded ? "card-controls expanded" : "card-controls",
         )}
       >
         <div className="card-controls-content w-full">
@@ -177,7 +177,7 @@ export function OptionCard({
                             "flex-grow",
                             isSizedPiece(formState.pieceDetail) &&
                               formState.pieceDetail.size === size &&
-                              "aliciap-radio-button-checked"
+                              "aliciap-radio-button-checked",
                           )}
                         >
                           <input

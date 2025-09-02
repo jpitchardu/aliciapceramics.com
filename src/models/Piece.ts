@@ -56,7 +56,7 @@ export const pieceOrderDetailSchema = pieceSchema.and(
     id: z.string().optional(),
     quantity: z.number(),
     description: z.string(),
-  })
+  }),
 );
 
 export type PieceOrderDetail = z.infer<typeof pieceOrderDetailSchema>;
@@ -126,24 +126,24 @@ export function getAllPieceTypes(): readonly Piece["type"][] {
 }
 
 export function isSizedPiece(
-  piece: Piece
+  piece: Piece,
 ): piece is Extract<
   Piece,
   { type: "mug-with-handle" | "mug-without-handle" | "tumbler" }
 > {
   return ["mug-with-handle", "mug-without-handle", "tumbler"].includes(
-    piece.type
+    piece.type,
   );
 }
 
 export function isSizedPieceType(
-  type: Piece["type"]
+  type: Piece["type"],
 ): type is "mug-with-handle" | "mug-without-handle" | "tumbler" {
   return ["mug-with-handle", "mug-without-handle", "tumbler"].includes(type);
 }
 
 export function getEmptyPieceOrderDetail(
-  type: Piece["type"]
+  type: Piece["type"],
 ): PieceOrderDetail {
   if (isSizedPieceType(type)) {
     return {

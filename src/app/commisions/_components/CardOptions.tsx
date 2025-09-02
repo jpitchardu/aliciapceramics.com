@@ -16,7 +16,7 @@ export function CardOptions({ options }: CardOptionsProps) {
     (id: string) => {
       setExpandedCardId(expandedCardId === id ? null : id);
     },
-    [expandedCardId]
+    [expandedCardId],
   );
 
   const handleAddToOrder = useCallback(
@@ -29,7 +29,7 @@ export function CardOptions({ options }: CardOptionsProps) {
         },
       });
     },
-    [dispatchOrderChange]
+    [dispatchOrderChange],
   );
 
   return (

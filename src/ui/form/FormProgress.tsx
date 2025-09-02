@@ -15,7 +15,7 @@ export function FormProgress({
           className={clsx(
             "progress-dot",
             index < currentStep && "completed",
-            index === currentStep && "active"
+            index === currentStep && "active",
           )}
         />
       ))}

@@ -38,13 +38,12 @@
   box-shadow: 0 8px 25px rgb(0 0 0 / 0.1);
 }
 
-
 .option-card-heading {
   width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content:start;
+  justify-content: start;
   gap: 6px;
 }
 
@@ -93,7 +92,6 @@
   outline: none;
   font-family: var(--font-family-body);
   width: 100%;
-
 }
 
 .aliciap-input-auto:focus {
@@ -105,4 +103,3 @@
 .aliciap-input-auto:hover:not(:focus) {
   background: rgb(225 175 161 / 0.3);
 }
-

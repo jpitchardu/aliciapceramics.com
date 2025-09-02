@@ -45,10 +45,7 @@ export function StarRain({ stars }: StarRainProps) {
                 animationDelay: delay,
               } as React.CSSProperties
             }
-            className={clsx(
-              "absolute",
-              ANIMATIONS[index % ANIMATIONS.length]
-            )}
+            className={clsx("absolute", ANIMATIONS[index % ANIMATIONS.length])}
           />
         );
       })}

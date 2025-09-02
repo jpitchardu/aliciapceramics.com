@@ -44,7 +44,7 @@ export const TextInput = ({
             "text-earth-dark",
           ],
           isFocused && "label-focused",
-          required && "required"
+          required && "required",
         )}
       >
         {label}

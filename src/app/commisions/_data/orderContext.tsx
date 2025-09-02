@@ -101,7 +101,7 @@ const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
       newOrder = {
         ...order,
         pieceDetails: order.pieceDetails.filter(
-          (detail) => detail.id !== action.payload.id
+          (detail) => detail.id !== action.payload.id,
         ),
         consent: false,
       };

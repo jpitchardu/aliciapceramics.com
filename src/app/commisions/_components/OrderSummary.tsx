@@ -19,7 +19,7 @@ export function OrderSummary() {
         payload: { id },
       });
     },
-    [dispatchOrderChange]
+    [dispatchOrderChange],
   );
 
   const canExpand = order.pieceDetails.length > 2;
@@ -33,7 +33,7 @@ export function OrderSummary() {
         "gap-2",
         "w-full",
         "transition-all",
-        "duration-300"
+        "duration-300",
       )}
     >
       {order.pieceDetails.map((detail) => (
@@ -47,7 +47,7 @@ export function OrderSummary() {
             "flex-row",
             "gap-2",
             "flex-shrink-1",
-            isCollapsed && "nth-[n+3]:hidden!"
+            isCollapsed && "nth-[n+3]:hidden!",
           )}
           onClick={() => handleRemovePieceDetail(detail.id!)}
         >

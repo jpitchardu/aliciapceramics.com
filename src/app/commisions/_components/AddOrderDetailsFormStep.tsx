@@ -23,7 +23,7 @@ export function AddOrderDetailsFormStep() {
   };
 
   const handleSpecialConsiderationsChange = (
-    e: ChangeEvent<HTMLTextAreaElement>
+    e: ChangeEvent<HTMLTextAreaElement>,
   ) => {
     const value = e.target.value;
     dispatchOrderChange({

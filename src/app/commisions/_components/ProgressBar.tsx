@@ -14,7 +14,7 @@ export const ProgressBar = ({ currentStep, totalSteps }: ProgressBarProps) => {
           className={clsx(
             "progress-dot",
             index < currentStep && "completed",
-            index === currentStep && "active"
+            index === currentStep && "active",
           )}
         />
       ))}
