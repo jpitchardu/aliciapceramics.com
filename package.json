@@ -7,7 +7,8 @@
     "build": "oxlint && next build",
     "start": "next start",
     "lint": "oxlint",
-    "lint:fix": "oxlint --fix"
+    "lint:fix": "oxlint --fix",
+    "prepare": "lefthook install"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -24,6 +25,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "lefthook": "^1.12.3",
     "oxlint": "^1.7.0",
     "prettier": "3.6.2",
     "tailwindcss": "^4",

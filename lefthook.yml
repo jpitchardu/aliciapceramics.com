@@ -1,0 +1,8 @@
+pre-push:
+  commands:
+    lint:
+      run: pnpm lint
+      fail_text: "Linting failed. Please fix the errors before pushing."
+    format:
+      run: pnpm prettier --check .
+      fail_text: "Code formatting issues found. Run 'pnpm prettier --write .' to fix."
