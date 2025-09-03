@@ -30,7 +30,7 @@ export function AcceptTermsAndConditionsFormStep() {
     const success = await createOrder(order);
 
     if (success) goNext();
-  }, []);
+  }, [order, goNext]);
 
   return (
     <Form.StepPage stepKey={stepKey}>
