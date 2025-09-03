@@ -633,11 +633,21 @@
   }
 
   /* Use CSS custom properties and calc() for scattered positioning */
-  .star-fall-1 { top: calc(10% + var(--star-index, 0) * 3%); }
-  .star-fall-2 { top: calc(20% + var(--star-index, 0) * 4%); }
-  .star-fall-3 { top: calc(35% + var(--star-index, 0) * 2%); }
-  .star-fall-4 { top: calc(50% + var(--star-index, 0) * 5%); }
-  .star-fall-5 { top: calc(70% + var(--star-index, 0) * 2%); }
+  .star-fall-1 {
+    top: calc(10% + var(--star-index, 0) * 3%);
+  }
+  .star-fall-2 {
+    top: calc(20% + var(--star-index, 0) * 4%);
+  }
+  .star-fall-3 {
+    top: calc(35% + var(--star-index, 0) * 2%);
+  }
+  .star-fall-4 {
+    top: calc(50% + var(--star-index, 0) * 5%);
+  }
+  .star-fall-5 {
+    top: calc(70% + var(--star-index, 0) * 2%);
+  }
 }
 
 /* Animation Classes */
