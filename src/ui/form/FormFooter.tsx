@@ -21,12 +21,12 @@ export const FormFooter = ({
   const canMoveForward = canGoNext;
 
   const _onNext = useCallback(() => {
-    if (onNext) onNext();
+    if (onNext) return onNext();
     goNext();
   }, [onNext, goNext]);
 
   const _onBack = useCallback(() => {
-    if (onBack) onBack();
+    if (onBack) return onBack();
     goBack();
   }, [onBack, goBack]);
 

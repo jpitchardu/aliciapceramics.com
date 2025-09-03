@@ -273,7 +273,6 @@
   color: var(--color-earth-dark);
   transition: var(--transition-aliciap);
   padding: 8px 12px;
-  width: min;
   border-radius: var(--radius-aliciap-xl);
 }
 

@@ -1,10 +1,12 @@
 import { OrderSummary } from "@/app/commisions/_components/OrderSummary";
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
+import { createOrder } from "@/services/order";
 import { Form } from "@/ui/form/Form";
+import { useFormContext } from "@/ui/form/FormContext";
 import { DollarIcon } from "@/ui/icons/DollarIcon";
 import { LightbulbIcon } from "@/ui/icons/LightBulbIcon";
 import { StarIcon } from "@/ui/icons/StartIcon";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useCallback } from "react";
 
 const stepKey = "accept-terms";
 
@@ -14,6 +16,8 @@ export function AcceptTermsAndConditionsFormStep() {
     orderFormState: { order, isOrderValid },
   } = useOrderContext();
 
+  const { goNext } = useFormContext();
+
   const handleConsentChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.checked;
     dispatchOrderChange({
@@ -22,7 +26,11 @@ export function AcceptTermsAndConditionsFormStep() {
     });
   };
 
-  // <div className="flex-shrink-0 gap-4 max-h-full flex flex-col">
+  const onSubmit = useCallback(async () => {
+    const success = await createOrder(order);
+
+    if (success) goNext();
+  }, []);
 
   return (
     <Form.StepPage stepKey={stepKey}>
@@ -121,7 +129,11 @@ export function AcceptTermsAndConditionsFormStep() {
           </div>
         </div>
       </div>
-      <Form.Footer canGoNext={isOrderValid} nextLabel="let's do it" />
+      <Form.Footer
+        canGoNext={isOrderValid}
+        nextLabel="let's do it"
+        onNext={onSubmit}
+      />
     </Form.StepPage>
   );
 }
