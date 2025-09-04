@@ -168,7 +168,7 @@ func upsertCustomer(client *supabase.Client, customer Customer) (string, error) 
 		return "", fmt.Errorf("failed to marshal customer: %w", err)
 	}
 
-	data, _, err = client.From("customers").Insert(string(customerJSON), false, "", "", "").Execute()
+	data, _, err = client.From("customers").Insert(string(customerJSON), false, "", "*", "").Execute()
 
 	if err != nil {
 		return "", fmt.Errorf("failed to create customer: %w", err)
