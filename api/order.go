@@ -1,16 +1,14 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 
-	"time"
-
 	"github.com/google/uuid"
-	"github.com/supabase-community/supabase-go"
 )
 
 type Customer struct {
@@ -47,14 +45,14 @@ type CustomerDB struct {
 }
 
 type OrderDB struct {
-	ID                    string    `json:"id,omitempty"`
-	CustomerID            string    `json:"customer_id"`
-	Timeline              time.Time `json:"timeline"`
-	Inspiration           string    `json:"inspiration"`
-	SpecialConsiderations string    `json:"special_considerations"`
-	Consent               bool      `json:"consent"`
-	Status                string    `json:"status"`
-	AccessToken           string    `json:"access_token"`
+	ID                    string `json:"id,omitempty"`
+	CustomerID            string `json:"customer_id"`
+	Timeline              string `json:"timeline"`
+	Inspiration           string `json:"inspiration"`
+	SpecialConsiderations string `json:"special_considerations"`
+	Consent               bool   `json:"consent"`
+	Status                string `json:"status"`
+	AccessToken           string `json:"access_token"`
 }
 
 type OrderDetailDB struct {
@@ -95,24 +93,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client, err := supabase.NewClient(supabaseUrl, supabaseKey, &supabase.ClientOptions{})
-
-	if err != nil {
-		http.Error(w, "failed to initialize database client: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	customerId, err := upsertCustomer(client, req.Order.Client)
+	customerId, err := upsertCustomer(supabaseUrl, supabaseKey, req.Order.Client)
 	if err != nil {
 		http.Error(w, "upsert customer failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	orderId, err := createOrder(client, customerId, req.Order)
+	orderId, err := createOrder(supabaseUrl, supabaseKey, customerId, req.Order)
 	if err != nil {
 		http.Error(w, "create order failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = createOrderDetails(client, orderId, req.Order.PieceDetails)
+	err = createOrderDetails(supabaseUrl, supabaseKey, orderId, req.Order.PieceDetails)
 	if err != nil {
 		http.Error(w, "create order details failed: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -136,26 +127,41 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func upsertCustomer(client *supabase.Client, customer Customer) (string, error) {
+func upsertCustomer(supabaseUrl, supabaseKey string, customer Customer) (string, error) {
+	// First, check if customer already exists
+	url := fmt.Sprintf("%s/rest/v1/customers?email=eq.%s&select=id", supabaseUrl, customer.Email)
 
-	data, _, err := client.From("customers").Select("id", "", false).Eq("email", customer.Email).Execute()
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
 
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to query customer: %w", err)
 	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response: %w", err)
+	}
 
 	var existingCustomers []CustomerDB
-	if len(data) > 0 {
-		err = json.Unmarshal(data, &existingCustomers)
-		if err != nil {
-			return "", fmt.Errorf("failed to parse customer data: %w", err)
-		}
+	if err := json.Unmarshal(body, &existingCustomers); err != nil {
+		return "", fmt.Errorf("failed to parse customer data: %w", err)
 	}
 
 	if len(existingCustomers) > 0 {
 		return existingCustomers[0].ID, nil
 	}
 
+	// Customer doesn't exist, create new one
 	newCustomer := CustomerDB{
 		Name:  customer.Name,
 		Email: customer.Email,
@@ -163,21 +169,43 @@ func upsertCustomer(client *supabase.Client, customer Customer) (string, error) 
 	}
 
 	customerJSON, err := json.Marshal(newCustomer)
-
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal customer: %w", err)
 	}
 
-	data, _, err = client.From("customers").Insert(string(customerJSON), false, "", "*", "").Execute()
+	fmt.Printf("Creating new customer: %s\n", customerJSON)
 
+	// Insert new customer
+	url = fmt.Sprintf("%s/rest/v1/customers", supabaseUrl)
+	req, err = http.NewRequest("POST", url, bytes.NewBuffer(customerJSON))
+	if err != nil {
+		return "", fmt.Errorf("failed to create insert request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Prefer", "return=representation")
+
+	resp, err = client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to create customer: %w", err)
 	}
+	defer resp.Body.Close()
+
+	body, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read insert response: %w", err)
+	}
+
+	fmt.Printf("Insert response: %s\n", string(body))
+
+	if resp.StatusCode != http.StatusCreated {
+		return "", fmt.Errorf("failed to create customer: status %d, body: %s", resp.StatusCode, string(body))
+	}
 
 	var result []CustomerDB
-	err = json.Unmarshal(data, &result)
-
-	if err != nil {
+	if err := json.Unmarshal(body, &result); err != nil {
 		return "", fmt.Errorf("failed to parse created customer: %w", err)
 	}
 
@@ -186,22 +214,14 @@ func upsertCustomer(client *supabase.Client, customer Customer) (string, error) 
 	}
 
 	return result[0].ID, nil
-
 }
 
-func createOrder(client *supabase.Client, customerID string, order Order) (string, error) {
-
+func createOrder(supabaseUrl, supabaseKey, customerID string, order Order) (string, error) {
 	accessToken := uuid.New().String()
-
-	timeline, err := time.Parse("2006-01-02", order.Timeline)
-
-	if err != nil {
-		return "", fmt.Errorf("cannot parse timeline: %w", err)
-	}
 
 	orderDB := OrderDB{
 		CustomerID:            customerID,
-		Timeline:              timeline,
+		Timeline:              order.Timeline,
 		Inspiration:           order.Inspiration,
 		SpecialConsiderations: order.SpecialConsiderations,
 		Consent:               order.Consent,
@@ -210,24 +230,41 @@ func createOrder(client *supabase.Client, customerID string, order Order) (strin
 	}
 
 	orderJSON, err := json.Marshal(orderDB)
-
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal order: %w", err)
 	}
 
-	data, count, err := client.From("orders").Insert(string(orderJSON), false, "", "id, name, email, phone", "").Execute()
+	fmt.Printf("Creating order: %s\n", orderJSON)
 
+	url := fmt.Sprintf("%s/rest/v1/orders", supabaseUrl)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(orderJSON))
+	if err != nil {
+		return "", fmt.Errorf("failed to create order request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Prefer", "return=representation")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to create order: %w", err)
 	}
+	defer resp.Body.Close()
 
-	fmt.Printf("Insert result - Count: %d, Error: %v\n", count, err)
-	fmt.Printf("Raw data returned: %q\n", string(data)) // %q shows exact string with quotes
-	fmt.Printf("Raw data length: %d\n", len(data))
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read order response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		return "", fmt.Errorf("failed to create order: status %d, body: %s", resp.StatusCode, string(body))
+	}
 
 	var result []OrderDB
-	err = json.Unmarshal(data, &result)
-	if err != nil {
+	if err := json.Unmarshal(body, &result); err != nil {
 		return "", fmt.Errorf("failed to parse created order: %w", err)
 	}
 
@@ -238,8 +275,7 @@ func createOrder(client *supabase.Client, customerID string, order Order) (strin
 	return result[0].ID, nil
 }
 
-func createOrderDetails(client *supabase.Client, orderID string, pieceDetails []PieceDetail) error {
-
+func createOrderDetails(supabaseUrl, supabaseKey, orderID string, pieceDetails []PieceDetail) error {
 	orderDetailDBs := []OrderDetailDB{}
 
 	for _, detail := range pieceDetails {
@@ -261,12 +297,34 @@ func createOrderDetails(client *supabase.Client, orderID string, pieceDetails []
 		return fmt.Errorf("failed to marshal order details: %w", err)
 	}
 
-	_, _, err = client.From("order_details").Insert(string(orderDetailsJSON), false, "", "*", "").Execute()
+	fmt.Printf("Creating order details: %s\n", orderDetailsJSON)
 
+	url := fmt.Sprintf("%s/rest/v1/order_details", supabaseUrl)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(orderDetailsJSON))
+	if err != nil {
+		return fmt.Errorf("failed to create order details request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Prefer", "return=representation")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to create order details: %w", err)
 	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read order details response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("failed to create order details: status %d, body: %s", resp.StatusCode, string(body))
+	}
 
 	return nil
-
 }
