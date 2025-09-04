@@ -98,23 +98,23 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	client, err := supabase.NewClient(supabaseUrl, supabaseKey, &supabase.ClientOptions{})
 
 	if err != nil {
-		http.Error(w, "Failed to connect to db", http.StatusInternalServerError)
+		http.Error(w, "failed to initialize database client: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	customerId, err := upsertCustomer(client, req.Order.Client)
 	if err != nil {
-		http.Error(w, "Failed to upsert customer", http.StatusInternalServerError)
+		http.Error(w, "upsert customer failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	orderId, err := createOrder(client, customerId, req.Order)
 	if err != nil {
-		http.Error(w, "Failed to create order", http.StatusInternalServerError)
+		http.Error(w, "create order failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = createOrderDetails(client, orderId, req.Order.PieceDetails)
 	if err != nil {
-		http.Error(w, "Failed to create order details", http.StatusInternalServerError)
+		http.Error(w, "create order details failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -141,14 +141,14 @@ func upsertCustomer(client *supabase.Client, customer Customer) (string, error) 
 	data, _, err := client.From("customers").Select("id", "", false).Eq("email", customer.Email).Execute()
 
 	if err != nil {
-		return "", fmt.Errorf("Failed to query customer", err)
+		return "", fmt.Errorf("failed to query customer: %w", err)
 	}
 
 	var existingCustomers []CustomerDB
 	if len(data) > 0 {
 		err = json.Unmarshal(data, &existingCustomers)
 		if err != nil {
-			return "", fmt.Errorf("failed to parse customer data", err)
+			return "", fmt.Errorf("failed to parse customer data: %w", err)
 		}
 	}
 
@@ -165,24 +165,24 @@ func upsertCustomer(client *supabase.Client, customer Customer) (string, error) 
 	customerJSON, err := json.Marshal(newCustomer)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal customer", err)
+		return "", fmt.Errorf("failed to marshal customer: %w", err)
 	}
 
 	data, _, err = client.From("customers").Insert(string(customerJSON), false, "", "", "").Execute()
 
 	if err != nil {
-		return "", fmt.Errorf("failed to create customer", err)
+		return "", fmt.Errorf("failed to create customer: %w", err)
 	}
 
 	var result []CustomerDB
 	err = json.Unmarshal(data, &result)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to parse created customer", err)
+		return "", fmt.Errorf("failed to parse created customer: %w", err)
 	}
 
 	if len(result) == 0 {
-		return "", fmt.Errorf("No customer returned after insert")
+		return "", fmt.Errorf("no customer returned after insert")
 	}
 
 	return result[0].ID, nil
@@ -196,7 +196,7 @@ func createOrder(client *supabase.Client, customerID string, order Order) (strin
 	timeline, err := time.Parse("2006-01-02", order.Timeline)
 
 	if err != nil {
-		return "", fmt.Errorf("Cannot parse timeline", err)
+		return "", fmt.Errorf("cannot parse timeline: %w", err)
 	}
 
 	orderDB := OrderDB{
@@ -212,18 +212,18 @@ func createOrder(client *supabase.Client, customerID string, order Order) (strin
 	orderJSON, err := json.Marshal(orderDB)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal order", err)
+		return "", fmt.Errorf("failed to marshal order: %w", err)
 	}
 
 	data, _, err := client.From("orders").Insert(string(orderJSON), false, "", "", "").Execute()
 	if err != nil {
-		return "", fmt.Errorf("failed to create order", err)
+		return "", fmt.Errorf("failed to create order: %w", err)
 	}
 
 	var result []OrderDB
 	err = json.Unmarshal(data, &result)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse created order", err)
+		return "", fmt.Errorf("failed to parse created order: %w", err)
 	}
 
 	if len(result) == 0 {
@@ -248,15 +248,18 @@ func createOrderDetails(client *supabase.Client, orderID string, pieceDetails []
 	}
 
 	if len(orderDetailDBs) <= 0 {
-		return fmt.Errorf("No order details to parse")
+		return fmt.Errorf("no order details to insert")
 	}
 
 	orderDetailsJSON, err := json.Marshal(orderDetailDBs)
+	if err != nil {
+		return fmt.Errorf("failed to marshal order details: %w", err)
+	}
 
 	_, _, err = client.From("order_details").Insert(string(orderDetailsJSON), false, "", "", "").Execute()
 
 	if err != nil {
-		return fmt.Errorf("Failed another key sate ")
+		return fmt.Errorf("failed to create order details: %w", err)
 	}
 
 	return nil
