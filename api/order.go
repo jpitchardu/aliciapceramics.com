@@ -215,10 +215,15 @@ func createOrder(client *supabase.Client, customerID string, order Order) (strin
 		return "", fmt.Errorf("failed to marshal order: %w", err)
 	}
 
-	data, _, err := client.From("orders").Insert(string(orderJSON), false, "", "", "").Execute()
+	data, count, err := client.From("orders").Insert(string(orderJSON), false, "", "id, name, email, phone", "").Execute()
+
 	if err != nil {
 		return "", fmt.Errorf("failed to create order: %w", err)
 	}
+
+	fmt.Printf("Insert result - Count: %d, Error: %v\n", count, err)
+	fmt.Printf("Raw data returned: %q\n", string(data)) // %q shows exact string with quotes
+	fmt.Printf("Raw data length: %d\n", len(data))
 
 	var result []OrderDB
 	err = json.Unmarshal(data, &result)
@@ -256,7 +261,7 @@ func createOrderDetails(client *supabase.Client, orderID string, pieceDetails []
 		return fmt.Errorf("failed to marshal order details: %w", err)
 	}
 
-	_, _, err = client.From("order_details").Insert(string(orderDetailsJSON), false, "", "", "").Execute()
+	_, _, err = client.From("order_details").Insert(string(orderDetailsJSON), false, "", "*", "").Execute()
 
 	if err != nil {
 		return fmt.Errorf("failed to create order details: %w", err)
