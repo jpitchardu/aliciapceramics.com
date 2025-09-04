@@ -28,7 +28,7 @@ export function AcceptTermsAndConditionsFormStep() {
         payload: { consent: value },
       });
     },
-    [dispatchOrderChange]
+    [dispatchOrderChange],
   );
 
   const onSubmit = useCallback(async () => {
