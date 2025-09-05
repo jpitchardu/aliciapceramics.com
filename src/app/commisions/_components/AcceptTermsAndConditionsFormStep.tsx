@@ -19,6 +19,7 @@ export function AcceptTermsAndConditionsFormStep() {
   const { goNext } = useFormContext();
 
   const [hasError, setHasError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleConsentChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -32,15 +33,19 @@ export function AcceptTermsAndConditionsFormStep() {
   );
 
   const onSubmit = useCallback(async () => {
+    if (isSubmitting) return;
+
     setHasError(false);
+    setIsSubmitting(true);
     const success = await createOrder(order);
 
     if (!success) {
+      setIsSubmitting(false);
       return setHasError(true);
     }
 
     goNext();
-  }, [order, goNext]);
+  }, [order, goNext, isSubmitting, setHasError, setIsSubmitting]);
 
   return (
     <Form.StepPage stepKey={stepKey}>
@@ -171,7 +176,7 @@ export function AcceptTermsAndConditionsFormStep() {
       )}
 
       <Form.Footer
-        canGoNext={isOrderValid}
+        canGoNext={isOrderValid && !isSubmitting}
         nextLabel="let's do it"
         onNext={onSubmit}
       />
