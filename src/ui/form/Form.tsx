@@ -36,7 +36,7 @@ export function Form<TStepKey extends string>({
 
   const isStepActive = useCallback(
     (step: TStepKey) => currentStep === step,
-    [currentStep]
+    [currentStep],
   );
 
   const formContext = useMemo((): FormContextValue<TStepKey> => {
