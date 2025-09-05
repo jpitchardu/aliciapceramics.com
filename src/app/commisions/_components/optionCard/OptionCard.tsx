@@ -11,6 +11,7 @@ import {
   pieceOrderDetailSchema,
   SizeOption,
 } from "@/models/Piece";
+import { TextArea } from "@/ui/TextArea";
 
 export type Option = {
   type: Piece["type"];
@@ -215,16 +216,14 @@ export function OptionCard({
                 />
               </div>
             </div>
-            <div className="flex flex-col gap-1 w-full items-start  ">
-              <legend className="text-sm font-label text-earth-dark">
-                Describe your ideal piece(s)
-              </legend>
-              <textarea
-                required
-                className="aliciap-textarea w-full aliciap-input"
+            <div className="flex flex-col gap-1 w-full items-start">
+              <TextArea
                 placeholder={designIdeasPlaceholder}
                 onChange={handleCommentsChange}
                 value={formState.pieceDetail.description}
+                label="Describe your ideal piece(s)"
+                containerClassName="items-start"
+                required
               />
             </div>
             <button

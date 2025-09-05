@@ -73,7 +73,6 @@ export function AddOrderDetailsFormStep() {
             placeholder="any special requests?"
             onChange={handleSpecialConsiderationsChange}
             value={order.specialConsiderations}
-            required={false}
           />
           <TextInput
             type="date"

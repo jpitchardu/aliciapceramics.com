@@ -6,9 +6,10 @@ import clsx from "clsx";
 type TextAreaProps = {
   label: string;
   placeholder: string;
-  value: string;
-  required: boolean;
   onChange: ChangeEventHandler<HTMLTextAreaElement>;
+  value?: string;
+  required?: boolean;
+  containerClassName?: string;
 };
 
 export function TextArea({
@@ -17,6 +18,7 @@ export function TextArea({
   value,
   required,
   onChange,
+  containerClassName,
 }: TextAreaProps) {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -29,7 +31,7 @@ export function TextArea({
   }, []);
 
   return (
-    <div className="w-full">
+    <div className={clsx("flex flex-col gap-1 w-full", containerClassName)}>
       <label
         className={clsx(
           [

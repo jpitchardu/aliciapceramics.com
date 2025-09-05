@@ -21,8 +21,8 @@ export const orderSchema = z
       .array(pieceOrderDetailSchema)
       .min(1, "at least one piece is required"),
     timeline: z.date().min(new Date(), "timeline must be in the future"),
-    inspiration: z.string().nonempty(),
-    specialConsiderations: z.string(),
+    inspiration: z.string().optional(),
+    specialConsiderations: z.string().optional(),
     consent: z.boolean(),
   })
   .strict();

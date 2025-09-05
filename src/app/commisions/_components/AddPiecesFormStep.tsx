@@ -69,7 +69,7 @@ export function AddPiecesFormStep() {
   } = useOrderContext();
 
   const isValid = Boolean(
-    error && !z.treeifyError(error).properties?.pieceDetails?.errors,
+    !error || !z.treeifyError(error).properties?.pieceDetails?.errors,
   );
 
   return (

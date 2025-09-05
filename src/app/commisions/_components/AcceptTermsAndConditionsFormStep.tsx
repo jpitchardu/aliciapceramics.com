@@ -1,6 +1,6 @@
 import { OrderSummary } from "@/app/commisions/_components/OrderSummary";
 import { useOrderContext } from "@/app/commisions/_data/orderContext";
-import { createOrder } from "@/services/order";
+import { ErrorCode, createOrder } from "@/services/order";
 import { Form } from "@/ui/form/Form";
 import { useFormContext } from "@/ui/form/FormContext";
 import { DollarIcon } from "@/ui/icons/DollarIcon";
@@ -10,6 +10,13 @@ import { ChangeEvent, useCallback, useState } from "react";
 
 const stepKey = "accept-terms";
 
+const errorMessagesByErrorCode: Record<ErrorCode, string> = {
+  TOO_MANY_REQUESTS: "please try again in the next hour",
+  SERVER_ERROR: "please try again",
+  CLIENT_ERROR: "please check the form is correct",
+  UNKNOWN: "please try again",
+};
+
 export function AcceptTermsAndConditionsFormStep() {
   const {
     dispatchOrderChange,
@@ -18,7 +25,7 @@ export function AcceptTermsAndConditionsFormStep() {
 
   const { goNext } = useFormContext();
 
-  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleConsentChange = useCallback(
@@ -35,17 +42,17 @@ export function AcceptTermsAndConditionsFormStep() {
   const onSubmit = useCallback(async () => {
     if (isSubmitting) return;
 
-    setHasError(false);
+    setErrorMessage(null);
     setIsSubmitting(true);
-    const success = await createOrder(order);
+    const createOrderResult = await createOrder(order);
 
-    if (!success) {
+    if (!createOrderResult.success) {
       setIsSubmitting(false);
-      return setHasError(true);
+      return setErrorMessage(errorMessagesByErrorCode[createOrderResult.error]);
     }
 
     goNext();
-  }, [order, goNext, isSubmitting, setHasError, setIsSubmitting]);
+  }, [order, goNext, isSubmitting, setErrorMessage, setIsSubmitting]);
 
   return (
     <Form.StepPage stepKey={stepKey}>
@@ -144,7 +151,7 @@ export function AcceptTermsAndConditionsFormStep() {
           </div>
         </div>
       </div>
-      {hasError && (
+      {errorMessage && (
         <div className="error-panel">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <svg
@@ -170,7 +177,7 @@ export function AcceptTermsAndConditionsFormStep() {
             className="font-body text-sm"
             style={{ color: "var(--color-earth-dark)", lineHeight: "1.6" }}
           >
-            please try again
+            {errorMessage}
           </p>
         </div>
       )}
