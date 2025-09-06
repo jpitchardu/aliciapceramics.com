@@ -64,7 +64,7 @@ export type PieceOrderDetail = z.infer<typeof pieceOrderDetailSchema>;
 type PieceConfig = {
   label: string;
   icon: string;
-  sizes: SizeOption[];
+  sizes: readonly SizeOption[];
 };
 
 const piecesConfigByType: Record<Piece["type"], PieceConfig> = {

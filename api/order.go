@@ -20,10 +20,10 @@ type Customer struct {
 }
 
 type PieceDetail struct {
-	Type        string `json:"type"`
-	Size        *int   `json:"size,omitempty"`
-	Quantity    int    `json:"quantity"`
-	Description string `json:"description"`
+	Type        string  `json:"type"`
+	Size        *string `json:"size,omitempty"`
+	Quantity    int     `json:"quantity"`
+	Description string  `json:"description"`
 }
 
 type Order struct {
@@ -58,12 +58,12 @@ type OrderDB struct {
 }
 
 type OrderDetailDB struct {
-	ID          string `json:"id,omitempty"`
-	OrderID     string `json:"order_id"`
-	Type        string `json:"type"`
-	Size        *int   `json:"size,omitempty"`
-	Quantity    int    `json:"quantity"`
-	Description string `json:"description"`
+	ID          string  `json:"id,omitempty"`
+	OrderID     string  `json:"order_id"`
+	Type        string  `json:"type"`
+	Size        *string `json:"size,omitempty"`
+	Quantity    int     `json:"quantity"`
+	Description string  `json:"description"`
 }
 
 type ErrorResponse struct {
@@ -73,14 +73,14 @@ type ErrorResponse struct {
 }
 
 type SuccessResponse struct {
-	Success bool                   `json:"success"`
-	Message string                 `json:"message"`
-	Data    map[string]interface{} `json:"data,omitempty"`
+	Success bool           `json:"success"`
+	Message string         `json:"message"`
+	Data    map[string]any `json:"data,omitempty"`
 }
 
-func logError(operation string, err error, context map[string]interface{}) {
+func logError(operation string, err error, context map[string]any) {
 	// Create PII-safe context for logging
-	safeContext := make(map[string]interface{})
+	safeContext := make(map[string]any)
 	for k, v := range context {
 		// Exclude PII fields
 		if k != "email" && k != "phone" && k != "name" && k != "customerName" {
@@ -93,7 +93,7 @@ func logError(operation string, err error, context map[string]interface{}) {
 			}
 		}
 	}
-	
+
 	log.Printf("ERROR [%s]: %v | Context: %+v", operation, err, safeContext)
 }
 
@@ -107,7 +107,7 @@ func respondWithError(w http.ResponseWriter, statusCode int, message string, cod
 	})
 }
 
-func respondWithSuccess(w http.ResponseWriter, message string, data map[string]interface{}) {
+func respondWithSuccess(w http.ResponseWriter, message string, data map[string]any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(SuccessResponse{
@@ -128,12 +128,12 @@ func validateOrder(order Order) error {
 	if !strings.Contains(order.Client.Email, "@") {
 		return fmt.Errorf("customer email format is invalid")
 	}
-	
+
 	// Piece details validation
 	if len(order.PieceDetails) == 0 {
 		return fmt.Errorf("at least one piece detail is required")
 	}
-	
+
 	for i, piece := range order.PieceDetails {
 		if strings.TrimSpace(piece.Type) == "" {
 			return fmt.Errorf("piece type is required for item %d", i+1)
@@ -145,23 +145,23 @@ func validateOrder(order Order) error {
 			return fmt.Errorf("piece quantity cannot exceed 50 for item %d", i+1)
 		}
 	}
-	
+
 	// Timeline validation
 	if strings.TrimSpace(order.Timeline) == "" {
 		return fmt.Errorf("timeline is required")
 	}
-	
+
 	// Consent validation
 	if !order.Consent {
 		return fmt.Errorf("consent is required")
 	}
-	
+
 	return nil
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		logError("invalid_method", fmt.Errorf("method %s not allowed", r.Method), map[string]interface{}{
+		logError("invalid_method", fmt.Errorf("method %s not allowed", r.Method), map[string]any{
 			"method": r.Method,
 		})
 		respondWithError(w, http.StatusMethodNotAllowed, "Method not allowed", "INVALID_METHOD")
@@ -170,7 +170,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		logError("read_body", err, map[string]interface{}{
+		logError("read_body", err, map[string]any{
 			"content_length": r.ContentLength,
 		})
 		respondWithError(w, http.StatusBadRequest, "Failed to read request body", "INVALID_REQUEST")
@@ -180,7 +180,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	var req OrderRequest
 	if err := json.Unmarshal(body, &req); err != nil {
-		logError("parse_json", err, map[string]interface{}{
+		logError("parse_json", err, map[string]any{
 			"body_length": len(body),
 		})
 		respondWithError(w, http.StatusBadRequest, "Invalid request format", "INVALID_JSON")
@@ -189,7 +189,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate the order data
 	if err := validateOrder(req.Order); err != nil {
-		logError("validation_failed", err, map[string]interface{}{
+		logError("validation_failed", err, map[string]any{
 			"piece_count": len(req.Order.PieceDetails),
 			"has_consent": req.Order.Consent,
 		})
@@ -201,7 +201,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	supabaseKey := os.Getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 	if supabaseUrl == "" || supabaseKey == "" {
-		logError("config_missing", fmt.Errorf("database configuration missing"), map[string]interface{}{
+		logError("config_missing", fmt.Errorf("database configuration missing"), map[string]any{
 			"has_url": supabaseUrl != "",
 			"has_key": supabaseKey != "",
 		})
@@ -211,9 +211,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	customerId, err := upsertCustomer(supabaseUrl, supabaseKey, req.Order.Client)
 	if err != nil {
-		logError("upsert_customer", err, map[string]interface{}{
+		logError("upsert_customer", err, map[string]any{
 			"email": req.Order.Client.Email,
-			"name": req.Order.Client.Name,
+			"name":  req.Order.Client.Name,
 		})
 		respondWithError(w, http.StatusInternalServerError, "Failed to process customer information", "CUSTOMER_ERROR")
 		return
@@ -221,7 +221,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	orderId, err := createOrder(supabaseUrl, supabaseKey, customerId, req.Order)
 	if err != nil {
-		logError("create_order", err, map[string]interface{}{
+		logError("create_order", err, map[string]any{
 			"customer_id": customerId,
 			"piece_count": len(req.Order.PieceDetails),
 		})
@@ -231,18 +231,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	err = createOrderDetails(supabaseUrl, supabaseKey, orderId, req.Order.PieceDetails)
 	if err != nil {
-		logError("create_order_details", err, map[string]interface{}{
-			"order_id": orderId,
+		logError("create_order_details", err, map[string]any{
+			"order_id":     orderId,
 			"detail_count": len(req.Order.PieceDetails),
 		})
 		respondWithError(w, http.StatusInternalServerError, "Failed to save order details", "ORDER_DETAILS_ERROR")
 		return
 	}
 
-	log.Printf("INFO: Order created successfully | order_id: %s | customer_id: %s | piece_count: %d", 
+	log.Printf("INFO: Order created successfully | order_id: %s | customer_id: %s | piece_count: %d",
 		orderId, customerId, len(req.Order.PieceDetails))
 
-	respondWithSuccess(w, "Order received successfully", map[string]interface{}{
+	respondWithSuccess(w, "Order received successfully", map[string]any{
 		"pieceCount": len(req.Order.PieceDetails),
 		"orderId":    orderId,
 	})
@@ -301,7 +301,7 @@ func upsertCustomer(supabaseUrl, supabaseKey string, customer Customer) (string,
 		return "", fmt.Errorf("failed to create insert request: %w", err)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+supabaseKey)//
+	req.Header.Set("Authorization", "Bearer "+supabaseKey) //
 	req.Header.Set("apikey", supabaseKey)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Prefer", "return=representation")
