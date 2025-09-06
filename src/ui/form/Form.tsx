@@ -52,7 +52,7 @@ export function Form<TStepKey extends string>({
 
   return (
     <FormProvider value={formContext}>
-      <div className="relative w-96 mh-m bg-earth-form max-h-[100svh] h-[900px] rounded-3xl py-8 shadow-xl flex flex-col items-start justify-start overflow-hidden">
+      <div className="relative w-96 mh-m bg-earth-form h-[900px] max-h-[90%] rounded-3xl py-8 shadow-xl flex flex-col items-start justify-start overflow-hidden">
         <FormProgress
           currentStep={stepKeys.indexOf(currentStep)}
           totalSteps={stepKeys.length}
