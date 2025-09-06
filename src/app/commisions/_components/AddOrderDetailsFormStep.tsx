@@ -24,7 +24,7 @@ export function AddOrderDetailsFormStep() {
   };
 
   const handleSpecialConsiderationsChange = (
-    e: ChangeEvent<HTMLTextAreaElement>
+    e: ChangeEvent<HTMLTextAreaElement>,
   ) => {
     const value = e.target.value;
     dispatchOrderChange({
@@ -78,17 +78,11 @@ export function AddOrderDetailsFormStep() {
           <TextInput
             type="date"
             min={getTwoMonthsFromNowInMinFormat()}
-            label="timeline (consider 2-3 months lead time)"
+            label="timeline (we can talk if you need it sooner)"
             placeholder="when would you love to have it by?"
             value={order.timeline.toISOString().split("T")[0]}
             onChange={handleTimelineChange}
           />
-          <div className="info-panel">
-            <p className="font-body text-sm  text-earth-dark text-left">
-              if you need this sooner, we can talk about it when I reach out to
-              you.
-            </p>
-          </div>
         </div>
       </div>
       <Form.Footer canGoNext={isValid} />
