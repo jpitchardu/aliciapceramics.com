@@ -1,6 +1,10 @@
 "use client";
 
-import { HTMLInputTypeAttribute, useCallback } from "react";
+import {
+  HTMLInputTypeAttribute,
+  InputHTMLAttributes,
+  useCallback,
+} from "react";
 import clsx from "clsx";
 import { useState } from "react";
 
@@ -10,6 +14,7 @@ type TextInputProps = {
   value?: string;
   required?: boolean;
   type?: HTMLInputTypeAttribute;
+  min?: InputHTMLAttributes<HTMLInputElement>["min"];
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
@@ -19,6 +24,7 @@ export const TextInput = ({
   value,
   required,
   type = "text",
+  min,
   onChange,
 }: TextInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -50,6 +56,7 @@ export const TextInput = ({
         {label}
       </label>
       <input
+        min={min}
         type={type}
         className="aliciap-input"
         placeholder={placeholder}

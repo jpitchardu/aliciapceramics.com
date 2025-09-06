@@ -5,6 +5,7 @@ import { TextArea } from "@/ui/TextArea";
 import { ChangeEvent } from "react";
 import { Form } from "@/ui/form/Form";
 import z from "zod";
+import { getTwoMonthsFromNowInMinFormat } from "@/models/Order";
 
 const stepKey = "add-order-details";
 
@@ -23,7 +24,7 @@ export function AddOrderDetailsFormStep() {
   };
 
   const handleSpecialConsiderationsChange = (
-    e: ChangeEvent<HTMLTextAreaElement>,
+    e: ChangeEvent<HTMLTextAreaElement>
   ) => {
     const value = e.target.value;
     dispatchOrderChange({
@@ -76,11 +77,18 @@ export function AddOrderDetailsFormStep() {
           />
           <TextInput
             type="date"
+            min={getTwoMonthsFromNowInMinFormat()}
             label="timeline (consider 2-3 months lead time)"
             placeholder="when would you love to have it by?"
             value={order.timeline.toISOString().split("T")[0]}
             onChange={handleTimelineChange}
           />
+          <div className="info-panel">
+            <p className="font-body text-sm  text-earth-dark text-left">
+              if you need this sooner, we can talk about it when I reach out to
+              you.
+            </p>
+          </div>
         </div>
       </div>
       <Form.Footer canGoNext={isValid} />
