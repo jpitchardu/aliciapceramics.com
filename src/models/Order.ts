@@ -15,13 +15,18 @@ export function getTwoMonthsFromNowInMinFormat() {
 export const orderClientSchema = z
   .object({
     email: z.email(),
-    name: z.string(),
+    name: z.string().min(1, "name is required"),
     phone: z
       .string()
+      .min(10, "phone number too short")
       .transform((val) => val.replace(/\D/g, ""))
-      .refine((val) => val.length === 10, {
-        message: "phone number must be 10 digits",
-      }),
+      .refine((v) => v.length === 10, {
+        message: "phone number must be exactly 10 digits",
+      })
+      .refine((v) => !v.startsWith("0") && !v.startsWith("1"), {
+        message: "phone number must be a valid US number",
+      })
+      .transform((v) => `+1${v}`),
   })
   .strict();
 
@@ -45,7 +50,7 @@ export const orderSchema = z
 
 export type Order = z.infer<typeof orderSchema>;
 
-export const getEmptyOrder = (): Order => {
+export const getEmptyOrder = (): Partial<Order> => {
   return {
     client: {
       email: "",
@@ -53,9 +58,6 @@ export const getEmptyOrder = (): Order => {
       phone: "",
     },
     pieceDetails: [],
-    timeline: getTwoMonthsFromNow(),
-    inspiration: "",
-    specialConsiderations: "",
     consent: false,
   };
 };

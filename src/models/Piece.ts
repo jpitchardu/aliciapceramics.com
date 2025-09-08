@@ -160,3 +160,7 @@ export function getEmptyPieceOrderDetail(
     description: "",
   };
 }
+
+export function getSizeLabel(size: SizeOption) {
+  return `${size} oz`;
+}

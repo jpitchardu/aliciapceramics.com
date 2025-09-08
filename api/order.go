@@ -129,6 +129,16 @@ func validateOrder(order Order) error {
 		return fmt.Errorf("customer email format is invalid")
 	}
 
+	if !strings.HasPrefix(order.Client.Phone, "+1"){
+		return fmt.Errorf("phone number must have the US country code")
+	}
+
+	phoneDigits := strings.TrimPrefix(order.Client.Phone, "+1");
+
+	if len(phoneDigits) != 10 {
+		return fmt.Errorf("phone number must be a valid US phone number")
+	}
+
 	// Piece details validation
 	if len(order.PieceDetails) == 0 {
 		return fmt.Errorf("at least one piece detail is required")

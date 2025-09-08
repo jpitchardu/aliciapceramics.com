@@ -16,12 +16,6 @@ const stepData = {
       label: "what are you looking for?",
       options: [
         {
-          type: "matcha-bowl",
-          designIdeasPlaceholder:
-            "Traditional but with 'overpriced grass water' on the bottom",
-          ...getConfigByPieceType("matcha-bowl"),
-        },
-        {
           type: "mug-with-handle",
           ...getConfigByPieceType("mug-with-handle"),
           designIdeasPlaceholder:
@@ -40,6 +34,12 @@ const stepData = {
             "A mug that says 'I'm not a morning person' in tiny letters on the bottom",
         },
         {
+          type: "matcha-bowl",
+          designIdeasPlaceholder:
+            "Traditional but with 'overpriced grass water' on the bottom",
+          ...getConfigByPieceType("matcha-bowl"),
+        },
+        {
           type: "trinket-dish",
           ...getConfigByPieceType("trinket-dish"),
           designIdeasPlaceholder: "Shaped like a tiny bathtub for my jewelry",
@@ -51,6 +51,7 @@ const stepData = {
           designIdeasPlaceholder:
             "Plate with 'SERVING SIZE: LOL' printed around the rim",
         },
+
         {
           type: "other",
           ...getConfigByPieceType("other"),

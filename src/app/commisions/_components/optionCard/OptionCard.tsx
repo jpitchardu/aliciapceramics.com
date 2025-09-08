@@ -5,6 +5,7 @@ import clsx from "clsx";
 import {
   getConfigByPieceType,
   getEmptyPieceOrderDetail,
+  getSizeLabel,
   isSizedPiece,
   Piece,
   PieceOrderDetail,
@@ -75,8 +76,6 @@ export function OptionCard({
     },
   );
 
-  const pieceConfig = getConfigByPieceType(type);
-
   const handleQuantityChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       dispatchPieceDetail({
@@ -123,6 +122,8 @@ export function OptionCard({
       cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [isExpanded]);
+
+  const pieceConfig = getConfigByPieceType(type);
 
   return (
     <div
@@ -194,7 +195,7 @@ export function OptionCard({
                             }
                             onChange={handleSizeChange}
                           />
-                          <span>{size}</span>
+                          <span>{getSizeLabel(size)}</span>
                         </label>
                       ))}
                     </div>

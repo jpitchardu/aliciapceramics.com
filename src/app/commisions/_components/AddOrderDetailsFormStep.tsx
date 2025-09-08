@@ -77,10 +77,11 @@ export function AddOrderDetailsFormStep() {
           />
           <TextInput
             type="date"
+            required
             min={getTwoMonthsFromNowInMinFormat()}
-            label="timeline (we can talk if you need it sooner)"
-            placeholder="when would you love to have it by?"
-            value={order.timeline.toISOString().split("T")[0]}
+            label="prefered timeline (we can talk if you need it sooner)"
+            placeholder="when would you prefer it by?"
+            value={order.timeline?.toISOString().split("T")[0]}
             onChange={handleTimelineChange}
           />
         </div>

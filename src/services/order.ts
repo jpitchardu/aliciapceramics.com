@@ -1,4 +1,4 @@
-import { Order } from "@/models/Order";
+import { Order, orderSchema } from "@/models/Order";
 
 type SuccessApiResponse = { success: true };
 type ErrorApiResponse = { success: false; error: ErrorCode };
@@ -18,13 +18,18 @@ const statusToErrorCodeMap: Record<number, ErrorCode> = {
 };
 
 export async function createOrder(order: Order): Promise<ApiResponse> {
+  const parsedOrder = orderSchema.parse(order);
+
   const res = await fetch("/api/order", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      order: { ...order, timeline: order.timeline.toISOString().slice(0, 10) },
+      order: {
+        ...parsedOrder,
+        timeline: parsedOrder.timeline?.toISOString().slice(0, 10),
+      },
     }),
   });
 
