@@ -70,8 +70,8 @@ export function AddOrderDetailsFormStep() {
             />
           </div>
           <TextArea
-            label="special considerations"
-            placeholder="any special requests?"
+            label="anything else?"
+            placeholder="anything else you want me to know"
             onChange={handleSpecialConsiderationsChange}
             value={order.specialConsiderations}
           />
