@@ -145,8 +145,8 @@ export function AcceptTermsAndConditionsFormStep() {
               htmlFor="terms-and-conditions"
               className="font-body text-sm text-earth-dark"
             >
-              I understand this is a collaborative creative process and I'm
-              excited to work together on my custom pieces
+              I'm excited to work together on my custom pieces and consent to
+              receive text messages about my order at the number provided.
             </label>
           </div>
         </div>
