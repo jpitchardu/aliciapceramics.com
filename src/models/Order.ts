@@ -50,14 +50,17 @@ export const orderSchema = z
 
 export type Order = z.infer<typeof orderSchema>;
 
-export const getEmptyOrder = (): Partial<Order> => {
+export const getEmptyOrder = (): Order => {
   return {
     client: {
       email: "",
       name: "",
       phone: "",
     },
+    inspiration: "",
+    specialConsiderations: "",
+    timeline: undefined,
     pieceDetails: [],
     consent: false,
-  };
+  } as unknown as Order;
 };
