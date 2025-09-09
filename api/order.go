@@ -66,57 +66,6 @@ type OrderDetailDB struct {
 	Description string  `json:"description"`
 }
 
-type ErrorResponse struct {
-	Success bool   `json:"success"`
-	Error   string `json:"error"`
-	Code    string `json:"code"`
-}
-
-type SuccessResponse struct {
-	Success bool           `json:"success"`
-	Message string         `json:"message"`
-	Data    map[string]any `json:"data,omitempty"`
-}
-
-func logError(operation string, err error, context map[string]any) {
-	// Create PII-safe context for logging
-	safeContext := make(map[string]any)
-	for k, v := range context {
-		// Exclude PII fields
-		if k != "email" && k != "phone" && k != "name" && k != "customerName" {
-			safeContext[k] = v
-		} else {
-			// Log only existence/format info for PII fields
-			if str, ok := v.(string); ok {
-				safeContext[k+"_length"] = len(str)
-				safeContext[k+"_has_value"] = str != ""
-			}
-		}
-	}
-
-	log.Printf("ERROR [%s]: %v | Context: %+v", operation, err, safeContext)
-}
-
-func respondWithError(w http.ResponseWriter, statusCode int, message string, code string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(ErrorResponse{
-		Success: false,
-		Error:   message,
-		Code:    code,
-	})
-}
-
-func respondWithSuccess(w http.ResponseWriter, message string, data map[string]any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(SuccessResponse{
-		Success: true,
-		Message: message,
-		Data:    data,
-	})
-}
-
 func validateOrder(order Order) error {
 	// Client validation
 	if strings.TrimSpace(order.Client.Name) == "" {
@@ -129,11 +78,11 @@ func validateOrder(order Order) error {
 		return fmt.Errorf("customer email format is invalid")
 	}
 
-	if !strings.HasPrefix(order.Client.Phone, "+1"){
+	if !strings.HasPrefix(order.Client.Phone, "+1") {
 		return fmt.Errorf("phone number must have the US country code")
 	}
 
-	phoneDigits := strings.TrimPrefix(order.Client.Phone, "+1");
+	phoneDigits := strings.TrimPrefix(order.Client.Phone, "+1")
 
 	if len(phoneDigits) != 10 {
 		return fmt.Errorf("phone number must be a valid US phone number")
@@ -169,41 +118,41 @@ func validateOrder(order Order) error {
 	return nil
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
+func OrderHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		logError("invalid_method", fmt.Errorf("method %s not allowed", r.Method), map[string]any{
+		LogError("invalid_method", fmt.Errorf("method %s not allowed", r.Method), map[string]any{
 			"method": r.Method,
 		})
-		respondWithError(w, http.StatusMethodNotAllowed, "Method not allowed", "INVALID_METHOD")
+		RespondWithError(w, http.StatusMethodNotAllowed, "Method not allowed", "INVALID_METHOD")
 		return
 	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		logError("read_body", err, map[string]any{
+		LogError("read_body", err, map[string]any{
 			"content_length": r.ContentLength,
 		})
-		respondWithError(w, http.StatusBadRequest, "Failed to read request body", "INVALID_REQUEST")
+		RespondWithError(w, http.StatusBadRequest, "Failed to read request body", "INVALID_REQUEST")
 		return
 	}
 	defer r.Body.Close()
 
 	var req OrderRequest
 	if err := json.Unmarshal(body, &req); err != nil {
-		logError("parse_json", err, map[string]any{
+		LogError("parse_json", err, map[string]any{
 			"body_length": len(body),
 		})
-		respondWithError(w, http.StatusBadRequest, "Invalid request format", "INVALID_JSON")
+		RespondWithError(w, http.StatusBadRequest, "Invalid request format", "INVALID_JSON")
 		return
 	}
 
 	// Validate the order data
 	if err := validateOrder(req.Order); err != nil {
-		logError("validation_failed", err, map[string]any{
+		LogError("validation_failed", err, map[string]any{
 			"piece_count": len(req.Order.PieceDetails),
 			"has_consent": req.Order.Consent,
 		})
-		respondWithError(w, http.StatusBadRequest, err.Error(), "VALIDATION_ERROR")
+		RespondWithError(w, http.StatusBadRequest, err.Error(), "VALIDATION_ERROR")
 		return
 	}
 
@@ -211,48 +160,48 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	supabaseKey := os.Getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 	if supabaseUrl == "" || supabaseKey == "" {
-		logError("config_missing", fmt.Errorf("database configuration missing"), map[string]any{
+		LogError("config_missing", fmt.Errorf("database configuration missing"), map[string]any{
 			"has_url": supabaseUrl != "",
 			"has_key": supabaseKey != "",
 		})
-		respondWithError(w, http.StatusInternalServerError, "Service temporarily unavailable", "CONFIG_ERROR")
+		RespondWithError(w, http.StatusInternalServerError, "Service temporarily unavailable", "CONFIG_ERROR")
 		return
 	}
 
 	customerId, err := upsertCustomer(supabaseUrl, supabaseKey, req.Order.Client)
 	if err != nil {
-		logError("upsert_customer", err, map[string]any{
+		LogError("upsert_customer", err, map[string]any{
 			"email": req.Order.Client.Email,
 			"name":  req.Order.Client.Name,
 		})
-		respondWithError(w, http.StatusInternalServerError, "Failed to process customer information", "CUSTOMER_ERROR")
+		RespondWithError(w, http.StatusInternalServerError, "Failed to process customer information", "CUSTOMER_ERROR")
 		return
 	}
 
 	orderId, err := createOrder(supabaseUrl, supabaseKey, customerId, req.Order)
 	if err != nil {
-		logError("create_order", err, map[string]any{
+		LogError("create_order", err, map[string]any{
 			"customer_id": customerId,
 			"piece_count": len(req.Order.PieceDetails),
 		})
-		respondWithError(w, http.StatusInternalServerError, "Failed to create order", "ORDER_ERROR")
+		RespondWithError(w, http.StatusInternalServerError, "Failed to create order", "ORDER_ERROR")
 		return
 	}
 
 	err = createOrderDetails(supabaseUrl, supabaseKey, orderId, req.Order.PieceDetails)
 	if err != nil {
-		logError("create_order_details", err, map[string]any{
+		LogError("create_order_details", err, map[string]any{
 			"order_id":     orderId,
 			"detail_count": len(req.Order.PieceDetails),
 		})
-		respondWithError(w, http.StatusInternalServerError, "Failed to save order details", "ORDER_DETAILS_ERROR")
+		RespondWithError(w, http.StatusInternalServerError, "Failed to save order details", "ORDER_DETAILS_ERROR")
 		return
 	}
 
 	log.Printf("INFO: Order created successfully | order_id: %s | customer_id: %s | piece_count: %d",
 		orderId, customerId, len(req.Order.PieceDetails))
 
-	respondWithSuccess(w, "Order received successfully", map[string]any{
+	RespondWithSuccess(w, "Order received successfully", map[string]any{
 		"pieceCount": len(req.Order.PieceDetails),
 		"orderId":    orderId,
 	})
