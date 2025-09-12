@@ -27,24 +27,25 @@ export function AcceptTermsAndConditionsFormStep() {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [consent, setConsent] = useState(false);
   const [smsConsent, setSmsConsent] = useState(false);
 
   const handleSmsConsentChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.checked;
       setSmsConsent(value);
-      // Update overall consent when both boxes are checked
       dispatchOrderChange({
         type: "accept-terms-and-conditions",
-        payload: { consent: value && order.consent },
+        payload: { consent: value && consent },
       });
     },
-    [setSmsConsent, dispatchOrderChange, order.consent],
+    [setSmsConsent, dispatchOrderChange, consent],
   );
 
   const handleConsentChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.checked;
+      setConsent(value);
       dispatchOrderChange({
         type: "accept-terms-and-conditions",
         payload: { consent: value && smsConsent },
@@ -170,7 +171,7 @@ export function AcceptTermsAndConditionsFormStep() {
               className="aliciap-checkbox"
               type="checkbox"
               onChange={handleConsentChange}
-              checked={order.consent}
+              checked={consent}
             />
             <label
               htmlFor="terms-and-conditions"
