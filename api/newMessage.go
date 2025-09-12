@@ -10,21 +10,21 @@ import (
 )
 
 type NewMessageRequest = struct {
-	Body    string `json:body`
-	OrderId string `json:orderId`
+	Body    string `json:"body"`
+	OrderId string `json:"orderId"`
 }
 
 type ConversationDB = struct {
-	Id            string `json:id`
-	OrderId       string `json:order_id`
-	CustomerPhone string `json:customer_phone`
+	Id            string `json:"id"`
+	OrderId       string `json:"order_id"`
+	CustomerPhone string `json:"customer_phone"`
 }
 
 type MessageDB = struct {
-	Id             *string `json:id`
-	ConversationId string  `json:conversation_id`
-	Body           string  `json:body`
-	Direction      string  `json:direction`
+	Id             *string `json:"id"`
+	ConversationId string  `json:"conversation_id"`
+	Body           string  `json:"body"`
+	Direction      string  `json:"direction"`
 }
 
 func validateNewMessageRequest(req NewMessageRequest) error {
@@ -75,6 +75,7 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		LogError("validation_failed", err, map[string]any{})
 		RespondWithError(w, http.StatusBadRequest, err.Error(), "VALIDATION_ERROR")
+		return
 	}
 
 	supabaseUrl := os.Getenv("SUPABASE_URL")
@@ -86,13 +87,15 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 			"has_key": supabaseKey != "",
 		})
 		RespondWithError(w, http.StatusInternalServerError, "Service temporarily unavailable", "CONFIG_ERROR")
-
+		return
 	}
 
 	conversation, err := getOrCreateConversation(supabaseUrl, supabaseKey, req.OrderId)
 
 	if err != nil {
 		LogError("get_order_details", fmt.Errorf("error trying to find an order: %w", err), map[string]any{})
+		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
+		return;
 	}
 
 	_, err = storeMessageInDb(supabaseUrl, supabaseKey, conversation.Id, strings.TrimSpace(req.Body))
@@ -116,7 +119,7 @@ func storeMessageInDb(supabaseUrl, supabaseKey string, conversationId string, bo
 	_ = MessageDB{
 		ConversationId: strings.TrimSpace(conversationId),
 		Body:           strings.TrimSpace(body),
-		Direction:      "inbound",
+		Direction:      "outbound",
 	}
 }
 

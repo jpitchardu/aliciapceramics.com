@@ -27,16 +27,30 @@ export function AcceptTermsAndConditionsFormStep() {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
+
+  const handleSmsConsentChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.checked;
+      setSmsConsent(value);
+      // Update overall consent when both boxes are checked
+      dispatchOrderChange({
+        type: "accept-terms-and-conditions",
+        payload: { consent: value && order.consent },
+      });
+    },
+    [setSmsConsent, dispatchOrderChange, order.consent]
+  );
 
   const handleConsentChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.checked;
       dispatchOrderChange({
         type: "accept-terms-and-conditions",
-        payload: { consent: value },
+        payload: { consent: value && smsConsent },
       });
     },
-    [dispatchOrderChange],
+    [dispatchOrderChange, smsConsent]
   );
 
   const onSubmit = useCallback(async () => {
@@ -135,6 +149,23 @@ export function AcceptTermsAndConditionsFormStep() {
           </div>
           <div className="bg-(--color-stone-disabled) rounded-lg p-4 flex flex-row items-center gap-2">
             <input
+              id="sms-consent"
+              className="aliciap-checkbox"
+              type="checkbox"
+              onChange={handleSmsConsentChange}
+              checked={smsConsent}
+            />
+            <label
+              htmlFor="sms-consent"
+              className="font-body text-sm text-earth-dark"
+            >
+              I agree to receive text messages from Alicia P Ceramics (including
+              order updates, timeline changes, and design discussions) at the
+              phone number I provided.
+            </label>
+          </div>
+          <div className="bg-(--color-stone-disabled) rounded-lg p-4 flex flex-row items-center gap-2">
+            <input
               id="terms-and-conditions"
               className="aliciap-checkbox"
               type="checkbox"
@@ -145,8 +176,8 @@ export function AcceptTermsAndConditionsFormStep() {
               htmlFor="terms-and-conditions"
               className="font-body text-sm text-earth-dark"
             >
-              I'm excited to work together on my custom pieces and consent to
-              receive text messages about my order at the number provided.
+              I'm excited to work together on my custom pieces and understand
+              the handmade nature and creative process described above.
             </label>
           </div>
         </div>
