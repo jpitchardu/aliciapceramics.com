@@ -7,8 +7,8 @@ export function Footer() {
         <div className="flex justify-center items-center text-sm text-stone-600">
           <span>© {new Date().getFullYear()} Alicia P Ceramics</span>
           <span className="mx-3">•</span>
-          <Link 
-            href="/privacy" 
+          <Link
+            href="/privacy"
             className="hover:text-earth-dark transition-colors"
           >
             Privacy Policy

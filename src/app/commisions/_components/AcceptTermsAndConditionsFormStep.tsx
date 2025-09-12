@@ -39,7 +39,7 @@ export function AcceptTermsAndConditionsFormStep() {
         payload: { consent: value && order.consent },
       });
     },
-    [setSmsConsent, dispatchOrderChange, order.consent]
+    [setSmsConsent, dispatchOrderChange, order.consent],
   );
 
   const handleConsentChange = useCallback(
@@ -50,7 +50,7 @@ export function AcceptTermsAndConditionsFormStep() {
         payload: { consent: value && smsConsent },
       });
     },
-    [dispatchOrderChange, smsConsent]
+    [dispatchOrderChange, smsConsent],
   );
 
   const onSubmit = useCallback(async () => {

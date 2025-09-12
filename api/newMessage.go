@@ -107,11 +107,11 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, error) {
-
+	return "", nil
 }
 
 func getOrCreateConversation(supabaseUrl, supabaseKey string, orderId string) (ConversationDB, error) {
-
+	return ConversationDB{}, nil
 }
 
 func storeMessageInDb(supabaseUrl, supabaseKey string, conversationId string, body string) (string, error) {
@@ -121,8 +121,10 @@ func storeMessageInDb(supabaseUrl, supabaseKey string, conversationId string, bo
 		Body:           strings.TrimSpace(body),
 		Direction:      "outbound",
 	}
+
+	return "", nil
 }
 
 func sendMessage(customerPhone string, body string) (string, error) {
-
+	return "", nil
 }
