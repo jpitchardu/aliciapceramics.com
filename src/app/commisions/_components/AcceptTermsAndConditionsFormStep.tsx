@@ -28,19 +28,6 @@ export function AcceptTermsAndConditionsFormStep() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [consent, setConsent] = useState(false);
-  const [smsConsent, setSmsConsent] = useState(false);
-
-  const handleSmsConsentChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.checked;
-      setSmsConsent(value);
-      dispatchOrderChange({
-        type: "accept-terms-and-conditions",
-        payload: { consent: value && consent },
-      });
-    },
-    [setSmsConsent, dispatchOrderChange, consent],
-  );
 
   const handleConsentChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -48,10 +35,10 @@ export function AcceptTermsAndConditionsFormStep() {
       setConsent(value);
       dispatchOrderChange({
         type: "accept-terms-and-conditions",
-        payload: { consent: value && smsConsent },
+        payload: { consent: value },
       });
     },
-    [dispatchOrderChange, smsConsent],
+    [dispatchOrderChange],
   );
 
   const onSubmit = useCallback(async () => {
@@ -147,23 +134,6 @@ export function AcceptTermsAndConditionsFormStep() {
               <span className="font-bold">Payment:</span> I'll send an invoice
               after we've discussed the details
             </p>
-          </div>
-          <div className="bg-(--color-stone-disabled) rounded-lg p-4 flex flex-row items-center gap-2">
-            <input
-              id="sms-consent"
-              className="aliciap-checkbox"
-              type="checkbox"
-              onChange={handleSmsConsentChange}
-              checked={smsConsent}
-            />
-            <label
-              htmlFor="sms-consent"
-              className="font-body text-sm text-earth-dark"
-            >
-              I agree to receive text messages from Alicia P Ceramics (including
-              order updates, timeline changes, and design discussions) at the
-              phone number I provided.
-            </label>
           </div>
           <div className="bg-(--color-stone-disabled) rounded-lg p-4 flex flex-row items-center gap-2">
             <input

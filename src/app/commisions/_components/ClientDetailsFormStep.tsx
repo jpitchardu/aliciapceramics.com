@@ -5,6 +5,7 @@ import { Order } from "@/models/Order";
 import { OrderSummary } from "@/app/commisions/_components/OrderSummary";
 import { Form } from "@/ui/form/Form";
 import z from "zod";
+import { ChangeEvent, useCallback } from "react";
 
 const stepData = {
   title: "let's get some info",
@@ -49,6 +50,19 @@ export function ClientDetailsFormStep() {
     });
   };
 
+  const handleSmsConsentChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.checked;
+      dispatchOrderChange({
+        type: "set-sms-consent",
+        payload: {
+          smsConsent: value,
+        },
+      });
+    },
+    [dispatchOrderChange],
+  );
+
   const isValid = !(error && z.treeifyError(error).properties?.client);
 
   return (
@@ -58,16 +72,32 @@ export function ClientDetailsFormStep() {
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="pt-4 space-y-4">
           {stepData.fields.map((field) => (
-            <TextInput
-              key={field.label}
-              label={field.label}
-              placeholder={field.placeholder}
-              required={field.required}
-              type={field.type}
-              value={order.client[field.path]}
-              onChange={(e) => handleChange(field.path, e.target.value)}
-            />
+            <div key={field.label}>
+              <TextInput
+                label={field.label}
+                placeholder={field.placeholder}
+                required={field.required}
+                type={field.type}
+                value={order.client[field.path]}
+                onChange={(e) => handleChange(field.path, e.target.value)}
+              />
+            </div>
           ))}
+          <div className="mt-3 bg-(--color-stone-disabled) rounded-lg p-3 flex flex-row items-start gap-2">
+            <input
+              id="sms-consent-client"
+              className="aliciap-checkbox mt-1"
+              type="checkbox"
+              onChange={handleSmsConsentChange}
+              checked={order.smsConsent ?? false}
+            />
+            <label
+              htmlFor="sms-consent-client"
+              className="font-body text-sm text-earth-dark"
+            >
+              Send me SMS updates about this order. Message rates may apply.
+            </label>
+          </div>
         </div>
       </div>
       <Form.Footer canGoNext={isValid} />

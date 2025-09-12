@@ -45,6 +45,7 @@ export const orderSchema = z
     inspiration: z.string().optional(),
     specialConsiderations: z.string().optional(),
     consent: z.boolean(),
+    smsConsent: z.boolean().optional(),
   })
   .strict();
 
@@ -62,5 +63,6 @@ export const getEmptyOrder = (): Order => {
     timeline: undefined,
     pieceDetails: [],
     consent: false,
+    smsConsent: undefined,
   } as unknown as Order;
 };

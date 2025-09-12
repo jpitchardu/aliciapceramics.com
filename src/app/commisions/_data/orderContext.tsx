@@ -40,12 +40,20 @@ type AcceptTermsAndConditionsAction = {
     consent: boolean;
   };
 };
+
+type SetSmsConsentAction = {
+  type: "set-sms-consent";
+  payload: {
+    smsConsent: boolean;
+  };
+};
 type OrderAction =
   | AddClientInfoAction
   | AddPieceOrderDetailAction
   | AddOrderDetailsAction
   | RemovePieceOrderDetailAction
-  | AcceptTermsAndConditionsAction;
+  | AcceptTermsAndConditionsAction
+  | SetSmsConsentAction;
 
 type OrderFormState = {
   order: Order;
@@ -75,6 +83,7 @@ const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
         ...order,
         client: { ...order.client, ...action.payload.client },
         consent: false,
+        smsConsent: undefined,
       };
       break;
     case "add-piece-detail":
@@ -88,6 +97,7 @@ const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
           },
         ],
         consent: false,
+        smsConsent: undefined,
       };
       break;
     case "add-order-details":
@@ -95,6 +105,7 @@ const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
         ...order,
         ...action.payload,
         consent: false,
+        smsConsent: undefined,
       };
       break;
     case "remove-piece-detail":
@@ -104,12 +115,19 @@ const orderReducer = ({ order }: OrderFormState, action: OrderAction) => {
           (detail) => detail.id !== action.payload.id,
         ),
         consent: false,
+        smsConsent: undefined,
       };
       break;
     case "accept-terms-and-conditions":
       newOrder = {
         ...order,
         consent: action.payload.consent,
+      };
+      break;
+    case "set-sms-consent":
+      newOrder = {
+        ...order,
+        smsConsent: action.payload.smsConsent,
       };
       break;
     default:

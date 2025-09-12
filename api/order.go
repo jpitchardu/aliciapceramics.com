@@ -33,6 +33,7 @@ type Order struct {
 	Inspiration           string        `json:"inspiration"`
 	SpecialConsiderations string        `json:"specialConsiderations"`
 	Consent               bool          `json:"consent"`
+	SMSConsent            *bool         `json:"smsConsent,omitempty"`
 }
 
 type OrderRequest struct {
@@ -53,6 +54,7 @@ type OrderDB struct {
 	Inspiration           string `json:"inspiration"`
 	SpecialConsiderations string `json:"special_considerations"`
 	Consent               bool   `json:"consent"`
+	SMSConsent            *bool  `json:"sms_consent,omitempty"`
 	Status                string `json:"status"`
 	AccessToken           string `json:"access_token"`
 }
@@ -352,6 +354,7 @@ func createOrder(supabaseUrl, supabaseKey, customerID string, order Order) (stri
 		Inspiration:           order.Inspiration,
 		SpecialConsiderations: order.SpecialConsiderations,
 		Consent:               order.Consent,
+		SMSConsent:            order.SMSConsent,
 		Status:                "pending",
 		AccessToken:           accessToken,
 	}
