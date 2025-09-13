@@ -50,20 +50,28 @@ export function ClientDetailsFormStep() {
     });
   };
 
-  const handleSmsConsentChange = useCallback(
+  const handleCommunicationChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.checked;
-      dispatchOrderChange({
-        type: "set-sms-consent",
-        payload: {
-          smsConsent: value,
-        },
-      });
+      const value = e.target.value as "sms" | "email_only";
+      if (value === "sms" || value === "email_only") {
+        dispatchOrderChange({
+          type: "set-communication-preference",
+          payload: {
+            communicationPreferences: value,
+          },
+        });
+      }
     },
     [dispatchOrderChange],
   );
 
-  const isValid = !(error && z.treeifyError(error).properties?.client);
+  const hasValidClientInfo = !(
+    error && z.treeifyError(error).properties?.client
+  );
+  const hasCommunicationMethod =
+    order.client.communicationPreferences === "sms" ||
+    order.client.communicationPreferences === "email_only";
+  const isValid = hasValidClientInfo && hasCommunicationMethod;
 
   return (
     <Form.StepPage stepKey={stepKey}>
@@ -83,21 +91,64 @@ export function ClientDetailsFormStep() {
               />
             </div>
           ))}
-          <div className="mt-3 bg-(--color-stone-disabled) rounded-lg p-3 flex flex-row items-start gap-2">
-            <input
-              id="sms-consent-client"
-              className="aliciap-checkbox mt-1"
-              type="checkbox"
-              onChange={handleSmsConsentChange}
-              checked={order.smsConsent ?? false}
-            />
-            <label
-              htmlFor="sms-consent-client"
-              className="font-body text-sm text-earth-dark"
+          <fieldset className="mt-3">
+            <legend className="block font-label text-sm text-earth-dark mb-2">
+              how would you like to receive updates? *
+            </legend>
+            <div
+              className="bg-(--color-stone-disabled) rounded-lg p-4"
+              role="radiogroup"
+              aria-required="true"
+              aria-describedby="communication-help"
             >
-              Send me SMS updates about this order. Message rates may apply.
-            </label>
-          </div>
+              <div className="space-y-3">
+                <div className="flex flex-row items-start gap-2">
+                  <input
+                    id="sms-consent-client"
+                    name="communication-preference"
+                    className="aliciap-radio mt-1"
+                    type="radio"
+                    value="sms"
+                    onChange={handleCommunicationChange}
+                    checked={order.client.communicationPreferences === "sms"}
+                    aria-describedby="sms-details"
+                  />
+                  <label
+                    htmlFor="sms-consent-client"
+                    className="font-body text-xs text-stone-600"
+                  >
+                    <span>
+                      I want to receive automated SMS updates from Alicia P
+                      Ceramics. Msg&data rates may apply.
+                    </span>
+                  </label>
+                </div>
+                <div className="flex flex-row items-start gap-2">
+                  <input
+                    id="email-only-client"
+                    name="communication-preference"
+                    className="aliciap-radio mt-1"
+                    type="radio"
+                    value="email_only"
+                    onChange={handleCommunicationChange}
+                    checked={
+                      order.client.communicationPreferences === "email_only"
+                    }
+                  />
+                  <label
+                    htmlFor="email-only-client"
+                    className="font-body text-xs text-stone-600"
+                  >
+                    I prefer to receive all communication via email only
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div id="communication-help" className="sr-only">
+              Choose how you would like to receive order updates. This selection
+              is required.
+            </div>
+          </fieldset>
         </div>
       </div>
       <Form.Footer canGoNext={isValid} />

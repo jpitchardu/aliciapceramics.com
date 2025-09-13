@@ -1,4 +1,24 @@
+"use client";
+
+import { useEffect } from "react";
+
 export default function PrivacyPolicy() {
+  useEffect(() => {
+    // Override body overflow for this page
+    const body = document.body;
+    const originalOverflow = body.style.overflow;
+    const originalHeight = body.style.height;
+
+    body.style.overflow = "auto";
+    body.style.height = "auto";
+
+    return () => {
+      // Restore original styles when leaving the page
+      body.style.overflow = originalOverflow;
+      body.style.height = originalHeight;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-stone-50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -59,8 +79,16 @@ export default function PrivacyPolicy() {
               <p>
                 By providing your phone number and consenting to text messages,
                 you agree to receive SMS communications from Alicia P Ceramics
-                about your order. You can opt out at any time by replying STOP
-                to any message.
+                about your order.{" "}
+                <strong>
+                  SMS messaging is optional and not required to complete your
+                  order.
+                </strong>{" "}
+                <strong>
+                  Message frequency varies. Standard message and data rates may
+                  apply depending on your mobile carrier.
+                </strong>{" "}
+                You can opt out at any time by replying STOP to any message.
               </p>
             </section>
 

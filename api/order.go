@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -14,9 +15,10 @@ import (
 )
 
 type Customer struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Phone string `json:"phone"`
+	Name                     string  `json:"name"`
+	Email                    string  `json:"email"`
+	Phone                    string  `json:"phone"`
+	CommunicationPreferences *string `json:"communicationPreferences,omitempty"`
 }
 
 type PieceDetail struct {
@@ -33,7 +35,6 @@ type Order struct {
 	Inspiration           string        `json:"inspiration"`
 	SpecialConsiderations string        `json:"specialConsiderations"`
 	Consent               bool          `json:"consent"`
-	SMSConsent            *bool         `json:"smsConsent,omitempty"`
 }
 
 type OrderRequest struct {
@@ -41,10 +42,11 @@ type OrderRequest struct {
 }
 
 type CustomerDB struct {
-	ID    string `json:"id,omitempty"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Phone string `json:"phone"`
+	ID                       string  `json:"id,omitempty"`
+	Name                     string  `json:"name"`
+	Email                    string  `json:"email"`
+	Phone                    string  `json:"phone"`
+	CommunicationPreferences *string `json:"communication_preferences,omitempty"`
 }
 
 type OrderDB struct {
@@ -54,7 +56,6 @@ type OrderDB struct {
 	Inspiration           string `json:"inspiration"`
 	SpecialConsiderations string `json:"special_considerations"`
 	Consent               bool   `json:"consent"`
-	SMSConsent            *bool  `json:"sms_consent,omitempty"`
 	Status                string `json:"status"`
 	AccessToken           string `json:"access_token"`
 }
@@ -66,6 +67,19 @@ type OrderDetailDB struct {
 	Size        *string `json:"size,omitempty"`
 	Quantity    int     `json:"quantity"`
 	Description string  `json:"description"`
+}
+
+type CustomerSMSConsentRecord struct {
+	ID               string  `json:"id,omitempty"`
+	CustomerID       string  `json:"customer_id"`
+	PhoneNumber      string  `json:"phone_number"`
+	ConsentType      string  `json:"consent_type"`
+	ConsentGiven     bool    `json:"consent_given"`
+	ConsentLanguage  string  `json:"consent_language"`
+	ConsentMethod    string  `json:"consent_method"`
+	RevocationMethod *string `json:"revocation_method,omitempty"`
+	IPAddress        *string `json:"ip_address,omitempty"`
+	UserAgent        *string `json:"user_agent,omitempty"`
 }
 
 type ErrorResponse struct {
@@ -251,6 +265,19 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create SMS consent record for TCPA compliance if SMS was selected
+	if req.Order.Client.CommunicationPreferences != nil && *req.Order.Client.CommunicationPreferences == "sms" {
+		clientIP := getClientIP(r)
+		userAgent := r.Header.Get("User-Agent")
+		err = createSMSConsentRecord(supabaseUrl, supabaseKey, customerId, req.Order.Client, clientIP, userAgent)
+		if err != nil {
+			LogError("create_sms_consent_record", err, map[string]any{
+				"customer_id": customerId,
+			})
+			// Don't fail the order creation, but log the error
+		}
+	}
+
 	log.Printf("INFO: Order created successfully | order_id: %s | customer_id: %s | piece_count: %d",
 		orderId, customerId, len(req.Order.PieceDetails))
 
@@ -296,9 +323,10 @@ func upsertCustomer(supabaseUrl, supabaseKey string, customer Customer) (string,
 
 	// Customer doesn't exist, create new one
 	newCustomer := CustomerDB{
-		Name:  customer.Name,
-		Email: customer.Email,
-		Phone: customer.Phone,
+		Name:                     customer.Name,
+		Email:                    customer.Email,
+		Phone:                    customer.Phone,
+		CommunicationPreferences: customer.CommunicationPreferences,
 	}
 
 	customerJSON, err := json.Marshal(newCustomer)
@@ -354,7 +382,6 @@ func createOrder(supabaseUrl, supabaseKey, customerID string, order Order) (stri
 		Inspiration:           order.Inspiration,
 		SpecialConsiderations: order.SpecialConsiderations,
 		Consent:               order.Consent,
-		SMSConsent:            order.SMSConsent,
 		Status:                "pending",
 		AccessToken:           accessToken,
 	}
@@ -451,6 +478,74 @@ func createOrderDetails(supabaseUrl, supabaseKey, orderID string, pieceDetails [
 
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("failed to create order details: status %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+func getClientIP(r *http.Request) string {
+	if xForwardedFor := r.Header.Get("X-Forwarded-For"); xForwardedFor != "" {
+		if ips := strings.Split(xForwardedFor, ","); len(ips) > 0 {
+			return strings.TrimSpace(ips[0])
+		}
+	}
+
+	if xRealIP := r.Header.Get("X-Real-IP"); xRealIP != "" {
+		return xRealIP
+	}
+
+	if ip, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		return ip
+	}
+
+	return r.RemoteAddr
+}
+
+func createSMSConsentRecord(supabaseUrl, supabaseKey, customerID string, customer Customer, ipAddress, userAgent string) error {
+	var ipPtr, userAgentPtr *string
+	if ipAddress != "" {
+		ipPtr = &ipAddress
+	}
+	if userAgent != "" {
+		userAgentPtr = &userAgent
+	}
+
+	consentRecord := CustomerSMSConsentRecord{
+		CustomerID:      customerID,
+		PhoneNumber:     customer.Phone,
+		ConsentType:     "sms_granted",
+		ConsentGiven:    true,
+		ConsentLanguage: "I want to receive automated SMS updates from Alicia P Ceramics. Msg&data rates may apply.",
+		ConsentMethod:   "web_form",
+		IPAddress:       ipPtr,
+		UserAgent:       userAgentPtr,
+	}
+
+	recordJSON, err := json.Marshal(consentRecord)
+	if err != nil {
+		return fmt.Errorf("failed to marshal consent record: %w", err)
+	}
+
+	url := fmt.Sprintf("%s/rest/v1/customer_sms_consent_records", supabaseUrl)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(recordJSON))
+	if err != nil {
+		return fmt.Errorf("failed to create consent record request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to create consent record: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to create consent record: status %d, body: %s", resp.StatusCode, string(body))
 	}
 
 	return nil
