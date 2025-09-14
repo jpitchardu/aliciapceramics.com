@@ -93,6 +93,34 @@ export default function PrivacyPolicy() {
             </section>
 
             <section>
+              <h2 className="font-heading text-xl mb-4">Information Sharing</h2>
+              <p className="mb-4">
+                We do not sell, trade, or rent your personal information to
+                third parties. We may share your information only in the
+                following circumstances:
+              </p>
+              <ul className="list-disc ml-6 space-y-2">
+                <li>
+                  <strong>Service Providers:</strong> With trusted third-party
+                  services that help us operate our business (such as SMS
+                  delivery and payment processing)
+                </li>
+                <li>
+                  <strong>Legal Requirements:</strong> When required by law or
+                  to protect our rights
+                </li>
+                <li>
+                  <strong>Business Operations:</strong> With your explicit
+                  consent for specific purposes
+                </li>
+              </ul>
+              <p className="mt-4">
+                All service providers operate under their published privacy
+                policies and security standards.
+              </p>
+            </section>
+
+            <section>
               <h2 className="font-heading text-xl mb-4">Data Security</h2>
               <p>
                 We implement appropriate security measures to protect your
