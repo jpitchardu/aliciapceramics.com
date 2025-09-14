@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -21,10 +22,10 @@ type ConversationDB = struct {
 }
 
 type MessageDB = struct {
-	Id             *string `json:"id"`
-	ConversationId string  `json:"conversation_id"`
-	Body           string  `json:"body"`
-	Direction      string  `json:"direction"`
+	Id             string `json:"id"`
+	ConversationId string `json:"conversation_id"`
+	Body           string `json:"body"`
+	Direction      string `json:"direction"`
 }
 
 func validateNewMessageRequest(req NewMessageRequest) error {
@@ -90,41 +91,285 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conversation, err := getOrCreateConversation(supabaseUrl, supabaseKey, req.OrderId)
-
-	if err != nil {
-		LogError("get_order_details", fmt.Errorf("error trying to find an order: %w", err), map[string]any{})
-		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
-		return;
-	}
-
-	_, err = storeMessageInDb(supabaseUrl, supabaseKey, conversation.Id, strings.TrimSpace(req.Body))
-
 	phoneNumber, err := getCustomerPhone(supabaseUrl, supabaseKey, req.OrderId)
 
-	_, err = sendMessage(phoneNumber, req.Body)
+	if err != nil {
+		LogError("get_customer_phone", fmt.Errorf("error trying to find an order: %w", err), map[string]any{})
+		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
+		return
+	}
+
+	conversation, err := getOrCreateConversation(supabaseUrl, supabaseKey, req.OrderId, phoneNumber)
+
+	if err != nil {
+		LogError("get_or_create_conversation", fmt.Errorf("error trying to find an order: %w", err), map[string]any{})
+		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
+		return
+	}
+
+	messageId, err := storeMessageInDb(supabaseUrl, supabaseKey, conversation.Id, strings.TrimSpace(req.Body))
+
+	if err != nil {
+		LogError("store_message_in_db", fmt.Errorf("error trying to find an order: %w", err), map[string]any{})
+		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
+		return
+	}
+
+	err = sendMessage(messageId, conversation.Id, phoneNumber, req.Body)
+	if err != nil {
+		LogError("send_message", fmt.Errorf("error trying to find an order: %w", err), map[string]any{})
+		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
+		return
+	}
+
+	RespondWithSuccess(w, "message sent successfully", map[string]any{
+		"MessageId": messageId,
+	})
 
 }
 
 func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, error) {
-	return "", nil
+	url := fmt.Sprintf("%s/rest/v1/orders?id=eq.%s&select=id,customer_id", supabaseUrl, orderId)
+	req, err := http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to create order request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to get order details for order: %s, with error: %w", orderId, err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to read response for order details: %w", err)
+	}
+
+	var orders []struct {
+		Id         string `json:"id"`
+		CustomerId string `json:"customer_id"`
+	}
+
+	if err := json.Unmarshal(body, &orders); err != nil {
+		return "", fmt.Errorf("failed to parse order with customer id response: %w", err)
+	}
+
+	if len(orders) == 0 {
+		return "", fmt.Errorf("order not found for id %s", orderId)
+	}
+
+	orderWithCustomerId := orders[0]
+
+	url = fmt.Sprintf("%s/rest/v1/customer_sms_consent_records?customer_id=eq.%s&select=phone_number,consent_given&order=created_at.desc&limit=1", supabaseUrl, orderWithCustomerId.CustomerId)
+	req, err = http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to create consent request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err = client.Do(req)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch consent details for customer %s with error: %w", orderWithCustomerId.CustomerId, err)
+	}
+	defer resp.Body.Close()
+
+	body, err = io.ReadAll(resp.Body)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to read response order for consent details: %w", err)
+	}
+
+	var consentDetails []struct {
+		PhoneNumber  string `json:"phone_number"`
+		ConsentGiven bool   `json:"consent_given"`
+	}
+
+	if err := json.Unmarshal(body, &consentDetails); err != nil {
+		return "", fmt.Errorf("failed to parse consent details response: %w", err)
+	}
+
+	if len(consentDetails) == 0 {
+		return "", fmt.Errorf("consent details not found for customer %s", orderWithCustomerId.CustomerId)
+	}
+
+	consentDetailsForCustomer := consentDetails[0]
+
+	if !consentDetailsForCustomer.ConsentGiven {
+		return "", fmt.Errorf("customer has not given consent for text messages")
+	}
+
+	return consentDetailsForCustomer.PhoneNumber, nil
 }
 
-func getOrCreateConversation(supabaseUrl, supabaseKey string, orderId string) (ConversationDB, error) {
-	return ConversationDB{}, nil
+func getOrCreateConversation(supabaseUrl, supabaseKey string, orderId string, phoneNumber string) (*ConversationDB, error) {
+
+	url := fmt.Sprintf("%s/rest/v1/conversations?order_id=eq.%s", supabaseUrl, orderId)
+
+	req, err := http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request for url %s with error: %w", url, err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := http.Client{}
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch conversation for order %s with error %w", orderId, err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response with error %w", err)
+	}
+
+	var conversations []ConversationDB
+
+	if err := json.Unmarshal(body, &conversations); err != nil {
+		return nil, fmt.Errorf("failed to parse response with error %w", err)
+	}
+
+	if len(conversations) > 0 {
+		return &conversations[0], nil
+	}
+
+	newConversation := ConversationDB{
+		OrderId:       orderId,
+		CustomerPhone: phoneNumber,
+	}
+
+	url = fmt.Sprintf("%s/rest/v1/conversations", supabaseUrl)
+
+	conversationJson, err := json.Marshal(newConversation)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode conversation json for order %s with error %w", orderId, err)
+	}
+
+	req, err = http.NewRequest("POST", url, bytes.NewBuffer(conversationJson))
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request for url %s with error %w", url, err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Prefer", "return=representation") // Add this!
+
+	resp, err = client.Do(req)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create a new conversation for order %s with error %w", orderId, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		return nil, fmt.Errorf("failed to create conversation for order %s, check supabase logs for code %d", orderId, resp.StatusCode)
+	}
+
+	body, err = io.ReadAll(resp.Body)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response with error %w", err)
+	}
+
+	conversations = nil
+
+	if err := json.Unmarshal(body, &conversations); err != nil {
+		return nil, fmt.Errorf("failed to parse response when creating a conversation err: %w", err)
+	}
+
+	if len(conversations) == 0 {
+		return nil, fmt.Errorf("no conversations returned after creating a conversation for order %s", orderId)
+	}
+
+	return &conversations[0], nil
+
 }
 
-func storeMessageInDb(supabaseUrl, supabaseKey string, conversationId string, body string) (string, error) {
+func storeMessageInDb(supabaseUrl, supabaseKey string, conversationId string, messageBody string) (string, error) {
 
-	_ = MessageDB{
+	message := MessageDB{
 		ConversationId: strings.TrimSpace(conversationId),
-		Body:           strings.TrimSpace(body),
+		Body:           strings.TrimSpace(messageBody),
 		Direction:      "outbound",
 	}
 
-	return "", nil
+	messageJson, err := json.Marshal(message)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to parse message into json with error %w", err)
+	}
+
+	url := fmt.Sprintf("%s/rest/v1/messages", supabaseUrl)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(messageJson))
+
+	if err != nil {
+		return "", fmt.Errorf("failed to create request for url %s with error %w", url, err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Prefer", "return=representation")
+
+	client := http.Client{}
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to create message with err %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		return "", fmt.Errorf("failed to create message with code %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to read response from url %s with error %w", url, err)
+	}
+
+	var createdMessages []MessageDB
+
+	if err := json.Unmarshal(body, &createdMessages); err != nil {
+		return "", fmt.Errorf("failed to parse created messages to json with err %w", err)
+	}
+
+	if len(createdMessages) == 0 {
+		return "", fmt.Errorf("no messages returned on creation")
+	}
+
+	return createdMessages[0].Id, nil
+
 }
 
-func sendMessage(customerPhone string, body string) (string, error) {
-	return "", nil
+func sendMessage(messageId, conversationId, customerPhone, body string) error {
+	return nil
 }

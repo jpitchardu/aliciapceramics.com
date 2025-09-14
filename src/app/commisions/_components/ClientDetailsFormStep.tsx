@@ -118,8 +118,9 @@ export function ClientDetailsFormStep() {
                     className="font-body text-xs text-stone-600"
                   >
                     <span>
-                      I want to receive automated SMS updates from Alicia P
-                      Ceramics. Msg&data rates may apply.
+                      I want to receive order updates via text message from
+                      Alicia P Ceramics at the phone number provided. Msg&data
+                      rates may apply.
                     </span>
                   </label>
                 </div>
