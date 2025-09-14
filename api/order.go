@@ -95,14 +95,11 @@ type SuccessResponse struct {
 }
 
 func LogError(operation string, err error, context map[string]any) {
-	// Create PII-safe context for logging
 	safeContext := make(map[string]any)
 	for k, v := range context {
-		// Exclude PII fields
 		if k != "email" && k != "phone" && k != "name" && k != "customerName" {
 			safeContext[k] = v
 		} else {
-			// Log only existence/format info for PII fields
 			if str, ok := v.(string); ok {
 				safeContext[k+"_length"] = len(str)
 				safeContext[k+"_has_value"] = str != ""
@@ -131,58 +128,6 @@ func RespondWithSuccess(w http.ResponseWriter, message string, data map[string]a
 		Message: message,
 		Data:    data,
 	})
-}
-
-func validateOrder(order Order) error {
-	// Client validation
-	if strings.TrimSpace(order.Client.Name) == "" {
-		return fmt.Errorf("customer name is required")
-	}
-	if strings.TrimSpace(order.Client.Email) == "" {
-		return fmt.Errorf("customer email is required")
-	}
-	if !strings.Contains(order.Client.Email, "@") {
-		return fmt.Errorf("customer email format is invalid")
-	}
-
-	if !strings.HasPrefix(order.Client.Phone, "+1") {
-		return fmt.Errorf("phone number must have the US country code")
-	}
-
-	phoneDigits := strings.TrimPrefix(order.Client.Phone, "+1")
-
-	if len(phoneDigits) != 10 {
-		return fmt.Errorf("phone number must be a valid US phone number")
-	}
-
-	// Piece details validation
-	if len(order.PieceDetails) == 0 {
-		return fmt.Errorf("at least one piece detail is required")
-	}
-
-	for i, piece := range order.PieceDetails {
-		if strings.TrimSpace(piece.Type) == "" {
-			return fmt.Errorf("piece type is required for item %d", i+1)
-		}
-		if piece.Quantity < 1 {
-			return fmt.Errorf("piece quantity must be at least 1 for item %d", i+1)
-		}
-		if piece.Quantity > 50 { // reasonable upper limit
-			return fmt.Errorf("piece quantity cannot exceed 50 for item %d", i+1)
-		}
-	}
-
-	// Timeline validation
-	if strings.TrimSpace(order.Timeline) == "" {
-		return fmt.Errorf("timeline is required")
-	}
-
-	// Consent validation
-	if !order.Consent {
-		return fmt.Errorf("consent is required")
-	}
-
-	return nil
 }
 
 func OrderHandler(w http.ResponseWriter, r *http.Request) {
@@ -285,6 +230,58 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		"pieceCount": len(req.Order.PieceDetails),
 		"orderId":    orderId,
 	})
+}
+
+func validateOrder(order Order) error {
+	// Client validation
+	if strings.TrimSpace(order.Client.Name) == "" {
+		return fmt.Errorf("customer name is required")
+	}
+	if strings.TrimSpace(order.Client.Email) == "" {
+		return fmt.Errorf("customer email is required")
+	}
+	if !strings.Contains(order.Client.Email, "@") {
+		return fmt.Errorf("customer email format is invalid")
+	}
+
+	if !strings.HasPrefix(order.Client.Phone, "+1") {
+		return fmt.Errorf("phone number must have the US country code")
+	}
+
+	phoneDigits := strings.TrimPrefix(order.Client.Phone, "+1")
+
+	if len(phoneDigits) != 10 {
+		return fmt.Errorf("phone number must be a valid US phone number")
+	}
+
+	// Piece details validation
+	if len(order.PieceDetails) == 0 {
+		return fmt.Errorf("at least one piece detail is required")
+	}
+
+	for i, piece := range order.PieceDetails {
+		if strings.TrimSpace(piece.Type) == "" {
+			return fmt.Errorf("piece type is required for item %d", i+1)
+		}
+		if piece.Quantity < 1 {
+			return fmt.Errorf("piece quantity must be at least 1 for item %d", i+1)
+		}
+		if piece.Quantity > 50 { // reasonable upper limit
+			return fmt.Errorf("piece quantity cannot exceed 50 for item %d", i+1)
+		}
+	}
+
+	// Timeline validation
+	if strings.TrimSpace(order.Timeline) == "" {
+		return fmt.Errorf("timeline is required")
+	}
+
+	// Consent validation
+	if !order.Consent {
+		return fmt.Errorf("consent is required")
+	}
+
+	return nil
 }
 
 func upsertCustomer(supabaseUrl, supabaseKey string, customer Customer) (string, error) {

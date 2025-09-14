@@ -28,21 +28,6 @@ type MessageDB = struct {
 	Direction      string `json:"direction"`
 }
 
-func validateNewMessageRequest(req NewMessageRequest) error {
-
-	trimmedBody := strings.TrimSpace(req.Body)
-	if len(trimmedBody) == 0 {
-		return fmt.Errorf("body is required")
-	}
-
-	trimmedOrderId := strings.TrimSpace(req.OrderId)
-	if len(trimmedOrderId) == 0 {
-		return fmt.Errorf("order id is required")
-	}
-
-	return nil
-}
-
 func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		LogError("invalid_method", fmt.Errorf("method %s not allowed", r.Method), map[string]any{
@@ -126,6 +111,21 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 		"MessageId": messageId,
 	})
 
+}
+
+func validateNewMessageRequest(req NewMessageRequest) error {
+
+	trimmedBody := strings.TrimSpace(req.Body)
+	if len(trimmedBody) == 0 {
+		return fmt.Errorf("body is required")
+	}
+
+	trimmedOrderId := strings.TrimSpace(req.OrderId)
+	if len(trimmedOrderId) == 0 {
+		return fmt.Errorf("order id is required")
+	}
+
+	return nil
 }
 
 func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, error) {
@@ -371,5 +371,59 @@ func storeMessageInDb(supabaseUrl, supabaseKey string, conversationId string, me
 }
 
 func sendMessage(messageId, conversationId, customerPhone, body string) error {
+	return enqueueUpstashMessage(messageId, conversationId, customerPhone, body)
+}
+
+func enqueueUpstashMessage(messageId, conversationId, customerPhone, messageBody string) error {
+	payload := SmsQueuePayload{
+		MessageId:      messageId,
+		ConversationId: conversationId,
+		CustomerPhone:  customerPhone,
+		Body:           messageBody,
+	}
+
+	payloadJson, err := json.Marshal(payload)
+
+	if err != nil {
+		return fmt.Errorf("failed to encode message queue payload into json with err %w", err)
+	}
+
+	url := fmt.Sprintf("https://qstash.upstash.io/v2/publish/%s", "https://aliciapceramics.com/api/process-sms-queue")
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payloadJson))
+
+	if err != nil {
+		return fmt.Errorf("failed to create request for url %s with error %w", url, err)
+	}
+
+	qstashToken := os.Getenv("QSTASH_TOKEN")
+
+	if qstashToken == "" {
+		return fmt.Errorf("QSTASH_TOKEN environment variable not set")
+	}
+
+	req.Header.Set("Authorization:", fmt.Sprintf("Bearer %s", qstashToken))
+	req.Header.Set("Content-type", "application/json")
+
+	client := http.Client{}
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return fmt.Errorf("failed to request enqueueing a new message with error %w", err)
+	}
+	defer resp.Body.Close()
+
+	_, err = io.ReadAll(resp.Body)
+
+	if err != nil {
+		return fmt.Errorf("failed to read response from qstash with err %w", err)
+	}
+
+	if resp.StatusCode != http.StatusAccepted {
+		return fmt.Errorf("failed to enqueue message with id %s with status code %d", messageId, resp.StatusCode)
+	}
+
 	return nil
+
 }
