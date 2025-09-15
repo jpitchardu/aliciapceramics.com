@@ -121,7 +121,7 @@ func updateMessageSidAndStatus(messageId, twilioSid, twilioStatus string) error 
 	}
 
 	url := fmt.Sprintf("%s/rest/v1/messages?id=eq.%s", supabaseUrl, messageId)
-	req, err := http.NewRequest("	PUT", url, bytes.NewBuffer(payloadJson))
+	req, err := http.NewRequest("PATCH", url, bytes.NewBuffer(payloadJson))
 
 	if err != nil {
 		return fmt.Errorf("failed to create update message request: %w", err)
