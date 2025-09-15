@@ -22,7 +22,7 @@ type ConversationDB = struct {
 }
 
 type MessageDB = struct {
-	Id             string `json:"id"`
+	Id             string `json:"id,omitempty"`
 	ConversationId string `json:"conversation_id"`
 	Body           string `json:"body"`
 	Direction      string `json:"direction"`
@@ -87,8 +87,8 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 	conversation, err := getOrCreateConversation(supabaseUrl, supabaseKey, req.OrderId, phoneNumber)
 
 	if err != nil {
-		LogError("get_or_create_conversation", fmt.Errorf("error trying to find an order: %w", err), map[string]any{
-			"order_id": req.OrderId
+		LogError("get_or_create_conversation", fmt.Errorf("error trying to find or create a conversation: %w", err), map[string]any{
+			"order_id": req.OrderId,
 		})
 		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
 		return
