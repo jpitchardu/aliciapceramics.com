@@ -109,6 +109,10 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	LogInfo("message published succesfully", map[string]any{
+		"message_id": messageId,
+	})
+
 	RespondWithSuccess(w, "message sent successfully", map[string]any{
 		"MessageId": messageId,
 	})
@@ -390,7 +394,7 @@ func enqueueUpstashMessage(messageId, conversationId, customerPhone, messageBody
 		return fmt.Errorf("failed to encode message queue payload into json with err %w", err)
 	}
 
-	url := fmt.Sprintf("https://qstash.upstash.io/v2/publish/%s", "https://aliciapceramics.com/api/process-sms-queue")
+	url := fmt.Sprintf("https://qstash.upstash.io/v2/publish/%s", "https://aliciapceramics.com/api/processSmsQueue")
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payloadJson))
 
@@ -422,7 +426,7 @@ func enqueueUpstashMessage(messageId, conversationId, customerPhone, messageBody
 		return fmt.Errorf("failed to read response from qstash with err %w", err)
 	}
 
-	if resp.StatusCode != http.StatusAccepted {
+	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("failed to enqueue message with id %s with status code %d and response %s", messageId, resp.StatusCode, string(body))
 	}
 

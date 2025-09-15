@@ -110,6 +110,23 @@ func LogError(operation string, err error, context map[string]any) {
 	log.Printf("ERROR [%s]: %v | Context: %+v", operation, err, safeContext)
 }
 
+func LogInfo(logBody string, context map[string]any) {
+	safeContext := make(map[string]any)
+	for k, v := range context {
+		if k != "email" && k != "phone" && k != "name" && k != "customerName" {
+			safeContext[k] = v
+		} else {
+			if str, ok := v.(string); ok {
+				safeContext[k+"_length"] = len(str)
+				safeContext[k+"_has_value"] = str != ""
+			}
+		}
+	}
+
+	log.Printf("LOG [%s] | Context: %+v", logBody, safeContext)
+
+}
+
 func RespondWithError(w http.ResponseWriter, statusCode int, message string, code string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
