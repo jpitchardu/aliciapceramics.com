@@ -416,14 +416,14 @@ func enqueueUpstashMessage(messageId, conversationId, customerPhone, messageBody
 	}
 	defer resp.Body.Close()
 
-	_, err = io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
 		return fmt.Errorf("failed to read response from qstash with err %w", err)
 	}
 
 	if resp.StatusCode != http.StatusAccepted {
-		return fmt.Errorf("failed to enqueue message with id %s with status code %d", messageId, resp.StatusCode)
+		return fmt.Errorf("failed to enqueue message with id %s with status code %d and response %s", messageId, resp.StatusCode, string(body))
 	}
 
 	return nil
