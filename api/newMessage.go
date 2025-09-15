@@ -404,7 +404,7 @@ func enqueueUpstashMessage(messageId, conversationId, customerPhone, messageBody
 		return fmt.Errorf("QSTASH_TOKEN environment variable not set")
 	}
 
-	req.Header.Set("Authorization:", fmt.Sprintf("Bearer %s", qstashToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", qstashToken))
 	req.Header.Set("Content-type", "application/json")
 
 	client := http.Client{}
