@@ -22,10 +22,12 @@ type ConversationDB = struct {
 }
 
 type MessageDB = struct {
-	Id             string `json:"id,omitempty"`
-	ConversationId string `json:"conversation_id"`
-	Body           string `json:"body"`
-	Direction      string `json:"direction"`
+	Id               string `json:"id,omitempty"`
+	ConversationId   string `json:"conversation_id"`
+	Body             string `json:"body"`
+	Direction        string `json:"direction"`
+	TwilioMessageSid string `json:"twilio_message_sid,omitempty`
+	TwilioStatus     string `json:"twilio_status,omitempty"`
 }
 
 func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
