@@ -90,6 +90,9 @@ export default function PrivacyPolicy() {
                 </strong>{" "}
                 You can opt out at any time by replying STOP to any message.
               </p>
+              <p>
+                We do not share, sale, or trade our customer's phone numbers
+              </p>
             </section>
 
             <section>
