@@ -120,7 +120,7 @@ export function ClientDetailsFormStep() {
                     <span>
                       I want to receive order updates via text message from
                       Alicia P Ceramics at the phone number provided. Msg&data
-                      rates may apply.
+                      rates may apply. Message frequency varies.
                     </span>
                   </label>
                 </div>
