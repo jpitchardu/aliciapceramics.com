@@ -363,7 +363,7 @@ func storeMessageInDb(supabaseUrl, supabaseKey string, conversationId string, me
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		return "", fmt.Errorf("failed to create message with code %d with error %s", resp.StatusCode, resp.Body)
+		return "", fmt.Errorf("failed to create message with code %d with error %s", resp.StatusCode, string(body))
 	}
 
 	var createdMessages []MessageDB
