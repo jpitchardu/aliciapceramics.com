@@ -81,7 +81,9 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 	phoneNumber, err := getCustomerPhone(supabaseUrl, supabaseKey, req.OrderId)
 
 	if err != nil {
-		LogError("get_customer_phone", fmt.Errorf("error trying to find an order: %w", err), map[string]any{})
+		LogError("get_customer_phone", fmt.Errorf("error trying to find an order: %w", err), map[string]any{
+			"order_id": req.OrderId,
+		})
 		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
 		return
 	}

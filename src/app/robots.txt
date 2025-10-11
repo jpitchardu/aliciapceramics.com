@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /.*
+
+# Crawl-delay for all bots
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://aliciapceramics.com/sitemap.xml
