@@ -139,7 +139,7 @@ func validateNewMessageRequest(req NewMessageRequest) error {
 }
 
 func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, error) {
-	url := fmt.Sprintf("%s/rest/v1/orders?id=eq.%s&select=id,customer_id", supabaseUrl, orderId)
+	url := fmt.Sprintf("%s/rest/v1/orders?id=eq.%s&select=id,customer_id,consent", supabaseUrl, orderId)
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
@@ -167,6 +167,7 @@ func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, 
 	var orders []struct {
 		Id         string `json:"id"`
 		CustomerId string `json:"customer_id"`
+		Consent    bool   `json:"consent"`
 	}
 
 	if err := json.Unmarshal(body, &orders); err != nil {
@@ -212,6 +213,10 @@ func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, 
 		return "", fmt.Errorf("failed to parse consent details response: %w", err)
 	}
 
+	if len(consentDetails) == 0 && orderWithCustomerId.Consent {
+		return legacyGetCustomerPhoneFromOrder(supabaseUrl, supabaseKey, orderWithCustomerId.CustomerId)
+	}
+
 	if len(consentDetails) == 0 {
 		return "", fmt.Errorf("consent details not found for customer %s", orderWithCustomerId.CustomerId)
 	}
@@ -223,6 +228,47 @@ func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, 
 	}
 
 	return consentDetailsForCustomer.PhoneNumber, nil
+}
+
+func legacyGetCustomerPhoneFromOrder(supabaseUrl, supabaseKey string, customerId string) (string, error) {
+	url := fmt.Sprintf("%s/rest/v1/customers?id=eq.%s&select=phone", supabaseUrl, customerId)
+
+	req, err := http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("apikey", supabaseKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to read response: %w", err)
+	}
+
+	var customers []struct {
+		Phone string `json:"phone"`
+	}
+
+	if err := json.Unmarshal(body, &customers); err != nil {
+		return "", fmt.Errorf("failed to parse customers response: %w", err)
+	}
+
+	if len(customers) == 0 {
+		return "", fmt.Errorf("customer not found for id %s", customerId)
+	}
+
+	return customers[0].Phone, nil
+
 }
 
 func getOrCreateConversation(supabaseUrl, supabaseKey string, orderId string, phoneNumber string) (*ConversationDB, error) {
