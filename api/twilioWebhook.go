@@ -77,9 +77,7 @@ func TwilioWebhookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Twilio expects 200 OK response
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
 }
 
 func handleIncomingSMS(payload TwilioWebhookPayload) error {
