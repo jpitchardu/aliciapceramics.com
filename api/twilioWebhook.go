@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type TwilioWebhookPayload struct {
@@ -122,7 +123,10 @@ func handleStatusUpdate(payload TwilioWebhookPayload) error {
 }
 
 func findConversationByPhone(supabaseUrl, supabaseKey, phoneNumber string) (string, error) {
-	url := fmt.Sprintf("%s/rest/v1/conversations?customer_phone=eq.%s&select=id", supabaseUrl, phoneNumber)
+
+	// Manually encode the + sign
+	encodedPhone := strings.ReplaceAll(phoneNumber, "+", "%2B")
+	url := fmt.Sprintf("%s/rest/v1/conversations?customer_phone=eq.%s&select=id", supabaseUrl, encodedPhone)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
