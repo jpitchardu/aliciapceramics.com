@@ -356,14 +356,14 @@ func storeMessageInDb(supabaseUrl, supabaseKey string, conversationId string, me
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusCreated {
-		return "", fmt.Errorf("failed to create message with code %d", resp.StatusCode)
-	}
-
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
 		return "", fmt.Errorf("failed to read response from url %s with error %w", url, err)
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		return "", fmt.Errorf("failed to create message with code %d with error %s", resp.StatusCode, resp.Body)
 	}
 
 	var createdMessages []MessageDB
