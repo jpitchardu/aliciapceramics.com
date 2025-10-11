@@ -26,7 +26,7 @@ type MessageDB = struct {
 	ConversationId   string `json:"conversation_id"`
 	Body             string `json:"body"`
 	Direction        string `json:"direction"`
-	TwilioMessageSid string `json:"twilio_message_sid,omitempty`
+	TwilioMessageSid string `json:"twilio_message_sid,omitempty"`
 	TwilioStatus     string `json:"twilio_status,omitempty"`
 }
 
