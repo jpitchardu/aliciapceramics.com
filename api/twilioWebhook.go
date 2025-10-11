@@ -100,19 +100,9 @@ func handleIncomingSMS(payload TwilioWebhookPayload) error {
 		TwilioStatus:     "received",
 	}
 
-	messageId, err := storeIncomingMessage(supabaseUrl, supabaseKey, message)
+	_, err = storeIncomingMessage(supabaseUrl, supabaseKey, message)
 	if err != nil {
 		return fmt.Errorf("failed to store incoming message: %w", err)
-	}
-
-	// Update order stats (increment unread count, update last_message_at)
-	err = updateOrderStatsForIncoming(supabaseUrl, supabaseKey, conversationId)
-	if err != nil {
-		LogError("update_order_stats_failed", err, map[string]any{
-			"conversation_id": conversationId,
-			"message_id":      messageId,
-		})
-		// Don't fail the webhook - message was saved successfully
 	}
 
 	return nil
@@ -214,79 +204,6 @@ func storeIncomingMessage(supabaseUrl, supabaseKey string, message MessageDB) (s
 	}
 
 	return createdMessages[0].Id, nil
-}
-
-func updateOrderStatsForIncoming(supabaseUrl, supabaseKey, conversationId string) error {
-	// First get the order_id from the conversation
-	getOrderUrl := fmt.Sprintf("%s/rest/v1/conversations?id=eq.%s&select=order_id", supabaseUrl, conversationId)
-
-	req, err := http.NewRequest("GET", getOrderUrl, nil)
-	if err != nil {
-		return fmt.Errorf("failed to create request for order lookup: %w", err)
-	}
-
-	req.Header.Set("Authorization", "Bearer "+supabaseKey)
-	req.Header.Set("apikey", supabaseKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to get order_id for conversation %s: %w", conversationId, err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read order lookup response: %w", err)
-	}
-
-	var conversations []struct {
-		OrderId string `json:"order_id"`
-	}
-
-	if err := json.Unmarshal(body, &conversations); err != nil {
-		return fmt.Errorf("failed to parse order lookup response: %w", err)
-	}
-
-	if len(conversations) == 0 {
-		return fmt.Errorf("no conversation found with id %s", conversationId)
-	}
-
-	orderId := conversations[0].OrderId
-
-	// Update the order stats using RPC call for atomic increment
-	rpcPayload := map[string]interface{}{
-		"order_id": orderId,
-	}
-
-	rpcJson, err := json.Marshal(rpcPayload)
-	if err != nil {
-		return fmt.Errorf("failed to marshal RPC payload: %w", err)
-	}
-
-	rpcUrl := fmt.Sprintf("%s/rest/v1/rpc/increment_unread_count", supabaseUrl)
-
-	req, err = http.NewRequest("POST", rpcUrl, bytes.NewBuffer(rpcJson))
-	if err != nil {
-		return fmt.Errorf("failed to create RPC request: %w", err)
-	}
-
-	req.Header.Set("Authorization", "Bearer "+supabaseKey)
-	req.Header.Set("apikey", supabaseKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err = client.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to update order stats for order %s: %w", orderId, err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to update order stats with status code %d", resp.StatusCode)
-	}
-
-	return nil
 }
 
 func updateMessageStatus(supabaseUrl, supabaseKey, twilioSid, status string) error {

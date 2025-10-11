@@ -17,7 +17,7 @@ type NewMessageRequest = struct {
 
 type ConversationDB = struct {
 	Id            string `json:"id,omitempty"`
-	OrderId       string `json:"order_id"`
+	CustomerId    string `json:"customer_id"`
 	CustomerPhone string `json:"customer_phone"`
 }
 
@@ -78,7 +78,7 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	phoneNumber, err := getCustomerPhone(supabaseUrl, supabaseKey, req.OrderId)
+	phoneNumber, customerId, err := getCustomerPhoneAndId(supabaseUrl, supabaseKey, req.OrderId)
 
 	if err != nil {
 		LogError("get_customer_phone", fmt.Errorf("error trying to find an order: %w", err), map[string]any{
@@ -88,7 +88,7 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conversation, err := getOrCreateConversation(supabaseUrl, supabaseKey, req.OrderId, phoneNumber)
+	conversation, err := getOrCreateConversation(supabaseUrl, supabaseKey, customerId, phoneNumber)
 
 	if err != nil {
 		LogError("get_or_create_conversation", fmt.Errorf("error trying to find or create a conversation: %w", err), map[string]any{
@@ -138,12 +138,12 @@ func validateNewMessageRequest(req NewMessageRequest) error {
 	return nil
 }
 
-func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, error) {
+func getCustomerPhoneAndId(supabaseUrl, supabaseKey string, orderId string) (string, string, error) {
 	url := fmt.Sprintf("%s/rest/v1/orders?id=eq.%s&select=id,customer_id,consent", supabaseUrl, orderId)
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to create order request: %w", err)
+		return "", "", fmt.Errorf("failed to create order request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+supabaseKey)
@@ -154,14 +154,14 @@ func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, 
 	resp, err := client.Do(req)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to get order details for order: %s, with error: %w", orderId, err)
+		return "", "", fmt.Errorf("failed to get order details for order: %s, with error: %w", orderId, err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to read response for order details: %w", err)
+		return "", "", fmt.Errorf("failed to read response for order details: %w", err)
 	}
 
 	var orders []struct {
@@ -171,11 +171,11 @@ func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, 
 	}
 
 	if err := json.Unmarshal(body, &orders); err != nil {
-		return "", fmt.Errorf("failed to parse order with customer id response: %w", err)
+		return "", "", fmt.Errorf("failed to parse order with customer id response: %w", err)
 	}
 
 	if len(orders) == 0 {
-		return "", fmt.Errorf("order not found for id %s", orderId)
+		return "", "", fmt.Errorf("order not found for id %s", orderId)
 	}
 
 	orderWithCustomerId := orders[0]
@@ -184,7 +184,7 @@ func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, 
 	req, err = http.NewRequest("GET", url, nil)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to create consent request: %w", err)
+		return "", "", fmt.Errorf("failed to create consent request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+supabaseKey)
@@ -194,14 +194,14 @@ func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, 
 	resp, err = client.Do(req)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch consent details for customer %s with error: %w", orderWithCustomerId.CustomerId, err)
+		return "", "", fmt.Errorf("failed to fetch consent details for customer %s with error: %w", orderWithCustomerId.CustomerId, err)
 	}
 	defer resp.Body.Close()
 
 	body, err = io.ReadAll(resp.Body)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to read response order for consent details: %w", err)
+		return "", "", fmt.Errorf("failed to read response order for consent details: %w", err)
 	}
 
 	var consentDetails []struct {
@@ -210,24 +210,26 @@ func getCustomerPhone(supabaseUrl, supabaseKey string, orderId string) (string, 
 	}
 
 	if err := json.Unmarshal(body, &consentDetails); err != nil {
-		return "", fmt.Errorf("failed to parse consent details response: %w", err)
+		return "", "", fmt.Errorf("failed to parse consent details response: %w", err)
 	}
 
 	if len(consentDetails) == 0 && orderWithCustomerId.Consent {
-		return legacyGetCustomerPhoneFromOrder(supabaseUrl, supabaseKey, orderWithCustomerId.CustomerId)
+		phone, err := legacyGetCustomerPhoneFromOrder(supabaseUrl, supabaseKey, orderWithCustomerId.CustomerId)
+
+		return phone, orderWithCustomerId.CustomerId, err
 	}
 
 	if len(consentDetails) == 0 {
-		return "", fmt.Errorf("consent details not found for customer %s", orderWithCustomerId.CustomerId)
+		return "", "", fmt.Errorf("consent details not found for customer %s", orderWithCustomerId.CustomerId)
 	}
 
 	consentDetailsForCustomer := consentDetails[0]
 
 	if !consentDetailsForCustomer.ConsentGiven {
-		return "", fmt.Errorf("customer has not given consent for text messages")
+		return "", "", fmt.Errorf("customer has not given consent for text messages")
 	}
 
-	return consentDetailsForCustomer.PhoneNumber, nil
+	return consentDetailsForCustomer.PhoneNumber, orderWithCustomerId.CustomerId, nil
 }
 
 func legacyGetCustomerPhoneFromOrder(supabaseUrl, supabaseKey string, customerId string) (string, error) {
@@ -271,9 +273,9 @@ func legacyGetCustomerPhoneFromOrder(supabaseUrl, supabaseKey string, customerId
 
 }
 
-func getOrCreateConversation(supabaseUrl, supabaseKey string, orderId string, phoneNumber string) (*ConversationDB, error) {
+func getOrCreateConversation(supabaseUrl, supabaseKey string, customerId string, phoneNumber string) (*ConversationDB, error) {
 
-	url := fmt.Sprintf("%s/rest/v1/conversations?order_id=eq.%s", supabaseUrl, orderId)
+	url := fmt.Sprintf("%s/rest/v1/conversations?customer_id=eq.%s", supabaseUrl, customerId)
 
 	req, err := http.NewRequest("GET", url, nil)
 
@@ -290,7 +292,7 @@ func getOrCreateConversation(supabaseUrl, supabaseKey string, orderId string, ph
 	resp, err := client.Do(req)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch conversation for order %s with error %w", orderId, err)
+		return nil, fmt.Errorf("failed to fetch conversation for customer %s with error %w", customerId, err)
 	}
 	defer resp.Body.Close()
 
@@ -311,7 +313,7 @@ func getOrCreateConversation(supabaseUrl, supabaseKey string, orderId string, ph
 	}
 
 	newConversation := ConversationDB{
-		OrderId:       orderId,
+		CustomerId:    customerId,
 		CustomerPhone: phoneNumber,
 	}
 
@@ -320,7 +322,7 @@ func getOrCreateConversation(supabaseUrl, supabaseKey string, orderId string, ph
 	conversationJson, err := json.Marshal(newConversation)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to encode conversation json for order %s with error %w", orderId, err)
+		return nil, fmt.Errorf("failed to encode conversation json for customer %s with error %w", customerId, err)
 	}
 
 	req, err = http.NewRequest("POST", url, bytes.NewBuffer(conversationJson))
@@ -337,12 +339,12 @@ func getOrCreateConversation(supabaseUrl, supabaseKey string, orderId string, ph
 	resp, err = client.Do(req)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to create a new conversation for order %s with error %w", orderId, err)
+		return nil, fmt.Errorf("failed to create a new conversation for customer %s with error %w", customerId, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("failed to create conversation for order %s, check supabase logs for code %d", orderId, resp.StatusCode)
+		return nil, fmt.Errorf("failed to create conversation for customer %s, check supabase logs for code %d", customerId, resp.StatusCode)
 	}
 
 	body, err = io.ReadAll(resp.Body)
@@ -358,7 +360,7 @@ func getOrCreateConversation(supabaseUrl, supabaseKey string, orderId string, ph
 	}
 
 	if len(conversations) == 0 {
-		return nil, fmt.Errorf("no conversations returned after creating a conversation for order %s", orderId)
+		return nil, fmt.Errorf("no conversations returned after creating a conversation for customer %s", customerId)
 	}
 
 	return &conversations[0], nil
