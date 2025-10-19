@@ -7,7 +7,7 @@ import (
 
 func Run() error {
 	if err := DeletePendingTasks(); err != nil {
-		return fmt.Errorf("failed to delete pending tasks: %w", err)
+		return err
 	}
 
 	startDate, endDate := getNextWeek()

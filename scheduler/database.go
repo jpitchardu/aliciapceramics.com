@@ -120,7 +120,7 @@ func DeletePendingTasks() error {
 	// First, check if customer already exists
 	url := fmt.Sprintf("%s/rest/v1/tasks?status=eq.pending", supabaseUrl)
 
-	req, err := http.NewRequest("DElETE", url, nil)
+	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete pending tasks request: %w", err)
 	}
