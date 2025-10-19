@@ -105,13 +105,13 @@ func Run() error {
 
 	for _, order := range nonDeadlineOrders {
 		for _, detail := range order.OrderDetails {
-			timeline, err := time.Parse("2006-01-02", order.Timeline)
+			timeline, err := time.Parse("2006-01-02T15:04:05.999999", order.Timeline)
 
 			if err != nil {
 				continue
 			}
 
-			newTasks, err := CalculateTaskChain(detail, timeline.AddDate(0, 1, 0))
+			newTasks, err := CalculateTaskChain(detail, timeline.AddDate(0, 1, 0).UTC())
 
 			if err != nil {
 				return fmt.Errorf("failed to calculate task chain for order detail %s with error %w", detail.ID, err)

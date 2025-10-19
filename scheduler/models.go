@@ -10,21 +10,21 @@ type OrderDB struct {
 	Status          string          `json:"status"`
 	DueDate         *time.Time      `json:"due_date"`
 	OrderDetails    []OrderDetailDB `json:"order_details"`
-	StatusChangedAt time.Time       `json:"status_changed_at"`
-	CreatedAt       time.Time       `json:"created_at"`
-	UpdatedAt       time.Time       `json:"updated_at"`
+	StatusChangedAt *time.Time      `json:"status_changed_at,omitempty"`
+	CreatedAt       *time.Time      `json:"created_at,omitempty"`
+	UpdatedAt       *time.Time      `json:"updated_at,omitempty"`
 }
 
 type OrderDetailDB struct {
-	ID              string    `json:"id,omitempty"`
-	OrderID         string    `json:"order_id"`
-	Type            string    `json:"type"`
-	Size            *string   `json:"size,omitempty"`
-	Quantity        int       `json:"quantity"`
-	Description     string    `json:"description"`
-	Status          string    `json:"status"`
-	StatusChangedAt time.Time `json:"status_changed_at"`
-	CreatedAt       time.Time `json:created_at`
+	ID              string     `json:"id,omitempty"`
+	OrderID         string     `json:"order_id"`
+	Type            string     `json:"type"`
+	Size            *string    `json:"size,omitempty"`
+	Quantity        int        `json:"quantity"`
+	Description     string     `json:"description"`
+	Status          string     `json:"status"`
+	StatusChangedAt *time.Time `json:"status_changed_at,omitempty"`
+	CreatedAt       *time.Time `json:"created_at,omitempty"`
 }
 
 type TaskDB struct {
