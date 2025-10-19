@@ -54,11 +54,20 @@ func Run() error {
 		dayTasks := []TaskToCreate{}
 		dayFocus := tasksWithDeadlinesWithinDateRange[0].OrderDetailStatus
 
+		if capacity <= 0 {
+			continue
+		}
+
 		for i := 0; i < len(tasksWithDeadlinesWithinDateRange); i++ {
 			task := tasksWithDeadlinesWithinDateRange[i]
 
 			if task.OrderDetailStatus != dayFocus || task.StartDate.After(day) {
 				continue
+			}
+
+			// Skip if no capacity remaining
+			if capacity <= 0 {
+				break
 			}
 
 			piecesForDay := min(CalculateQuantity(capacity, task.TaskType, task.PieceType), task.Quantity)
@@ -116,7 +125,7 @@ func Run() error {
 
 			if err != nil {
 				return fmt.Errorf("failed to parse timeline with error %w", err)
-				continue
+
 			}
 
 			newTasks, err := CalculateTaskChain(detail, timeline.AddDate(0, 1, 0).UTC())
@@ -145,7 +154,7 @@ func Run() error {
 			}
 		}
 
-		if daySchedule.AvailableHours == 0 {
+		if daySchedule.AvailableHours <= 0 {
 			continue
 		}
 
@@ -155,6 +164,11 @@ func Run() error {
 
 			if task.OrderDetailStatus != daySchedule.Mode {
 				continue
+			}
+
+			// Skip if no capacity remaining
+			if daySchedule.AvailableHours <= 0 {
+				break
 			}
 
 			piecesForDay := min(CalculateQuantity(daySchedule.AvailableHours, task.TaskType, task.PieceType), task.Quantity)

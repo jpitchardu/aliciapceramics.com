@@ -19,6 +19,10 @@ func CalculateHours(taskType TaskType, pieceType PieceType, quantity int) float6
 
 func CalculateQuantity(hours float64, taskType TaskType, pieceType PieceType) int {
 
+	if hours <= 0 {
+		return 0
+	}
+
 	shifts := hours / ShiftDurationHours
 	step, found := getProductionStepForTaskByPiece(taskType, pieceType)
 
