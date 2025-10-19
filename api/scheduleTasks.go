@@ -14,6 +14,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := scheduler.Run(); err != nil {
+		LogError("schedule_tasks", err, map[string]any{})
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
