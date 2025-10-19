@@ -3,13 +3,16 @@ package scheduler
 import "time"
 
 type OrderDB struct {
-	ID           string          `json:"id,omitempty"`
-	CustomerID   string          `json:"customer_id"`
-	Type         string          `json:"type"`
-	Timeline     string          `json:"timeline"`
-	Status       string          `json:"status"`
-	DueDate      *time.Time      `json:"due_date"`
-	OrderDetails []OrderDetailDB `json:"order_details"`
+	ID              string          `json:"id,omitempty"`
+	CustomerID      string          `json:"customer_id"`
+	Type            string          `json:"type"`
+	Timeline        string          `json:"timeline"`
+	Status          string          `json:"status"`
+	DueDate         *time.Time      `json:"due_date"`
+	OrderDetails    []OrderDetailDB `json:"order_details"`
+	StatusChangedAt time.Time       `json:"status_changed_at"`
+	CreatedAt       time.Time       `json:"created_at"`
+	UpdatedAt       time.Time       `json:"updated_at"`
 }
 
 type OrderDetailDB struct {
@@ -21,6 +24,7 @@ type OrderDetailDB struct {
 	Description     string    `json:"description"`
 	Status          string    `json:"status"`
 	StatusChangedAt time.Time `json:"status_changed_at"`
+	CreatedAt       time.Time `json:created_at`
 }
 
 type TaskDB struct {
