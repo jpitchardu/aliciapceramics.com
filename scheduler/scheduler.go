@@ -95,7 +95,7 @@ func Run() error {
 
 	}
 
-	nonDeadlineOrders, err := getNonDeadlineOrders()
+	nonDeadlineOrders, err := GetNonDeadlineOrders()
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch orders with deadlines, error: %w", err)
