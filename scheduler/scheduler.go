@@ -109,6 +109,7 @@ func Run() error {
 			timeline, err := time.Parse("2006-01-02T15:04:05.999999", order.Timeline)
 
 			if err != nil {
+				return fmt.Errorf("failed to parse timeline with error %w", err)
 				continue
 			}
 
