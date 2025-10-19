@@ -159,13 +159,16 @@ func InsertTasks(tasks []TaskToCreate) error {
 		return fmt.Errorf("database configuration missing, has_url: %t ; has_key: %t", supabaseUrl != "", supabaseKey != "")
 	}
 
+	// Debug: Log the tasks being marshaled
+	fmt.Printf("DEBUG: Marshaling %d tasks: %+v\n", len(tasks), tasks)
+
 	// First, check if customer already exists
 	url := fmt.Sprintf("%s/rest/v1/tasks", supabaseUrl)
 
 	body, err := json.Marshal(tasks)
 
 	if err != nil {
-		return fmt.Errorf("failed to parse tasks into json")
+		return fmt.Errorf("failed to parse tasks into json: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
