@@ -98,7 +98,7 @@ func Run() error {
 	nonDeadlineOrders, err := GetNonDeadlineOrders()
 
 	if err != nil {
-		return fmt.Errorf("failed to fetch orders with deadlines, error: %w", err)
+		return fmt.Errorf("failed to fetch orders without deadlines, error: %w", err)
 	}
 
 	tasksWithoutDeadlines := []TaskChainItem{}
