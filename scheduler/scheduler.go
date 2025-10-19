@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -179,6 +180,15 @@ func Run() error {
 
 	}
 
+	LogInfo("deadline_orders", map[string]any{
+		"numberOrDeadlineOrders":           len(deadlineOrders),
+		"tasksWithDeadlines":               len(tasksWithDeadlines),
+		"tasksWithDeadlinesInTheTimeRange": len(tasksWithDeadlinesWithinDateRange),
+		"numberOfNonDeadlineOrders":        len(nonDeadlineOrders),
+		"tasksWithoutDeadlines":            len(tasksWithoutDeadlines),
+		"weeklySchedule":                   weekSchedule,
+	})
+
 	for day, schedule := range weekSchedule {
 		err := InsertTasks(schedule.Tasks)
 
@@ -198,4 +208,21 @@ func getNextWeek() (monday, sunday time.Time) {
 	sunday = monday.AddDate(0, 0, 6)
 
 	return
+}
+
+func LogInfo(logBody string, context map[string]any) {
+	safeContext := make(map[string]any)
+	for k, v := range context {
+		if k != "email" && k != "phone" && k != "name" && k != "customerName" {
+			safeContext[k] = v
+		} else {
+			if str, ok := v.(string); ok {
+				safeContext[k+"_length"] = len(str)
+				safeContext[k+"_has_value"] = str != ""
+			}
+		}
+	}
+
+	log.Printf("LOG [%s] | Context: %+v", logBody, safeContext)
+
 }
