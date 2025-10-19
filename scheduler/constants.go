@@ -69,12 +69,13 @@ const (
 )
 
 const (
-	StepKeyBuild  StepKey = "build"
-	StepKeyTrim   StepKey = "trim"
-	StepKeyAttach StepKey = "attach"
-	StepKeyBisque StepKey = "bisque"
-	StepKeyGlaze  StepKey = "glaze"
-	StepKeyFire   StepKey = "fire"
+	StepKeyPending StepKey = "pending"
+	StepKeyBuild   StepKey = "build"
+	StepKeyTrim    StepKey = "trim"
+	StepKeyAttach  StepKey = "attach"
+	StepKeyBisque  StepKey = "bisque"
+	StepKeyGlaze   StepKey = "glaze"
+	StepKeyFire    StepKey = "fire"
 )
 
 type ProductionStep struct {
@@ -146,6 +147,7 @@ func IsValidPieceType(pieceType string) (PieceType, bool) {
 func IsValidStepKey(stepKey string) (StepKey, bool) {
 	switch StepKey(stepKey) {
 	case
+		StepKeyPending,
 		StepKeyBuild,
 		StepKeyTrim,
 		StepKeyAttach,

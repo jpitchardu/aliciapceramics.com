@@ -23,11 +23,20 @@ func CalculateTaskChain(orderDetail OrderDetailDB, dueDate time.Time) ([]TaskCha
 
 	process := ProductionProcess[safePieceType]
 
+	var currentStepIndex int
+
+	for idx, step := range process {
+		if step.StepKey == safeStep {
+			currentStepIndex = idx
+			break
+		}
+	}
+
 	var tasks = []TaskChainItem{}
 
-	for idx := range process {
+	for i := len(process) - 1; i >= currentStepIndex; i-- {
 
-		step := process[len(process)-(idx+1)]
+		step := process[i]
 
 		var daysNeeded float64
 
@@ -43,7 +52,7 @@ func CalculateTaskChain(orderDetail OrderDetailDB, dueDate time.Time) ([]TaskCha
 			StartDate:         dueDateWithBuffer.AddDate(0, 0, -int(daysNeeded)),
 			Quantity:          orderDetail.Quantity,
 			OrderDetailId:     orderDetail.ID,
-			OrderDetailStatus: safeStep,
+			OrderDetailStatus: step.StepKey,
 		}
 
 		tasks = append(tasks, task)
