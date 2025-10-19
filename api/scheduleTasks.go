@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"aliciapceramics/api/scheduler"
+	"aliciapceramics/scheduler"
 	"encoding/json"
 	"net/http"
 )
