@@ -23,17 +23,6 @@ func CalculateTaskChain(orderDetail OrderDetailDB, dueDate time.Time) ([]TaskCha
 
 	process := ProductionProcess[safePieceType]
 
-	for _, step := range process {
-		if string(step.StepKey) != orderDetail.Status {
-			continue
-		}
-
-		daysDrying := time.Since(orderDetail.StatusChangedAt).Hours() / 24
-		if daysDrying < float64(step.DryingDays) {
-			return []TaskChainItem{}, nil
-		}
-	}
-
 	var tasks = []TaskChainItem{}
 
 	for idx := range process {
