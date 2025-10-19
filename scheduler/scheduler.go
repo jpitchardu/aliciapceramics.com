@@ -64,6 +64,12 @@ func Run() error {
 			piecesForDay := min(CalculateQuantity(capacity, task.TaskType, task.PieceType), task.Quantity)
 			hoursUsed := CalculateHours(task.TaskType, task.PieceType, piecesForDay)
 
+			// For tasks with zero rate (external processes), use the full quantity
+			if piecesForDay == 0 && task.Quantity > 0 {
+				piecesForDay = task.Quantity
+				hoursUsed = CalculateHours(task.TaskType, task.PieceType, piecesForDay)
+			}
+
 			if hoursUsed > capacity*1.1 {
 				continue
 			}
@@ -153,6 +159,12 @@ func Run() error {
 
 			piecesForDay := min(CalculateQuantity(daySchedule.AvailableHours, task.TaskType, task.PieceType), task.Quantity)
 			hoursUsed := CalculateHours(task.TaskType, task.PieceType, piecesForDay)
+
+			// For tasks with zero rate (external processes), use the full quantity
+			if piecesForDay == 0 && task.Quantity > 0 {
+				piecesForDay = task.Quantity
+				hoursUsed = CalculateHours(task.TaskType, task.PieceType, piecesForDay)
+			}
 
 			if hoursUsed > daySchedule.AvailableHours*1.1 {
 				continue

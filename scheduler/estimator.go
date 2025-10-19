@@ -9,6 +9,11 @@ func CalculateHours(taskType TaskType, pieceType PieceType, quantity int) float6
 		return 0
 	}
 
+	// Handle tasks with zero rate (external processes like bisque/fire)
+	if productionStep.Rate == 0 {
+		return 0
+	}
+
 	return float64(quantity) / (productionStep.Rate * ShiftDurationHours)
 }
 
