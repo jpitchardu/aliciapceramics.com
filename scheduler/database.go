@@ -53,13 +53,13 @@ func GetDeadlineOrders() ([]OrderDB, error) {
 	err = json.Unmarshal(body, &orders)
 
 	if err != nil {
-		return []OrderDB{}, fmt.Errorf("failed to parse response: %w", err)
+		return []OrderDB{}, fmt.Errorf("failed to parse orders with deadlines response: %w, body: %s", err, string(body))
 	}
 
 	return orders, nil
 }
 
-func getNonDeadlineOrders() ([]OrderDB, error) {
+func GetNonDeadlineOrders() ([]OrderDB, error) {
 	supabaseUrl := os.Getenv("SUPABASE_URL")
 	supabaseKey := os.Getenv("SUPABASE_SERVICE_ROLE_KEY")
 
