@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/scheduleTasks",
+      "schedule": "0 0 * * 0"
+    }
+  ]
+}

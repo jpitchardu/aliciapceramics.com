@@ -1,0 +1,24 @@
+package handler
+
+import (
+	"aliciapceramics/api/scheduler"
+	"encoding/json"
+	"net/http"
+)
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Header.Get("User-Agent") != "vercel-cron/1.0" {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	if err := scheduler.Run(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]bool{"success": true})
+}
