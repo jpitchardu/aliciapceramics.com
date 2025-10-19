@@ -14,7 +14,7 @@ func CalculateHours(taskType TaskType, pieceType PieceType, quantity int) float6
 		return 0
 	}
 
-	return float64(quantity) / (productionStep.Rate * ShiftDurationHours)
+	return float64(quantity) / (productionStep.Rate / ShiftDurationHours)
 }
 
 func CalculateQuantity(hours float64, taskType TaskType, pieceType PieceType) int {
