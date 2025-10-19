@@ -103,7 +103,7 @@ func GetNonDeadlineOrders() ([]OrderDB, error) {
 	err = json.Unmarshal(body, &orders)
 
 	if err != nil {
-		return []OrderDB{}, fmt.Errorf("failed to parse response: %w, with body %s", err, string(body))
+		return []OrderDB{}, fmt.Errorf("failed to parse response for non deadline orders: %w", err)
 	}
 
 	return orders, nil
