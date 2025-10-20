@@ -178,6 +178,10 @@ func Run() error {
 
 			task := tasksWithoutDeadlines[i]
 
+			if task.StartDate.After(day) {
+				continue
+			}
+
 			isExternalProcess := task.TaskType == TaskTypeBisque || task.TaskType == TaskTypeFire
 
 			if daySchedule.Mode == "" && !isExternalProcess {
