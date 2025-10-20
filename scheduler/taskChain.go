@@ -38,18 +38,24 @@ func CalculateTaskChain(orderDetail OrderDetailDB, dueDate time.Time) ([]TaskCha
 
 		step := process[i]
 
-		var daysNeeded float64
-
-		if step.TaskType == TaskTypeBisque || step.TaskType == TaskTypeFire {
-			daysNeeded = float64(step.DryingDays)
+		var workDays int
+		if step.Rate > 0 {
+			workDays = int(math.Ceil(float64(orderDetail.Quantity) / step.Rate))
 		} else {
-			daysNeeded = float64(step.DryingDays) + math.Ceil(float64(orderDetail.Quantity)/step.Rate)
+			workDays = 0
+		}
+
+		var daysNeeded int
+		if step.TaskType == TaskTypeBisque || step.TaskType == TaskTypeFire {
+			daysNeeded = step.DryingDays
+		} else {
+			daysNeeded = workDays + step.DryingDays
 		}
 
 		task := TaskChainItem{
 			TaskType:          step.TaskType,
 			PieceType:         safePieceType,
-			StartDate:         dueDateWithBuffer.AddDate(0, 0, -int(daysNeeded)),
+			StartDate:         dueDateWithBuffer.AddDate(0, 0, -daysNeeded),
 			Quantity:          orderDetail.Quantity,
 			OrderDetailId:     orderDetail.ID,
 			OrderDetailStatus: step.StepKey,

@@ -52,7 +52,7 @@ func Run() error {
 
 		capacity := WeeklySchedule[day.Weekday()]
 		dayTasks := []TaskToCreate{}
-		dayFocus := tasksWithDeadlinesWithinDateRange[0].OrderDetailStatus
+		var dayFocus StepKey
 
 		if capacity <= 0 {
 			continue
@@ -61,19 +61,27 @@ func Run() error {
 		for i := 0; i < len(tasksWithDeadlinesWithinDateRange); i++ {
 			task := tasksWithDeadlinesWithinDateRange[i]
 
-			if task.OrderDetailStatus != dayFocus || task.StartDate.After(day) {
+			if task.StartDate.After(day) {
 				continue
 			}
 
-			// Skip if no capacity remaining
-			if capacity <= 0 {
+			isExternalProcess := task.TaskType == TaskTypeBisque || task.TaskType == TaskTypeFire
+
+			if dayFocus == "" {
+				if !isExternalProcess {
+					dayFocus = task.OrderDetailStatus
+				}
+			} else if task.OrderDetailStatus != dayFocus && !isExternalProcess {
+				continue
+			}
+
+			if capacity <= 0 && !isExternalProcess {
 				break
 			}
 
 			piecesForDay := min(CalculateQuantity(capacity, task.TaskType, task.PieceType), task.Quantity)
 			hoursUsed := CalculateHours(task.TaskType, task.PieceType, piecesForDay)
 
-			// For tasks with zero rate (external processes), use the full quantity
 			if piecesForDay == 0 && task.Quantity > 0 {
 				piecesForDay = task.Quantity
 				hoursUsed = CalculateHours(task.TaskType, task.PieceType, piecesForDay)
@@ -146,15 +154,23 @@ func Run() error {
 				break
 			}
 
+			var initialMode StepKey
+			for _, task := range tasksWithoutDeadlines {
+				if task.TaskType != TaskTypeBisque && task.TaskType != TaskTypeFire {
+					initialMode = task.OrderDetailStatus
+					break
+				}
+			}
+
 			daySchedule = &DaySchedule{
 				Weekday:        day.Weekday(),
 				Tasks:          []TaskToCreate{},
-				Mode:           tasksWithoutDeadlines[0].OrderDetailStatus,
+				Mode:           initialMode,
 				AvailableHours: WeeklySchedule[day.Weekday()],
 			}
 		}
 
-		if daySchedule.AvailableHours <= 0 {
+		if daySchedule.AvailableHours <= 0 && daySchedule.Mode != "" {
 			continue
 		}
 
@@ -162,19 +178,23 @@ func Run() error {
 
 			task := tasksWithoutDeadlines[i]
 
-			if task.OrderDetailStatus != daySchedule.Mode {
+			isExternalProcess := task.TaskType == TaskTypeBisque || task.TaskType == TaskTypeFire
+
+			if daySchedule.Mode == "" && !isExternalProcess {
+				daySchedule.Mode = task.OrderDetailStatus
+			}
+
+			if task.OrderDetailStatus != daySchedule.Mode && !isExternalProcess {
 				continue
 			}
 
-			// Skip if no capacity remaining
-			if daySchedule.AvailableHours <= 0 {
+			if daySchedule.AvailableHours <= 0 && !isExternalProcess {
 				break
 			}
 
 			piecesForDay := min(CalculateQuantity(daySchedule.AvailableHours, task.TaskType, task.PieceType), task.Quantity)
 			hoursUsed := CalculateHours(task.TaskType, task.PieceType, piecesForDay)
 
-			// For tasks with zero rate (external processes), use the full quantity
 			if piecesForDay == 0 && task.Quantity > 0 {
 				piecesForDay = task.Quantity
 				hoursUsed = CalculateHours(task.TaskType, task.PieceType, piecesForDay)
@@ -228,11 +248,17 @@ func Run() error {
 	return nil
 }
 
-func getNextWeek() (monday, sunday time.Time) {
+func getNextWeek() (startDate, endDate time.Time) {
 	now := time.Now()
 
-	monday = now.AddDate(0, 0, 1)
-	sunday = monday.AddDate(0, 0, 6)
+	startDate = now.AddDate(0, 0, 1)
+
+	daysUntilSaturday := (int(time.Saturday) - int(startDate.Weekday()) + 7) % 7
+	if daysUntilSaturday == 0 {
+		daysUntilSaturday = 7
+	}
+
+	endDate = startDate.AddDate(0, 0, daysUntilSaturday)
 
 	return
 }

@@ -6,3 +6,10 @@ pre-push:
     format:
       run: pnpm prettier --check .
       fail_text: "Code formatting issues found. Run 'pnpm prettier --write .' to fix."
+    test-scheduler:
+      root: "scheduler/"
+      run: go test
+      skip:
+        - merge
+        - rebase
+      fail_text: "Scheduler tests failed. Please fix the errors before pushing."

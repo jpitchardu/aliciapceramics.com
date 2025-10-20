@@ -69,13 +69,14 @@ const (
 )
 
 const (
-	StepKeyPending StepKey = "pending"
-	StepKeyBuild   StepKey = "build"
-	StepKeyTrim    StepKey = "trim"
-	StepKeyAttach  StepKey = "attach"
-	StepKeyBisque  StepKey = "bisque"
-	StepKeyGlaze   StepKey = "glaze"
-	StepKeyFire    StepKey = "fire"
+	StepKeyPending   StepKey = "pending"
+	StepKeyBuild     StepKey = "build"
+	StepKeyTrim      StepKey = "trim"
+	StepKeyAttach    StepKey = "attach"
+	StepKeyTrimFinal StepKey = "trim_final"
+	StepKeyBisque    StepKey = "bisque"
+	StepKeyGlaze     StepKey = "glaze"
+	StepKeyFire      StepKey = "fire"
 )
 
 type ProductionStep struct {
@@ -90,14 +91,14 @@ var ProductionProcess = map[PieceType][]ProductionStep{
 		{StepKey: StepKeyBuild, TaskType: TaskTypeBuildBase, Rate: 5, DryingDays: 2},
 		{StepKey: StepKeyTrim, TaskType: TaskTypeTrim, Rate: 15, DryingDays: 1},
 		{StepKey: StepKeyAttach, TaskType: TaskTypeAttachHandle, Rate: 8, DryingDays: 2},
-		{StepKey: StepKeyTrim, TaskType: TaskTypeTrim, Rate: 15, DryingDays: 3},
+		{StepKey: StepKeyTrimFinal, TaskType: TaskTypeTrim, Rate: 15, DryingDays: 3},
 		{StepKey: StepKeyBisque, TaskType: TaskTypeBisque, Rate: 0, DryingDays: 5},
 		{StepKey: StepKeyGlaze, TaskType: TaskTypeGlaze, Rate: 17, DryingDays: 0},
 		{StepKey: StepKeyFire, TaskType: TaskTypeFire, Rate: 0, DryingDays: 5},
 	},
 	PieceTypeMugWithoutHandle: {
 		{StepKey: StepKeyBuild, TaskType: TaskTypeBuildBase, Rate: 5, DryingDays: 2},
-		{StepKey: StepKeyTrim, TaskType: TaskTypeTrim, Rate: 15, DryingDays: 1},
+		{StepKey: StepKeyTrimFinal, TaskType: TaskTypeTrim, Rate: 15, DryingDays: 3},
 		{StepKey: StepKeyBisque, TaskType: TaskTypeBisque, Rate: 0, DryingDays: 5},
 		{StepKey: StepKeyGlaze, TaskType: TaskTypeGlaze, Rate: 17, DryingDays: 0},
 		{StepKey: StepKeyFire, TaskType: TaskTypeFire, Rate: 0, DryingDays: 5},
@@ -106,21 +107,21 @@ var ProductionProcess = map[PieceType][]ProductionStep{
 		{StepKey: StepKeyBuild, TaskType: TaskTypeBuildBase, Rate: 5, DryingDays: 2},
 		{StepKey: StepKeyTrim, TaskType: TaskTypeTrim, Rate: 15, DryingDays: 1},
 		{StepKey: StepKeyAttach, TaskType: TaskTypeAttachLid, Rate: 10, DryingDays: 2},
-		{StepKey: StepKeyTrim, TaskType: TaskTypeTrim, Rate: 15, DryingDays: 3},
+		{StepKey: StepKeyTrimFinal, TaskType: TaskTypeTrim, Rate: 15, DryingDays: 3},
 		{StepKey: StepKeyBisque, TaskType: TaskTypeBisque, Rate: 0, DryingDays: 5},
 		{StepKey: StepKeyGlaze, TaskType: TaskTypeGlaze, Rate: 17, DryingDays: 0},
 		{StepKey: StepKeyFire, TaskType: TaskTypeFire, Rate: 0, DryingDays: 5},
 	},
 	PieceTypeMatchaBowl: {
 		{StepKey: StepKeyBuild, TaskType: TaskTypeBuildBase, Rate: 3, DryingDays: 3},
-		{StepKey: StepKeyTrim, TaskType: TaskTypeTrim, Rate: 8, DryingDays: 3},
+		{StepKey: StepKeyTrimFinal, TaskType: TaskTypeTrim, Rate: 8, DryingDays: 3},
 		{StepKey: StepKeyBisque, TaskType: TaskTypeBisque, Rate: 0, DryingDays: 5},
 		{StepKey: StepKeyGlaze, TaskType: TaskTypeGlaze, Rate: 17, DryingDays: 0},
 		{StepKey: StepKeyFire, TaskType: TaskTypeFire, Rate: 0, DryingDays: 5},
 	},
 	PieceTypeTrinketDish: {
 		{StepKey: StepKeyBuild, TaskType: TaskTypeBuildBase, Rate: 30, DryingDays: 2},
-		{StepKey: StepKeyTrim, TaskType: TaskTypeTrim, Rate: 120, DryingDays: 3},
+		{StepKey: StepKeyTrimFinal, TaskType: TaskTypeTrim, Rate: 120, DryingDays: 3},
 		{StepKey: StepKeyBisque, TaskType: TaskTypeBisque, Rate: 0, DryingDays: 5},
 		{StepKey: StepKeyGlaze, TaskType: TaskTypeGlaze, Rate: 50, DryingDays: 0},
 		{StepKey: StepKeyFire, TaskType: TaskTypeFire, Rate: 0, DryingDays: 0},
@@ -151,6 +152,7 @@ func IsValidStepKey(stepKey string) (StepKey, bool) {
 		StepKeyBuild,
 		StepKeyTrim,
 		StepKeyAttach,
+		StepKeyTrimFinal,
 		StepKeyBisque,
 		StepKeyGlaze,
 		StepKeyFire:
