@@ -11,8 +11,8 @@ import (
 )
 
 type NewMessageRequest = struct {
-	Body    string `json:"body"`
-	OrderId string `json:"orderId"`
+	Body       string `json:"body"`
+	CustomerId string `json:"customerId"`
 }
 
 type ConversationDB = struct {
@@ -78,11 +78,11 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	phoneNumber, customerId, err := getCustomerPhoneAndId(supabaseUrl, supabaseKey, req.OrderId)
+	phoneNumber, customerId, err := getCustomerPhoneById(supabaseUrl, supabaseKey, req.CustomerId)
 
 	if err != nil {
-		LogError("get_customer_phone", fmt.Errorf("error trying to find an order: %w", err), map[string]any{
-			"order_id": req.OrderId,
+		LogError("get_customer_phone", fmt.Errorf("error trying to find customer: %w", err), map[string]any{
+			"customer_id": req.CustomerId,
 		})
 		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
 		return
@@ -92,7 +92,7 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		LogError("get_or_create_conversation", fmt.Errorf("error trying to find or create a conversation: %w", err), map[string]any{
-			"order_id": req.OrderId,
+			"customer_id": req.CustomerId,
 		})
 		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
 		return
@@ -101,14 +101,14 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 	messageId, err := storeMessageInDb(supabaseUrl, supabaseKey, conversation.Id, strings.TrimSpace(req.Body))
 
 	if err != nil {
-		LogError("store_message_in_db", fmt.Errorf("error trying to find an order: %w", err), map[string]any{})
+		LogError("store_message_in_db", fmt.Errorf("error storing message in database: %w", err), map[string]any{})
 		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
 		return
 	}
 
 	err = sendMessage(messageId, conversation.Id, phoneNumber, req.Body)
 	if err != nil {
-		LogError("send_message", fmt.Errorf("error trying to find an order: %w", err), map[string]any{})
+		LogError("send_message", fmt.Errorf("error sending message: %w", err), map[string]any{})
 		RespondWithError(w, http.StatusInternalServerError, "We are experiencing errors", "SERVER_ERROR")
 		return
 	}
@@ -130,20 +130,21 @@ func validateNewMessageRequest(req NewMessageRequest) error {
 		return fmt.Errorf("body is required")
 	}
 
-	trimmedOrderId := strings.TrimSpace(req.OrderId)
-	if len(trimmedOrderId) == 0 {
-		return fmt.Errorf("order id is required")
+	trimmedCustomerId := strings.TrimSpace(req.CustomerId)
+
+	if len(trimmedCustomerId) == 0 {
+		return fmt.Errorf("customerId is required")
 	}
 
 	return nil
 }
 
-func getCustomerPhoneAndId(supabaseUrl, supabaseKey string, orderId string) (string, string, error) {
-	url := fmt.Sprintf("%s/rest/v1/orders?id=eq.%s&select=id,customer_id,consent", supabaseUrl, orderId)
+func getCustomerPhoneById(supabaseUrl, supabaseKey string, customerId string) (string, string, error) {
+	url := fmt.Sprintf("%s/rest/v1/customer_sms_consent_records?customer_id=eq.%s&select=phone_number,consent_given&order=created_at.desc&limit=1", supabaseUrl, customerId)
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
-		return "", "", fmt.Errorf("failed to create order request: %w", err)
+		return "", "", fmt.Errorf("failed to create consent request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+supabaseKey)
@@ -154,54 +155,14 @@ func getCustomerPhoneAndId(supabaseUrl, supabaseKey string, orderId string) (str
 	resp, err := client.Do(req)
 
 	if err != nil {
-		return "", "", fmt.Errorf("failed to get order details for order: %s, with error: %w", orderId, err)
+		return "", "", fmt.Errorf("failed to fetch consent details for customer %s with error: %w", customerId, err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		return "", "", fmt.Errorf("failed to read response for order details: %w", err)
-	}
-
-	var orders []struct {
-		Id         string `json:"id"`
-		CustomerId string `json:"customer_id"`
-		Consent    bool   `json:"consent"`
-	}
-
-	if err := json.Unmarshal(body, &orders); err != nil {
-		return "", "", fmt.Errorf("failed to parse order with customer id response: %w", err)
-	}
-
-	if len(orders) == 0 {
-		return "", "", fmt.Errorf("order not found for id %s", orderId)
-	}
-
-	orderWithCustomerId := orders[0]
-
-	url = fmt.Sprintf("%s/rest/v1/customer_sms_consent_records?customer_id=eq.%s&select=phone_number,consent_given&order=created_at.desc&limit=1", supabaseUrl, orderWithCustomerId.CustomerId)
-	req, err = http.NewRequest("GET", url, nil)
-
-	if err != nil {
-		return "", "", fmt.Errorf("failed to create consent request: %w", err)
-	}
-
-	req.Header.Set("Authorization", "Bearer "+supabaseKey)
-	req.Header.Set("apikey", supabaseKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err = client.Do(req)
-
-	if err != nil {
-		return "", "", fmt.Errorf("failed to fetch consent details for customer %s with error: %w", orderWithCustomerId.CustomerId, err)
-	}
-	defer resp.Body.Close()
-
-	body, err = io.ReadAll(resp.Body)
-
-	if err != nil {
-		return "", "", fmt.Errorf("failed to read response order for consent details: %w", err)
+		return "", "", fmt.Errorf("failed to read response for consent details: %w", err)
 	}
 
 	var consentDetails []struct {
@@ -213,14 +174,9 @@ func getCustomerPhoneAndId(supabaseUrl, supabaseKey string, orderId string) (str
 		return "", "", fmt.Errorf("failed to parse consent details response: %w", err)
 	}
 
-	if len(consentDetails) == 0 && orderWithCustomerId.Consent {
-		phone, err := legacyGetCustomerPhoneFromOrder(supabaseUrl, supabaseKey, orderWithCustomerId.CustomerId)
-
-		return phone, orderWithCustomerId.CustomerId, err
-	}
-
 	if len(consentDetails) == 0 {
-		return "", "", fmt.Errorf("consent details not found for customer %s", orderWithCustomerId.CustomerId)
+		phone, err := legacyGetCustomerPhoneFromOrder(supabaseUrl, supabaseKey, customerId)
+		return phone, customerId, err
 	}
 
 	consentDetailsForCustomer := consentDetails[0]
@@ -229,8 +185,9 @@ func getCustomerPhoneAndId(supabaseUrl, supabaseKey string, orderId string) (str
 		return "", "", fmt.Errorf("customer has not given consent for text messages")
 	}
 
-	return consentDetailsForCustomer.PhoneNumber, orderWithCustomerId.CustomerId, nil
+	return consentDetailsForCustomer.PhoneNumber, customerId, nil
 }
+
 
 func legacyGetCustomerPhoneFromOrder(supabaseUrl, supabaseKey string, customerId string) (string, error) {
 	url := fmt.Sprintf("%s/rest/v1/customers?id=eq.%s&select=phone", supabaseUrl, customerId)

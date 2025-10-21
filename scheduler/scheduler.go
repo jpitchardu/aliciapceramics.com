@@ -320,7 +320,11 @@ func calculateTaskCompletion(scheduledDate time.Time, taskType TaskType, pieceTy
 func getNextWeek() (startDate, endDate time.Time) {
 	now := time.Now()
 
-	startDate = now.AddDate(0, 0, 1)
+	if now.Weekday() == time.Sunday {
+		startDate = now.AddDate(0, 0, 1)
+	} else {
+		startDate = now
+	}
 
 	daysUntilSaturday := (int(time.Saturday) - int(startDate.Weekday()) + 7) % 7
 	if daysUntilSaturday == 0 {

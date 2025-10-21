@@ -344,15 +344,20 @@ func TestWeekSchedule_FullWeekScheduling(t *testing.T) {
 func TestGetNextWeek(t *testing.T) {
 	startDate, endDate := getNextWeek()
 
-	assert.True(t, startDate.Before(endDate), "Start date should be before end date")
+	assert.True(t, startDate.Before(endDate) || startDate.Equal(endDate), "Start date should be before or equal to end date")
 
 	assert.Equal(t, time.Saturday, endDate.Weekday(), "End date should always be Saturday")
 
 	daysBetween := endDate.Sub(startDate).Hours() / 24
 	assert.True(t, daysBetween >= 0 && daysBetween <= 7, "Should schedule between 0-7 days depending on when run")
 
-	tomorrowWeekday := time.Now().AddDate(0, 0, 1).Weekday()
-	assert.Equal(t, tomorrowWeekday, startDate.Weekday(), "Start date should be tomorrow")
+	now := time.Now()
+	if now.Weekday() == time.Sunday {
+		tomorrowWeekday := now.AddDate(0, 0, 1).Weekday()
+		assert.Equal(t, tomorrowWeekday, startDate.Weekday(), "Start date should be tomorrow when run on Sunday")
+	} else {
+		assert.Equal(t, now.Weekday(), startDate.Weekday(), "Start date should be today when not run on Sunday")
+	}
 }
 
 func TestGetNextWeek_EdgeCases(t *testing.T) {
@@ -362,12 +367,12 @@ func TestGetNextWeek_EdgeCases(t *testing.T) {
 		expectedDays  int
 	}{
 		{"Run on Sunday, schedule Mon-Sat", time.Sunday, 5},
-		{"Run on Monday, schedule Tue-Sat", time.Monday, 4},
-		{"Run on Tuesday, schedule Wed-Sat", time.Tuesday, 3},
-		{"Run on Wednesday, schedule Thu-Sat", time.Wednesday, 2},
-		{"Run on Thursday, schedule Fri-Sat", time.Thursday, 1},
-		{"Run on Friday, schedule Sat-Sat", time.Friday, 7},
-		{"Run on Saturday, schedule Sun-Sat", time.Saturday, 6},
+		{"Run on Monday, schedule Mon-Sat", time.Monday, 5},
+		{"Run on Tuesday, schedule Tue-Sat", time.Tuesday, 4},
+		{"Run on Wednesday, schedule Wed-Sat", time.Wednesday, 3},
+		{"Run on Thursday, schedule Thu-Sat", time.Thursday, 2},
+		{"Run on Friday, schedule Fri-Sat", time.Friday, 1},
+		{"Run on Saturday, schedule Sat-Sat", time.Saturday, 0},
 	}
 
 	for _, tt := range tests {
@@ -375,14 +380,20 @@ func TestGetNextWeek_EdgeCases(t *testing.T) {
 			now := time.Now()
 			daysToAdd := (int(tt.todayWeekday) - int(now.Weekday()) + 7) % 7
 			mockToday := now.AddDate(0, 0, daysToAdd)
-			tomorrow := mockToday.AddDate(0, 0, 1)
 
-			daysUntilSaturday := (int(time.Saturday) - int(tomorrow.Weekday()) + 7) % 7
-			if daysUntilSaturday == 0 {
+			var startDay time.Time
+			if mockToday.Weekday() == time.Sunday {
+				startDay = mockToday.AddDate(0, 0, 1)
+			} else {
+				startDay = mockToday
+			}
+
+			daysUntilSaturday := (int(time.Saturday) - int(startDay.Weekday()) + 7) % 7
+			if daysUntilSaturday == 0 && startDay.Weekday() != time.Saturday {
 				daysUntilSaturday = 7
 			}
 
-			assert.Equal(t, tt.expectedDays, daysUntilSaturday, "Days until Saturday from tomorrow should match")
+			assert.Equal(t, tt.expectedDays, daysUntilSaturday, "Days until Saturday from start day should match")
 		})
 	}
 }
