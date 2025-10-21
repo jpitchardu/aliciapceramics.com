@@ -319,3 +319,63 @@ func TestCalculateTaskChain_TrinketDish(t *testing.T) {
 	}
 	assert.False(t, hasAttach, "Trinket dish should not have attach step")
 }
+
+func TestCalculateTaskChain_AttachStatus_StillDrying(t *testing.T) {
+	oneDayAgo := time.Now().AddDate(0, 0, -1)
+	orderDetail := OrderDetailDB{
+		ID:              "test-attach-drying",
+		Type:            "tumbler",
+		Quantity:        10,
+		Status:          "attach",
+		StatusChangedAt: &oneDayAgo,
+	}
+	dueDate := time.Now().AddDate(0, 0, 7)
+
+	tasks, err := CalculateTaskChain(orderDetail, dueDate)
+	require.NoError(t, err)
+
+	assert.Len(t, tasks, 0, "Should return empty task chain when still drying (attach has 2-day drying period, only 1 day passed)")
+}
+
+func TestCalculateTaskChain_AttachStatus_DryingComplete(t *testing.T) {
+	threeDaysAgo := time.Date(2025, 10, 18, 0, 0, 0, 0, time.UTC)
+	orderDetail := OrderDetailDB{
+		ID:              "test-attach-complete",
+		Type:            "tumbler",
+		Quantity:        10,
+		Status:          "attach",
+		StatusChangedAt: &threeDaysAgo,
+	}
+	dueDate := time.Date(2025, 10, 28, 0, 0, 0, 0, time.UTC)
+
+	tasks, err := CalculateTaskChain(orderDetail, dueDate)
+	require.NoError(t, err)
+
+	assert.Greater(t, len(tasks), 0, "Should return tasks when drying is complete")
+	assert.Equal(t, TaskTypeTrim, tasks[0].TaskType, "First task should be final trim, NOT attach")
+	assert.Equal(t, StepKeyTrimFinal, tasks[0].OrderDetailStatus, "First task should have trim_final status")
+
+	for _, task := range tasks {
+		assert.NotEqual(t, TaskTypeAttachLid, task.TaskType, "Should NOT schedule another attach task")
+		assert.NotEqual(t, TaskTypeAttachHandle, task.TaskType, "Should NOT schedule another attach task")
+	}
+}
+
+func TestCalculateTaskChain_PendingStatus_IgnoresStatusChangedAt(t *testing.T) {
+	oneWeekAgo := time.Now().AddDate(0, 0, -7)
+	orderDetail := OrderDetailDB{
+		ID:              "test-pending-with-date",
+		Type:            "mug-with-handle",
+		Quantity:        5,
+		Status:          "pending",
+		StatusChangedAt: &oneWeekAgo,
+	}
+	dueDate := time.Now().AddDate(0, 0, 21)
+
+	tasks, err := CalculateTaskChain(orderDetail, dueDate)
+	require.NoError(t, err)
+
+	assert.Len(t, tasks, 7, "Pending status should create full task chain")
+	assert.Equal(t, TaskTypeBuildBase, tasks[0].TaskType, "Should start from build step")
+	assert.Equal(t, StepKeyBuild, tasks[0].OrderDetailStatus, "Should start from build status")
+}

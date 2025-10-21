@@ -32,6 +32,17 @@ func CalculateTaskChain(orderDetail OrderDetailDB, dueDate time.Time) ([]TaskCha
 		}
 	}
 
+	if safeStep != StepKeyPending && orderDetail.StatusChangedAt != nil {
+		currentStep := process[currentStepIndex]
+		dryingComplete := orderDetail.StatusChangedAt.AddDate(0, 0, currentStep.DryingDays)
+
+		if dryingComplete.After(time.Now()) {
+			return []TaskChainItem{}, nil
+		}
+
+		currentStepIndex++
+	}
+
 	var tasks = []TaskChainItem{}
 
 	for i := len(process) - 1; i >= currentStepIndex; i-- {
