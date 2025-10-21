@@ -44,6 +44,7 @@ func Run() error {
 	}
 
 	weekSchedule := make(WeekSchedule)
+	orderDetailLastCompletion := make(map[string]time.Time)
 
 	for day := startDate; !day.After(endDate); day = day.AddDate(0, 0, 1) {
 		if len(tasksWithDeadlinesWithinDateRange) == 0 {
@@ -58,10 +59,23 @@ func Run() error {
 			continue
 		}
 
+		anyTaskScheduled := false
+
 		for i := 0; i < len(tasksWithDeadlinesWithinDateRange); i++ {
 			task := tasksWithDeadlinesWithinDateRange[i]
 
-			if task.StartDate.After(day) {
+			earliestPossibleStart := task.StartDate
+			if lastCompletion, exists := orderDetailLastCompletion[task.OrderDetailId]; exists {
+				if lastCompletion.After(earliestPossibleStart) {
+					earliestPossibleStart = lastCompletion
+				}
+			}
+
+			if earliestPossibleStart.After(day) {
+				if day.Equal(endDate) {
+					tasksWithDeadlinesWithinDateRange = append(tasksWithDeadlinesWithinDateRange[:i], tasksWithDeadlinesWithinDateRange[i+1:]...)
+					i -= 1
+				}
 				continue
 			}
 
@@ -100,6 +114,10 @@ func Run() error {
 				IsLate:         task.StartDate.Before(startDate),
 			})
 			capacity -= hoursUsed
+			anyTaskScheduled = true
+
+			completionDate := calculateTaskCompletion(day, task.TaskType, task.PieceType, piecesForDay)
+			orderDetailLastCompletion[task.OrderDetailId] = completionDate
 
 			if piecesForDay >= task.Quantity {
 				tasksWithDeadlinesWithinDateRange = append(tasksWithDeadlinesWithinDateRange[:i], tasksWithDeadlinesWithinDateRange[i+1:]...)
@@ -115,6 +133,10 @@ func Run() error {
 			Tasks:          dayTasks,
 			AvailableHours: capacity,
 			Mode:           dayFocus,
+		}
+
+		if !anyTaskScheduled && day.Equal(endDate) {
+			break
 		}
 
 	}
@@ -174,11 +196,24 @@ func Run() error {
 			continue
 		}
 
+		anyTaskScheduled := false
+
 		for i := 0; i < len(tasksWithoutDeadlines); i++ {
 
 			task := tasksWithoutDeadlines[i]
 
-			if task.StartDate.After(day) {
+			earliestPossibleStart := task.StartDate
+			if lastCompletion, exists := orderDetailLastCompletion[task.OrderDetailId]; exists {
+				if lastCompletion.After(earliestPossibleStart) {
+					earliestPossibleStart = lastCompletion
+				}
+			}
+
+			if earliestPossibleStart.After(day) {
+				if day.Equal(endDate) {
+					tasksWithoutDeadlines = append(tasksWithoutDeadlines[:i], tasksWithoutDeadlines[i+1:]...)
+					i -= 1
+				}
 				continue
 			}
 
@@ -217,6 +252,10 @@ func Run() error {
 				IsLate:         task.StartDate.Before(startDate),
 			})
 			daySchedule.AvailableHours -= hoursUsed
+			anyTaskScheduled = true
+
+			completionDate := calculateTaskCompletion(day, task.TaskType, task.PieceType, piecesForDay)
+			orderDetailLastCompletion[task.OrderDetailId] = completionDate
 
 			if piecesForDay >= task.Quantity {
 				tasksWithoutDeadlines = append(tasksWithoutDeadlines[:i], tasksWithoutDeadlines[i+1:]...)
@@ -228,6 +267,10 @@ func Run() error {
 		}
 
 		weekSchedule[day] = daySchedule
+
+		if !anyTaskScheduled && len(tasksWithoutDeadlines) > 0 && day.Equal(endDate) {
+			break
+		}
 
 	}
 
@@ -250,6 +293,29 @@ func Run() error {
 	}
 
 	return nil
+}
+
+func calculateTaskCompletion(scheduledDate time.Time, taskType TaskType, pieceType PieceType, quantity int) time.Time {
+	process := ProductionProcess[pieceType]
+
+	var dryingDays int
+	var workDays int
+
+	for _, step := range process {
+		if step.TaskType == taskType {
+			dryingDays = step.DryingDays
+			if step.Rate > 0 {
+				workDays = int(float64(quantity)/step.Rate + 0.999)
+			}
+			break
+		}
+	}
+
+	if taskType == TaskTypeBisque || taskType == TaskTypeFire {
+		return scheduledDate.AddDate(0, 0, dryingDays)
+	}
+
+	return scheduledDate.AddDate(0, 0, workDays+dryingDays)
 }
 
 func getNextWeek() (startDate, endDate time.Time) {

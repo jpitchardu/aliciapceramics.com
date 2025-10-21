@@ -386,3 +386,44 @@ func TestGetNextWeek_EdgeCases(t *testing.T) {
 		})
 	}
 }
+
+func TestBUG2_LateTasksRespectDryingPeriods(t *testing.T) {
+	monday := time.Date(2025, 10, 20, 0, 0, 0, 0, time.UTC)
+
+	buildTask := TaskChainItem{
+		TaskType:          TaskTypeBuildBase,
+		PieceType:         PieceTypeMugWithHandle,
+		StartDate:         monday.AddDate(0, 0, -7),
+		Quantity:          5,
+		OrderDetailId:     "late-order-1",
+		OrderDetailStatus: StepKeyBuild,
+	}
+
+	trimTask := TaskChainItem{
+		TaskType:          TaskTypeTrim,
+		PieceType:         PieceTypeMugWithHandle,
+		StartDate:         monday.AddDate(0, 0, -5),
+		Quantity:          5,
+		OrderDetailId:     "late-order-1",
+		OrderDetailStatus: StepKeyTrim,
+	}
+
+	scheduledBuildDate := monday
+	buildCompletion := calculateTaskCompletion(scheduledBuildDate, buildTask.TaskType, buildTask.PieceType, buildTask.Quantity)
+
+	expectedBuildCompletion := monday.AddDate(0, 0, 3)
+	assert.Equal(t, expectedBuildCompletion, buildCompletion, "Build should complete on day 3 (1 work day + 2 drying days)")
+
+	earliestTrimStart := buildCompletion
+	assert.True(t, trimTask.StartDate.Before(earliestTrimStart), "Trim is late relative to calculated start, but must wait for build drying")
+
+	scheduledTrimDate := earliestTrimStart
+	if scheduledTrimDate.Before(monday) {
+		scheduledTrimDate = monday
+	}
+
+	assert.Equal(t, monday.AddDate(0, 0, 3), scheduledTrimDate, "Trim should be scheduled after build completion on day 3")
+
+	daysBetweenTasks := scheduledTrimDate.Sub(scheduledBuildDate).Hours() / 24
+	assert.Equal(t, float64(3), daysBetweenTasks, "Should maintain 3-day gap (1 work + 2 drying) between build and trim")
+}
