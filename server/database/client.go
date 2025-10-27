@@ -5,7 +5,17 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
+
+var httpClient = &http.Client{
+	Timeout: 30 * time.Second,
+	Transport: &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     90 * time.Second,
+	},
+}
 
 func MakeDBCall(method, url string, payload io.Reader) ([]byte, int, error) {
 
@@ -29,8 +39,7 @@ func MakeDBCall(method, url string, payload io.Reader) ([]byte, int, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Prefer", "return=representation")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 
 	if err != nil {
 		return []byte{}, 0, fmt.Errorf("error when calling url: %s with error: %w", url, err)

@@ -388,6 +388,8 @@ func upsertCustomer(supabaseUrl, supabaseKey string, customer Customer) (string,
 
 func createOrder(customerID string, order Order) (string, error) {
 
+	service := orders.OrderService{}
+
 	createOrderDTO := orders.CreateOrderDTO{
 		CustomerID:            customerID,
 		Timeline:              order.Timeline,
@@ -406,7 +408,7 @@ func createOrder(customerID string, order Order) (string, error) {
 		})
 	}
 
-	result, err := orders.CreateOrder(createOrderDTO)
+	result, err := service.CreateOrder(createOrderDTO)
 
 	if err != nil {
 		return "", fmt.Errorf("[NewOrderHandler] err %w", err)
