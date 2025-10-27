@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"aliciapceramics/server/orders"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -10,8 +11,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	"github.com/google/uuid"
 )
 
 type Customer struct {
@@ -207,7 +206,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orderId, err := createOrder(supabaseUrl, supabaseKey, customerId, req.Order)
+	orderId, err := createOrder(customerId, req.Order)
 	if err != nil {
 		LogError("create_order", err, map[string]any{
 			"customer_id": customerId,
@@ -387,61 +386,33 @@ func upsertCustomer(supabaseUrl, supabaseKey string, customer Customer) (string,
 	return result[0].ID, nil
 }
 
-func createOrder(supabaseUrl, supabaseKey, customerID string, order Order) (string, error) {
-	accessToken := uuid.New().String()
+func createOrder(customerID string, order Order) (string, error) {
 
-	orderDB := OrderDB{
+	createOrderDTO := orders.CreateOrderDTO{
 		CustomerID:            customerID,
 		Timeline:              order.Timeline,
 		Inspiration:           order.Inspiration,
 		SpecialConsiderations: order.SpecialConsiderations,
 		Consent:               order.Consent,
-		Status:                "pending",
-		AccessToken:           accessToken,
+		PieceDetails:          []orders.CreateOrderDetailDTO{},
 	}
 
-	orderJSON, err := json.Marshal(orderDB)
+	for _, detail := range order.PieceDetails {
+		createOrderDTO.PieceDetails = append(createOrderDTO.PieceDetails, orders.CreateOrderDetailDTO{
+			Type:        detail.Type,
+			Size:        detail.Size,
+			Quantity:    detail.Quantity,
+			Description: detail.Description,
+		})
+	}
+
+	result, err := orders.CreateOrder(createOrderDTO)
+
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal order: %w", err)
+		return "", fmt.Errorf("[NewOrderHandler] err %w", err)
 	}
 
-	url := fmt.Sprintf("%s/rest/v1/orders", supabaseUrl)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(orderJSON))
-	if err != nil {
-		return "", fmt.Errorf("failed to create order request: %w", err)
-	}
-
-	req.Header.Set("Authorization", "Bearer "+supabaseKey)
-	req.Header.Set("apikey", supabaseKey)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Prefer", "return=representation")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to create order: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read order response: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusCreated {
-		return "", fmt.Errorf("failed to create order: status %d", resp.StatusCode)
-	}
-
-	var result []OrderDB
-	if err := json.Unmarshal(body, &result); err != nil {
-		return "", fmt.Errorf("failed to parse created order: %w", err)
-	}
-
-	if len(result) == 0 {
-		return "", fmt.Errorf("no order returned after insert")
-	}
-
-	return result[0].ID, nil
+	return result.ID, nil
 }
 
 func createOrderDetails(supabaseUrl, supabaseKey, orderID string, pieceDetails []PieceDetail) error {

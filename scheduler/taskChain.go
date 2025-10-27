@@ -1,12 +1,13 @@
 package scheduler
 
 import (
+	"aliciapceramics/server/orders"
 	"fmt"
 	"math"
 	"time"
 )
 
-func CalculateTaskChain(orderDetail OrderDetailDB, dueDate time.Time) ([]TaskChainItem, error) {
+func CalculateTaskChain(orderDetail orders.OrderDetailDTO, dueDate time.Time) ([]TaskChainItem, error) {
 
 	safePieceType, isValidPieceType := IsValidPieceType(orderDetail.Type)
 	safeStep, isValidStep := IsValidStepKey(orderDetail.Status)
@@ -49,9 +50,11 @@ func CalculateTaskChain(orderDetail OrderDetailDB, dueDate time.Time) ([]TaskCha
 
 		step := process[i]
 
+		remainingQuantity := orderDetail.Quantity - orderDetail.CompletedQuantity
+
 		var workDays int
 		if step.Rate > 0 {
-			workDays = int(math.Ceil(float64(orderDetail.Quantity) / step.Rate))
+			workDays = int(math.Ceil(float64(remainingQuantity) / step.Rate))
 		} else {
 			workDays = 0
 		}
@@ -67,7 +70,7 @@ func CalculateTaskChain(orderDetail OrderDetailDB, dueDate time.Time) ([]TaskCha
 			TaskType:          step.TaskType,
 			PieceType:         safePieceType,
 			StartDate:         dueDateWithBuffer.AddDate(0, 0, -daysNeeded),
-			Quantity:          orderDetail.Quantity,
+			Quantity:          remainingQuantity,
 			OrderDetailId:     orderDetail.ID,
 			OrderDetailStatus: step.StepKey,
 		}

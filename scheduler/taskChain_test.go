@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"aliciapceramics/server/orders"
 	"testing"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func TestCalculateTaskChain_SimpleMugWithHandle(t *testing.T) {
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-1",
 		Type:     "mug-with-handle",
 		Quantity: 1,
@@ -60,7 +61,7 @@ func TestCalculateTaskChain_SimpleMugWithHandle(t *testing.T) {
 }
 
 func TestCalculateTaskChain_MugWithoutHandle(t *testing.T) {
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-2",
 		Type:     "mug-without-handle",
 		Quantity: 1,
@@ -92,7 +93,7 @@ func TestCalculateTaskChain_MugWithoutHandle(t *testing.T) {
 }
 
 func TestCalculateTaskChain_TumblerWithLid(t *testing.T) {
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-3",
 		Type:     "tumbler",
 		Quantity: 1,
@@ -118,7 +119,7 @@ func TestCalculateTaskChain_TumblerWithLid(t *testing.T) {
 }
 
 func TestCalculateTaskChain_LargeQuantityMug(t *testing.T) {
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-4",
 		Type:     "mug-with-handle",
 		Quantity: 10,
@@ -131,7 +132,7 @@ func TestCalculateTaskChain_LargeQuantityMug(t *testing.T) {
 
 	assert.Len(t, tasks, 7, "Should create 7 tasks regardless of quantity")
 
-	singleMugOrderDetail := OrderDetailDB{
+	singleMugOrderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-single",
 		Type:     "mug-with-handle",
 		Quantity: 1,
@@ -148,7 +149,7 @@ func TestCalculateTaskChain_LargeQuantityMug(t *testing.T) {
 }
 
 func TestCalculateTaskChain_MatchaBowlDifferentProcess(t *testing.T) {
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-5",
 		Type:     "matcha-bowl",
 		Quantity: 1,
@@ -169,7 +170,7 @@ func TestCalculateTaskChain_MatchaBowlDifferentProcess(t *testing.T) {
 	}
 	assert.False(t, hasAttach, "Matcha bowl should not have attach step")
 
-	mugOrderDetail := OrderDetailDB{
+	mugOrderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-mug",
 		Type:     "mug-with-handle",
 		Quantity: 1,
@@ -182,7 +183,7 @@ func TestCalculateTaskChain_MatchaBowlDifferentProcess(t *testing.T) {
 }
 
 func TestCalculateTaskChain_InProgressMug(t *testing.T) {
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-6",
 		Type:     "mug-with-handle",
 		Quantity: 1,
@@ -202,7 +203,7 @@ func TestCalculateTaskChain_InProgressMug(t *testing.T) {
 }
 
 func TestCalculateTaskChain_InvalidPieceType(t *testing.T) {
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-invalid",
 		Type:     "invalid-piece-type",
 		Quantity: 1,
@@ -216,7 +217,7 @@ func TestCalculateTaskChain_InvalidPieceType(t *testing.T) {
 }
 
 func TestCalculateTaskChain_InvalidStatus(t *testing.T) {
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-invalid-status",
 		Type:     "mug-with-handle",
 		Quantity: 1,
@@ -230,7 +231,7 @@ func TestCalculateTaskChain_InvalidStatus(t *testing.T) {
 }
 
 func TestCalculateTaskChain_ZeroQuantity(t *testing.T) {
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-detail-zero",
 		Type:     "mug-with-handle",
 		Quantity: 0,
@@ -249,7 +250,7 @@ func TestCalculateTaskChain_ZeroQuantity(t *testing.T) {
 func TestCalculateTaskChain_BUG1_DuplicateTrimStepKeys(t *testing.T) {
 	t.Log("FIXED BUG #1: Mug process now has distinct 'trim' and 'trim_final' StepKeys")
 
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-bug-1",
 		Type:     "mug-with-handle",
 		Quantity: 1,
@@ -276,7 +277,7 @@ func TestCalculateTaskChain_BUG1_DuplicateTrimStepKeys(t *testing.T) {
 func TestCalculateTaskChain_BUG2_DryingPeriodViolation(t *testing.T) {
 	t.Log("FIXED BUG #2: Drying period calculation now correctly enforced")
 
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-bug-2",
 		Type:     "mug-with-handle",
 		Quantity: 1,
@@ -298,7 +299,7 @@ func TestCalculateTaskChain_BUG2_DryingPeriodViolation(t *testing.T) {
 }
 
 func TestCalculateTaskChain_TrinketDish(t *testing.T) {
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-trinket",
 		Type:     "trinket-dish",
 		Quantity: 30,
@@ -322,7 +323,7 @@ func TestCalculateTaskChain_TrinketDish(t *testing.T) {
 
 func TestCalculateTaskChain_AttachStatus_StillDrying(t *testing.T) {
 	oneDayAgo := time.Now().AddDate(0, 0, -1)
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:              "test-attach-drying",
 		Type:            "tumbler",
 		Quantity:        10,
@@ -339,7 +340,7 @@ func TestCalculateTaskChain_AttachStatus_StillDrying(t *testing.T) {
 
 func TestCalculateTaskChain_AttachStatus_DryingComplete(t *testing.T) {
 	threeDaysAgo := time.Date(2025, 10, 18, 0, 0, 0, 0, time.UTC)
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:              "test-attach-complete",
 		Type:            "tumbler",
 		Quantity:        10,
@@ -363,7 +364,7 @@ func TestCalculateTaskChain_AttachStatus_DryingComplete(t *testing.T) {
 
 func TestCalculateTaskChain_PendingStatus_IgnoresStatusChangedAt(t *testing.T) {
 	oneWeekAgo := time.Now().AddDate(0, 0, -7)
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:              "test-pending-with-date",
 		Type:            "mug-with-handle",
 		Quantity:        5,

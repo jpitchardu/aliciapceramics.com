@@ -16,15 +16,16 @@ type OrderDB struct {
 }
 
 type OrderDetailDB struct {
-	ID              string     `json:"id,omitempty"`
-	OrderID         string     `json:"order_id"`
-	Type            string     `json:"type"`
-	Size            *string    `json:"size,omitempty"`
-	Quantity        int        `json:"quantity"`
-	Description     string     `json:"description"`
-	Status          string     `json:"status"`
-	StatusChangedAt *time.Time `json:"status_changed_at,omitempty"`
-	CreatedAt       *time.Time `json:"created_at,omitempty"`
+	ID                string     `json:"id,omitempty"`
+	OrderID           string     `json:"order_id"`
+	Type              string     `json:"type"`
+	Size              *string    `json:"size,omitempty"`
+	Quantity          int        `json:"quantity"`
+	Description       string     `json:"description"`
+	Status            string     `json:"status"`
+	CompletedQuantity int        `json:"completed_quantity"`
+	StatusChangedAt   *time.Time `json:"status_changed_at,omitempty"`
+	CreatedAt         *time.Time `json:"created_at,omitempty"`
 }
 
 type TaskDB struct {

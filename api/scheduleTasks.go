@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
+func ScheduleTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Header.Get("User-Agent") != "vercel-cron/1.0" {
 		http.Error(w, "Forbidden", http.StatusForbidden)

@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"aliciapceramics/server/orders"
 	"fmt"
 	"math"
 	"time"
@@ -8,7 +9,7 @@ import (
 
 const StandardProductionWeeks = 3
 
-func CalculateCompletionDate(orderDetail OrderDetailDB, fromDate time.Time) (time.Time, error) {
+func CalculateCompletionDate(orderDetail orders.OrderDetailDTO, fromDate time.Time) (time.Time, error) {
 	safePieceType, isValidPieceType := IsValidPieceType(orderDetail.Type)
 	safeStep, isValidStep := IsValidStepKey(orderDetail.Status)
 

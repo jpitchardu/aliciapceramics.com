@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"aliciapceramics/server/orders"
 	"testing"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 func TestCalculateCompletionDate_PendingMugWithHandle(t *testing.T) {
 	now := time.Now()
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-1",
 		Type:     string(PieceTypeMugWithHandle),
 		Status:   string(StepKeyPending),
@@ -27,7 +28,7 @@ func TestCalculateCompletionDate_PendingMugWithHandle(t *testing.T) {
 
 func TestCalculateCompletionDate_PendingMugWithoutHandle(t *testing.T) {
 	now := time.Now()
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-2",
 		Type:     string(PieceTypeMugWithoutHandle),
 		Status:   string(StepKeyPending),
@@ -45,7 +46,7 @@ func TestCalculateCompletionDate_PendingMugWithoutHandle(t *testing.T) {
 
 func TestCalculateCompletionDate_BuildStepMugWithHandle(t *testing.T) {
 	now := time.Now()
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-3",
 		Type:     string(PieceTypeMugWithHandle),
 		Status:   string(StepKeyBuild),
@@ -62,7 +63,7 @@ func TestCalculateCompletionDate_BuildStepMugWithHandle(t *testing.T) {
 
 func TestCalculateCompletionDate_GlazeStepMugWithHandle(t *testing.T) {
 	now := time.Now()
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-4",
 		Type:     string(PieceTypeMugWithHandle),
 		Status:   string(StepKeyGlaze),
@@ -81,14 +82,14 @@ func TestCalculateCompletionDate_GlazeStepMugWithHandle(t *testing.T) {
 func TestCalculateCompletionDate_HighQuantityTakesLonger(t *testing.T) {
 	now := time.Now()
 
-	smallOrderDetail := OrderDetailDB{
+	smallOrderDetail := orders.OrderDetailDTO{
 		ID:       "test-5",
 		Type:     string(PieceTypeMugWithHandle),
 		Status:   string(StepKeyPending),
 		Quantity: 2,
 	}
 
-	largeOrderDetail := OrderDetailDB{
+	largeOrderDetail := orders.OrderDetailDTO{
 		ID:       "test-6",
 		Type:     string(PieceTypeMugWithHandle),
 		Status:   string(StepKeyPending),
@@ -106,7 +107,7 @@ func TestCalculateCompletionDate_HighQuantityTakesLonger(t *testing.T) {
 
 func TestCalculateCompletionDate_InvalidPieceType(t *testing.T) {
 	now := time.Now()
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-7",
 		Type:     "invalid-type",
 		Status:   string(StepKeyPending),
@@ -119,7 +120,7 @@ func TestCalculateCompletionDate_InvalidPieceType(t *testing.T) {
 
 func TestCalculateCompletionDate_InvalidStatus(t *testing.T) {
 	now := time.Now()
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-8",
 		Type:     string(PieceTypeMugWithHandle),
 		Status:   "invalid-status",
@@ -133,14 +134,14 @@ func TestCalculateCompletionDate_InvalidStatus(t *testing.T) {
 func TestCalculateCompletionDate_DifferentPieceTypes(t *testing.T) {
 	now := time.Now()
 
-	mugDetail := OrderDetailDB{
+	mugDetail := orders.OrderDetailDTO{
 		ID:       "test-9",
 		Type:     string(PieceTypeMugWithHandle),
 		Status:   string(StepKeyPending),
 		Quantity: 10,
 	}
 
-	matchaBowlDetail := OrderDetailDB{
+	matchaBowlDetail := orders.OrderDetailDTO{
 		ID:       "test-10",
 		Type:     string(PieceTypeMatchaBowl),
 		Status:   string(StepKeyPending),
@@ -161,7 +162,7 @@ func TestCalculateCompletionDate_MinimumThreeWeeksFromNow(t *testing.T) {
 	now := time.Now()
 	threeWeeksFromNow := now.AddDate(0, 0, 21)
 
-	orderDetail := OrderDetailDB{
+	orderDetail := orders.OrderDetailDTO{
 		ID:       "test-11",
 		Type:     string(PieceTypeMugWithHandle),
 		Status:   string(StepKeyPending),
@@ -178,14 +179,14 @@ func TestCalculateCompletionDate_MinimumThreeWeeksFromNow(t *testing.T) {
 func TestCalculateCompletionDate_TrinketDishFasterProduction(t *testing.T) {
 	now := time.Now()
 
-	mugDetail := OrderDetailDB{
+	mugDetail := orders.OrderDetailDTO{
 		ID:       "test-12",
 		Type:     string(PieceTypeMugWithHandle),
 		Status:   string(StepKeyPending),
 		Quantity: 10,
 	}
 
-	trinketDetail := OrderDetailDB{
+	trinketDetail := orders.OrderDetailDTO{
 		ID:       "test-13",
 		Type:     string(PieceTypeTrinketDish),
 		Status:   string(StepKeyPending),

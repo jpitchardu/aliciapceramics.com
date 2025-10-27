@@ -1,27 +1,31 @@
 package scheduler
 
 import (
+	"aliciapceramics/server/orders"
 	"fmt"
 	"log"
 	"time"
 )
 
 func Run() error {
+
+	orders := orders.OrderService{}
+
 	if err := DeletePendingTasks(); err != nil {
 		return err
 	}
 
 	startDate, endDate := getNextWeek()
 
-	deadlineOrders, err := GetDeadlineOrders()
+	deadlineOrders, err := orders.GetOrdersWithDeadlines()
 
 	if err != nil {
-		return fmt.Errorf("failed to fetch orders with deadlines, error: %w", err)
+		return fmt.Errorf("[Scheduler run] error: %w", err)
 	}
 
 	tasksWithDeadlines := []TaskChainItem{}
 
-	for _, order := range deadlineOrders {
+	for _, order := range deadlineOrders.Orders {
 		for _, detail := range order.OrderDetails {
 			newTasks, err := CalculateTaskChain(detail, *order.DueDate)
 
@@ -141,7 +145,7 @@ func Run() error {
 
 	}
 
-	nonDeadlineOrders, err := GetNonDeadlineOrders()
+	nonDeadlineOrdersDTO, err := orders.GetNonDeadlineOrders()
 
 	if err != nil {
 		return fmt.Errorf("failed to fetch orders without deadlines, error: %w", err)
@@ -149,7 +153,7 @@ func Run() error {
 
 	tasksWithoutDeadlines := []TaskChainItem{}
 
-	for _, order := range nonDeadlineOrders {
+	for _, order := range nonDeadlineOrdersDTO.Orders {
 		for _, detail := range order.OrderDetails {
 			completionDate, err := CalculateCompletionDate(detail, time.Now())
 
@@ -274,10 +278,10 @@ func Run() error {
 	}
 
 	LogInfo("deadline_orders", map[string]any{
-		"numberOrDeadlineOrders":           len(deadlineOrders),
+		"numberOrDeadlineOrders":           len(deadlineOrders.Orders),
 		"tasksWithDeadlines":               len(tasksWithDeadlines),
 		"tasksWithDeadlinesInTheTimeRange": len(tasksWithDeadlinesWithinDateRange),
-		"numberOfNonDeadlineOrders":        len(nonDeadlineOrders),
+		"numberOfNonDeadlineOrders":        len(nonDeadlineOrdersDTO.Orders),
 		"tasksWithoutDeadlines":            len(tasksWithoutDeadlines),
 		"weeklySchedule":                   weekSchedule,
 	})
