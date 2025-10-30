@@ -37,21 +37,11 @@ func Run() error {
 		}
 	}
 
-	tasksWithDeadlinesWithinDateRange := []TaskChainItem{}
-
-	for _, task := range tasksWithDeadlines {
-		if endDate.Before(task.StartDate) {
-			continue
-		}
-
-		tasksWithDeadlinesWithinDateRange = append(tasksWithDeadlinesWithinDateRange, task)
-	}
-
 	weekSchedule := make(WeekSchedule)
 	orderDetailLastCompletion := make(map[string]time.Time)
 
 	for day := startDate; !day.After(endDate); day = day.AddDate(0, 0, 1) {
-		if len(tasksWithDeadlinesWithinDateRange) == 0 {
+		if len(tasksWithDeadlines) == 0 {
 			break
 		}
 
@@ -65,8 +55,8 @@ func Run() error {
 
 		anyTaskScheduled := false
 
-		for i := 0; i < len(tasksWithDeadlinesWithinDateRange); i++ {
-			task := tasksWithDeadlinesWithinDateRange[i]
+		for i := 0; i < len(tasksWithDeadlines); i++ {
+			task := tasksWithDeadlines[i]
 
 			earliestPossibleStart := task.StartDate
 			if lastCompletion, exists := orderDetailLastCompletion[task.OrderDetailId]; exists {
@@ -77,7 +67,7 @@ func Run() error {
 
 			if earliestPossibleStart.After(day) {
 				if day.Equal(endDate) {
-					tasksWithDeadlinesWithinDateRange = append(tasksWithDeadlinesWithinDateRange[:i], tasksWithDeadlinesWithinDateRange[i+1:]...)
+					tasksWithDeadlines = append(tasksWithDeadlines[:i], tasksWithDeadlines[i+1:]...)
 					i -= 1
 				}
 				continue
@@ -124,10 +114,10 @@ func Run() error {
 			orderDetailLastCompletion[task.OrderDetailId] = completionDate
 
 			if piecesForDay >= task.Quantity {
-				tasksWithDeadlinesWithinDateRange = append(tasksWithDeadlinesWithinDateRange[:i], tasksWithDeadlinesWithinDateRange[i+1:]...)
+				tasksWithDeadlines = append(tasksWithDeadlines[:i], tasksWithDeadlines[i+1:]...)
 				i -= 1
 			} else {
-				tasksWithDeadlinesWithinDateRange[i].Quantity -= piecesForDay
+				tasksWithDeadlines[i].Quantity -= piecesForDay
 			}
 
 		}
@@ -278,12 +268,11 @@ func Run() error {
 	}
 
 	LogInfo("deadline_orders", map[string]any{
-		"numberOrDeadlineOrders":           len(deadlineOrders.Orders),
-		"tasksWithDeadlines":               len(tasksWithDeadlines),
-		"tasksWithDeadlinesInTheTimeRange": len(tasksWithDeadlinesWithinDateRange),
-		"numberOfNonDeadlineOrders":        len(nonDeadlineOrdersDTO.Orders),
-		"tasksWithoutDeadlines":            len(tasksWithoutDeadlines),
-		"weeklySchedule":                   weekSchedule,
+		"numberOrDeadlineOrders":          len(deadlineOrders.Orders),
+		"remainingTasksWithDeadlines":     len(tasksWithDeadlines),
+		"numberOfNonDeadlineOrders":       len(nonDeadlineOrdersDTO.Orders),
+		"remainingTasksWithoutDeadlines":  len(tasksWithoutDeadlines),
+		"weeklySchedule":                  weekSchedule,
 	})
 
 	for day, schedule := range weekSchedule {

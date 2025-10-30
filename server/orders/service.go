@@ -31,7 +31,7 @@ func (s *OrderService) GetOrdersWithDeadlines() (OrdersDTO, error) {
 		return OrdersDTO{}, fmt.Errorf("failed to fetch orders with status %d and response %s", statusCode, string(body))
 	}
 
-	var orders []orderDB
+	var orders []orderRow
 
 	err = json.Unmarshal(body, &orders)
 
@@ -85,7 +85,7 @@ func (s *OrderService) GetNonDeadlineOrders() (OrdersDTO, error) {
 		return OrdersDTO{}, fmt.Errorf("failed to fetch orders with status %d and response %s", statusCode, string(body))
 	}
 
-	var orders []orderDB
+	var orders []orderRow
 
 	err = json.Unmarshal(body, &orders)
 
@@ -132,7 +132,7 @@ func (s *OrderService) CreateOrder(payload CreateOrderDTO) (OrderDTO, error) {
 
 	accessToken := uuid.New().String()
 
-	orderToCreate := orderDB{
+	orderToCreate := orderRow{
 		CustomerID:            payload.CustomerID,
 		Timeline:              payload.Timeline,
 		Inspiration:           payload.Inspiration,
@@ -158,7 +158,7 @@ func (s *OrderService) CreateOrder(payload CreateOrderDTO) (OrderDTO, error) {
 		return OrderDTO{}, fmt.Errorf("failed to create order: status %d", statusCode)
 	}
 
-	result := []orderDB{}
+	result := []orderRow{}
 
 	if err := json.Unmarshal(body, &result); err != nil {
 		return OrderDTO{}, fmt.Errorf("[CreateOrder] failed to parse response with error: %w, response: %s", err, string(body))

@@ -2,24 +2,24 @@ package orders
 
 import "time"
 
-type orderDB struct {
-	ID                    string          `json:"id,omitempty"`
-	CustomerID            string          `json:"customer_id"`
-	Type                  string          `json:"type"`
-	Timeline              string          `json:"timeline"`
-	Inspiration           string          `json:"inspiration"`
-	SpecialConsiderations string          `json:"special_considerations"`
-	Consent               bool            `json:"consent"`
-	AccessToken           string          `json:"access_token"`
-	Status                string          `json:"status"`
-	DueDate               *time.Time      `json:"due_date"`
-	OrderDetails          []orderDetailDB `json:"order_details"`
-	StatusChangedAt       *time.Time      `json:"status_changed_at,omitempty"`
-	CreatedAt             *time.Time      `json:"created_at,omitempty"`
-	UpdatedAt             *time.Time      `json:"updated_at,omitempty"`
+type orderRow struct {
+	ID                    string           `json:"id,omitempty"`
+	CustomerID            string           `json:"customer_id"`
+	Type                  string           `json:"type"`
+	Timeline              string           `json:"timeline"`
+	Inspiration           string           `json:"inspiration"`
+	SpecialConsiderations string           `json:"special_considerations"`
+	Consent               bool             `json:"consent"`
+	AccessToken           string           `json:"access_token"`
+	Status                string           `json:"status"`
+	DueDate               *time.Time       `json:"due_date"`
+	OrderDetails          []orderDetailRow `json:"order_details"`
+	StatusChangedAt       *time.Time       `json:"status_changed_at,omitempty"`
+	CreatedAt             *time.Time       `json:"created_at,omitempty"`
+	UpdatedAt             *time.Time       `json:"updated_at,omitempty"`
 }
 
-type orderDetailDB struct {
+type orderDetailRow struct {
 	ID                string     `json:"id,omitempty"`
 	OrderID           string     `json:"order_id"`
 	Type              string     `json:"type"`
