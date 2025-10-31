@@ -21,7 +21,7 @@ type OrderService struct {
 
 func (s *OrderService) GetOrdersWithDeadlines() (OrdersDTO, error) {
 
-	body, statusCode, err := database.MakeDBCall("GET", "orders?select=*,order_details(*)&due_date=not.is.null&status=neq.delivered&status.new.cancelled&order=due_date.asc", nil)
+	body, statusCode, err := database.MakeDBCall("GET", "orders?select=*,order_details(*)&due_date=not.is.null&status=neq.delivered&status=neq.cancelled&order=due_date.asc", nil)
 
 	if err != nil {
 		return OrdersDTO{}, fmt.Errorf("error in GetOrders: %w", err)
@@ -75,7 +75,7 @@ func (s *OrderService) GetOrdersWithDeadlines() (OrdersDTO, error) {
 
 func (s *OrderService) GetNonDeadlineOrders() (OrdersDTO, error) {
 
-	body, statusCode, err := database.MakeDBCall("GET", "orders?select=*,order_details(*)&due_date=not.is.null&status=neq.delivered&status.new.cancelled&order=due_date.asc", nil)
+	body, statusCode, err := database.MakeDBCall("GET", "orders?select=*,order_details(*)&due_date=not.is.null&status=neq.delivered&status=neq.cancelled&order=due_date.asc", nil)
 
 	if err != nil {
 		return OrdersDTO{}, fmt.Errorf("error in GetOrders: %w", err)

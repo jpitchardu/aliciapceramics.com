@@ -18,7 +18,7 @@ func GetDeadlineOrders() ([]OrderDB, error) {
 	}
 
 	// First, check if customer already exists
-	url := fmt.Sprintf("%s/rest/v1/orders?select=*,order_details(*)&due_date=not.is.null&status=neq.delivered&status.new.cancelled&order=due_date.asc", supabaseUrl)
+	url := fmt.Sprintf("%s/rest/v1/orders?select=*,order_details(*)&due_date=not.is.null&status=neq.delivered&status=neq.cancelled&order=due_date.asc", supabaseUrl)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
