@@ -8,8 +8,8 @@ import (
 
 func ScheduleTasksHandler(w http.ResponseWriter, r *http.Request) {
 
-	if r.Header.Get("User-Agent") != "vercel-cron/1.0" {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
