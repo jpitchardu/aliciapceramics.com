@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"aliciapceramics/server/availability"
 	"aliciapceramics/server/orders"
 	"fmt"
 	"log"
@@ -16,6 +17,9 @@ func Run() error {
 	}
 
 	startDate, endDate := getNextWeek()
+
+	availabilityRepo := availability.NewSupabaseAvailabilityRepository()
+	availabilityService := availability.NewAvailabilityService(availabilityRepo)
 
 	deadlineOrders, err := orders.GetOrdersWithDeadlines()
 
@@ -45,7 +49,11 @@ func Run() error {
 			break
 		}
 
-		capacity := WeeklySchedule[day.Weekday()]
+		capacity, err := availabilityService.GetAvailabilityForDate(day)
+		if err != nil {
+			return fmt.Errorf("[Scheduler run] failed to get availability for %s: %w", day.Format("2006-01-02"), err)
+		}
+
 		dayTasks := []TaskToCreate{}
 		var dayFocus StepKey
 
@@ -177,11 +185,16 @@ func Run() error {
 				}
 			}
 
+			dayCapacity, err := availabilityService.GetAvailabilityForDate(day)
+			if err != nil {
+				return fmt.Errorf("[Scheduler run] failed to get availability for %s: %w", day.Format("2006-01-02"), err)
+			}
+
 			daySchedule = &DaySchedule{
 				Weekday:        day.Weekday(),
 				Tasks:          []TaskToCreate{},
 				Mode:           initialMode,
-				AvailableHours: WeeklySchedule[day.Weekday()],
+				AvailableHours: dayCapacity,
 			}
 		}
 

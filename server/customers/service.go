@@ -7,10 +7,10 @@ import (
 type ICustomerService interface{}
 
 type CustomerService struct {
-	repo CustomerRepository
+	repo customerRepository
 }
 
-func NewCustomerService(repo CustomerRepository) *CustomerService {
+func NewCustomerService(repo customerRepository) *CustomerService {
 	return &CustomerService{repo: repo}
 }
 
