@@ -3,6 +3,10 @@
     {
       "path": "/api/scheduleTasks",
       "schedule": "0 0 * * 0"
+    },
+    {
+      "path": "/api/syncOrderStatuses",
+      "schedule": "0 * * * *"
     }
   ]
 }

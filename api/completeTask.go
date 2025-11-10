@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"aliciapceramics/server/orders"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -166,7 +167,7 @@ func completeTask(ctx context.Context, db *pgxpool.Pool, taskID string) error {
 	}
 
 	if newCompletedQuantity >= orderDetail.Quantity {
-		nextStatus, err := getNextStatus(task.TaskType)
+		nextStatus, err := orders.GetNextStatus(task.TaskType)
 		if err != nil {
 			return fmt.Errorf("failed to determine next status: %w", err)
 		}
@@ -182,7 +183,7 @@ func completeTask(ctx context.Context, db *pgxpool.Pool, taskID string) error {
 		}
 	}
 
-	orderStatus, err := calculateOrderStatus(ctx, tx, orderDetail.OrderID)
+	orderStatus, err := orders.CalculateOrderStatus(ctx, tx, orderDetail.OrderID)
 	if err != nil {
 		return fmt.Errorf("failed to calculate order status: %w", err)
 	}
@@ -202,76 +203,4 @@ func completeTask(ctx context.Context, db *pgxpool.Pool, taskID string) error {
 	}
 
 	return nil
-}
-
-func getNextStatus(taskType string) (string, error) {
-	statusMap := map[string]string{
-		"task_build_base":    "build",
-		"task_build_bowl":    "build",
-		"task_trim":          "trim",
-		"task_attach_handle": "attach",
-		"task_attach_lid":    "attach",
-		"task_bisque":        "bisque",
-		"task_glaze":         "glaze",
-		"task_fire":          "completed",
-	}
-
-	nextStatus, ok := statusMap[taskType]
-	if !ok {
-		return "", fmt.Errorf("unknown task type: %s", taskType)
-	}
-
-	return nextStatus, nil
-}
-
-func calculateOrderStatus(ctx context.Context, tx pgx.Tx, orderID string) (string, error) {
-	rows, err := tx.Query(ctx, `
-		SELECT status
-		FROM order_details
-		WHERE order_id = $1
-	`, orderID)
-
-	if err != nil {
-		return "", fmt.Errorf("failed to query order details: %w", err)
-	}
-	defer rows.Close()
-
-	var statuses []string
-	for rows.Next() {
-		var status string
-		if err := rows.Scan(&status); err != nil {
-			return "", fmt.Errorf("failed to scan status: %w", err)
-		}
-		statuses = append(statuses, status)
-	}
-
-	if err := rows.Err(); err != nil {
-		return "", fmt.Errorf("error iterating rows: %w", err)
-	}
-
-	if len(statuses) == 0 {
-		return "pending", nil
-	}
-
-	allCompleted := true
-	anyInProgress := false
-
-	for _, status := range statuses {
-		if status != "completed" {
-			allCompleted = false
-		}
-		if status != "pending" && status != "completed" {
-			anyInProgress = true
-		}
-	}
-
-	if allCompleted {
-		return "completed", nil
-	}
-
-	if anyInProgress {
-		return "in_progress", nil
-	}
-
-	return "confirmed", nil
 }

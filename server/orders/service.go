@@ -3,11 +3,13 @@ package orders
 import (
 	"aliciapceramics/server/database"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type IOrderService interface {
@@ -193,4 +195,100 @@ func (s *OrderService) CreateOrder(payload CreateOrderDTO) (OrderDTO, error) {
 	}
 
 	return dto, nil
+}
+
+func GetNextStatus(taskType string) (string, error) {
+	statusMap := map[string]string{
+		"task_build_base":    "build",
+		"task_build_bowl":    "build",
+		"task_trim":          "trim",
+		"task_attach_handle": "attach",
+		"task_attach_lid":    "attach",
+		"task_bisque":        "bisque",
+		"task_glaze":         "glaze",
+		"task_fire":          "completed",
+	}
+
+	nextStatus, ok := statusMap[taskType]
+	if !ok {
+		return "", fmt.Errorf("unknown task type: %s", taskType)
+	}
+
+	return nextStatus, nil
+}
+
+func CalculateOrderStatus(ctx context.Context, tx pgx.Tx, orderID string) (string, error) {
+	rows, err := tx.Query(ctx, `
+		SELECT status
+		FROM order_details
+		WHERE order_id = $1
+	`, orderID)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to query order details: %w", err)
+	}
+	defer rows.Close()
+
+	var statuses []string
+	for rows.Next() {
+		var status string
+		if err := rows.Scan(&status); err != nil {
+			return "", fmt.Errorf("failed to scan status: %w", err)
+		}
+		statuses = append(statuses, status)
+	}
+
+	if err := rows.Err(); err != nil {
+		return "", fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	if len(statuses) == 0 {
+		return "pending", nil
+	}
+
+	statusPriority := map[string]int{
+		"pending":    0,
+		"build":      1,
+		"trim":       2,
+		"attach":     3,
+		"trim_final": 4,
+		"bisque":     5,
+		"glaze":      6,
+		"fire":       7,
+		"completed":  8,
+	}
+
+	statusToOrderStatus := map[string]string{
+		"pending":    "pending",
+		"build":      "building",
+		"trim":       "trimming",
+		"attach":     "building",
+		"trim_final": "trimming",
+		"bisque":     "bisque_firing",
+		"glaze":      "glazing",
+		"fire":       "glaze_firing",
+		"completed":  "completed",
+	}
+
+	leastAdvancedStatus := "completed"
+	minPriority := statusPriority["completed"]
+
+	for _, status := range statuses {
+		priority, exists := statusPriority[status]
+		if !exists {
+			priority = 0
+		}
+
+		if priority < minPriority {
+			minPriority = priority
+			leastAdvancedStatus = status
+		}
+	}
+
+	orderStatus, exists := statusToOrderStatus[leastAdvancedStatus]
+	if !exists {
+		return "pending", nil
+	}
+
+	return orderStatus, nil
 }
