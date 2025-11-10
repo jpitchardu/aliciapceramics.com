@@ -103,6 +103,10 @@ func Run() error {
 				hoursUsed = CalculateHours(task.TaskType, task.PieceType, piecesForDay)
 			}
 
+			if piecesForDay == 0 {
+				continue
+			}
+
 			if hoursUsed > capacity*1.1 {
 				continue
 			}
@@ -243,6 +247,10 @@ func Run() error {
 			if piecesForDay == 0 && task.Quantity > 0 {
 				piecesForDay = task.Quantity
 				hoursUsed = CalculateHours(task.TaskType, task.PieceType, piecesForDay)
+			}
+
+			if piecesForDay == 0 {
+				continue
 			}
 
 			if hoursUsed > daySchedule.AvailableHours*1.1 {
