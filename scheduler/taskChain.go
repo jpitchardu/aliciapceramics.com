@@ -12,7 +12,7 @@ func CalculateTaskChain(orderDetail orders.OrderDetailDTO, dueDate time.Time) ([
 	safePieceType, isValidPieceType := IsValidPieceType(orderDetail.Type)
 	safeStep, isValidStep := IsValidStepKey(orderDetail.Status)
 
-	dueDateWithBuffer := dueDate.AddDate(0, 0, -3) // For sake of not stressing out
+	dueDateWithBuffer := dueDate.AddDate(0, 0, -3)
 
 	if !isValidPieceType {
 		return []TaskChainItem{}, fmt.Errorf("order detail %s is not valid with type %s", orderDetail.ID, orderDetail.Type)
@@ -42,6 +42,10 @@ func CalculateTaskChain(orderDetail orders.OrderDetailDTO, dueDate time.Time) ([
 		}
 
 		currentStepIndex++
+	}
+
+	if currentStepIndex >= len(process) {
+		return []TaskChainItem{}, nil
 	}
 
 	var tasks = []TaskChainItem{}

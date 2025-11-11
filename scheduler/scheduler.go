@@ -28,6 +28,7 @@ func Run() error {
 	}
 
 	tasksWithDeadlines := []TaskChainItem{}
+	orderDetailCurrentStatus := make(map[string]StepKey)
 
 	for _, order := range deadlineOrders.Orders {
 		for _, detail := range order.OrderDetails {
@@ -35,6 +36,10 @@ func Run() error {
 
 			if err != nil {
 				return fmt.Errorf("failed to calculate task chain for order detail %s with error %w", detail.ID, err)
+			}
+
+			if len(newTasks) > 0 {
+				orderDetailCurrentStatus[detail.ID] = newTasks[0].OrderDetailStatus
 			}
 
 			tasksWithDeadlines = append(tasksWithDeadlines, newTasks...)
@@ -65,6 +70,11 @@ func Run() error {
 
 		for i := 0; i < len(tasksWithDeadlines); i++ {
 			task := tasksWithDeadlines[i]
+
+			currentStatus, exists := orderDetailCurrentStatus[task.OrderDetailId]
+			if !exists || task.OrderDetailStatus != currentStatus {
+				continue
+			}
 
 			earliestPossibleStart := task.StartDate
 			if lastCompletion, exists := orderDetailLastCompletion[task.OrderDetailId]; exists {
@@ -128,6 +138,13 @@ func Run() error {
 			if piecesForDay >= task.Quantity {
 				tasksWithDeadlines = append(tasksWithDeadlines[:i], tasksWithDeadlines[i+1:]...)
 				i -= 1
+
+				for j := 0; j < len(tasksWithDeadlines); j++ {
+					if tasksWithDeadlines[j].OrderDetailId == task.OrderDetailId {
+						orderDetailCurrentStatus[task.OrderDetailId] = tasksWithDeadlines[j].OrderDetailStatus
+						break
+					}
+				}
 			} else {
 				tasksWithDeadlines[i].Quantity -= piecesForDay
 			}
@@ -167,6 +184,10 @@ func Run() error {
 
 			if err != nil {
 				return fmt.Errorf("failed to calculate task chain for order detail %s with error %w", detail.ID, err)
+			}
+
+			if len(newTasks) > 0 {
+				orderDetailCurrentStatus[detail.ID] = newTasks[0].OrderDetailStatus
 			}
 
 			tasksWithoutDeadlines = append(tasksWithoutDeadlines, newTasks...)
@@ -211,6 +232,11 @@ func Run() error {
 		for i := 0; i < len(tasksWithoutDeadlines); i++ {
 
 			task := tasksWithoutDeadlines[i]
+
+			currentStatus, exists := orderDetailCurrentStatus[task.OrderDetailId]
+			if !exists || task.OrderDetailStatus != currentStatus {
+				continue
+			}
 
 			earliestPossibleStart := task.StartDate
 			if lastCompletion, exists := orderDetailLastCompletion[task.OrderDetailId]; exists {
@@ -274,6 +300,13 @@ func Run() error {
 			if piecesForDay >= task.Quantity {
 				tasksWithoutDeadlines = append(tasksWithoutDeadlines[:i], tasksWithoutDeadlines[i+1:]...)
 				i -= 1
+
+				for j := 0; j < len(tasksWithoutDeadlines); j++ {
+					if tasksWithoutDeadlines[j].OrderDetailId == task.OrderDetailId {
+						orderDetailCurrentStatus[task.OrderDetailId] = tasksWithoutDeadlines[j].OrderDetailStatus
+						break
+					}
+				}
 			} else {
 				tasksWithoutDeadlines[i].Quantity -= piecesForDay
 			}
