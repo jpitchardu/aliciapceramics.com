@@ -76,28 +76,28 @@ export default function BulkCommissionPage() {
         initialStep="client-details"
         isValid={isBulkOrderValid}
       >
-        <Form.StepPage step="client-details">
+        <Form.StepPage stepKey="client-details">
           <ClientDetailsFormStep />
         </Form.StepPage>
 
-        <Form.StepPage step="add-pieces">
+        <Form.StepPage stepKey="add-pieces">
           <AddPiecesFormStep />
         </Form.StepPage>
 
-        <Form.StepPage step="order-details">
+        <Form.StepPage stepKey="order-details">
           <AddOrderDetailsFormStep
             earliestDate={new Date(bulkCodeData.earliestCompletionDate)}
             isBulkOrder={true}
           />
         </Form.StepPage>
 
-        <Form.StepPage step="terms">
+        <Form.StepPage stepKey="terms">
           <AcceptTermsAndConditionsFormStep
             bulkCommissionCodeId={bulkCodeData.id}
           />
         </Form.StepPage>
 
-        <Form.StepPage step="confirmed">
+        <Form.StepPage stepKey="confirmed">
           <OrderConfirmedFormStep />
         </Form.StepPage>
       </Form>
