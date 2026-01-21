@@ -17,7 +17,13 @@ const errorMessagesByErrorCode: Record<ErrorCode, string> = {
   UNKNOWN: "please try again",
 };
 
-export function AcceptTermsAndConditionsFormStep() {
+type AcceptTermsAndConditionsFormStepProps = {
+  bulkCommissionCodeId?: string;
+};
+
+export function AcceptTermsAndConditionsFormStep({
+  bulkCommissionCodeId,
+}: AcceptTermsAndConditionsFormStepProps = {}) {
   const {
     dispatchOrderChange,
     orderFormState: { order, isOrderValid },
@@ -46,7 +52,7 @@ export function AcceptTermsAndConditionsFormStep() {
 
     setErrorMessage(null);
     setIsSubmitting(true);
-    const createOrderResult = await createOrder(order);
+    const createOrderResult = await createOrder(order, bulkCommissionCodeId);
 
     if (!createOrderResult.success) {
       setIsSubmitting(false);
@@ -54,7 +60,14 @@ export function AcceptTermsAndConditionsFormStep() {
     }
 
     goNext();
-  }, [order, goNext, isSubmitting, setErrorMessage, setIsSubmitting]);
+  }, [
+    order,
+    bulkCommissionCodeId,
+    goNext,
+    isSubmitting,
+    setErrorMessage,
+    setIsSubmitting,
+  ]);
 
   return (
     <Form.StepPage stepKey={stepKey}>

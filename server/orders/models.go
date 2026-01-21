@@ -31,3 +31,13 @@ type orderDetailRow struct {
 	StatusChangedAt   *time.Time `json:"status_changed_at,omitempty"`
 	CreatedAt         *time.Time `json:"created_at,omitempty"`
 }
+
+type bulkCodeRow struct {
+	ID                      string  `json:"id,omitempty"`
+	Code                    string  `json:"code"`
+	Name                    string  `json:"name"`
+	EarliestCompletionDate  string  `json:"earliest_completion_date"`
+	RedeemedAt              *string `json:"redeemed_at,omitempty"`
+	CreatedAt               *string `json:"created_at,omitempty"`
+	UpdatedAt               *string `json:"updated_at,omitempty"`
+}

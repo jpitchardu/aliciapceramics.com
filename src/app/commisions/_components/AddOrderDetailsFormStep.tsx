@@ -9,7 +9,15 @@ import { getTwoMonthsFromNowInMinFormat } from "@/models/Order";
 
 const stepKey = "add-order-details";
 
-export function AddOrderDetailsFormStep() {
+type AddOrderDetailsFormStepProps = {
+  earliestDate?: Date;
+  isBulkOrder?: boolean;
+};
+
+export function AddOrderDetailsFormStep({
+  earliestDate,
+  isBulkOrder = false,
+}: AddOrderDetailsFormStepProps = {}) {
   const {
     orderFormState: { order, error },
     dispatchOrderChange,
@@ -75,15 +83,34 @@ export function AddOrderDetailsFormStep() {
             onChange={handleSpecialConsiderationsChange}
             value={order.specialConsiderations}
           />
-          <TextInput
-            type="date"
-            required
-            min={getTwoMonthsFromNowInMinFormat()}
-            label="prefered timeline (we can talk if you need it sooner)"
-            placeholder="when would you prefer it by?"
-            value={order.timeline?.toISOString().split("T")[0]}
-            onChange={handleTimelineChange}
-          />
+          {!isBulkOrder && (
+            <TextInput
+              type="date"
+              required
+              min={
+                earliestDate?.toISOString().split("T")[0] ||
+                getTwoMonthsFromNowInMinFormat()
+              }
+              label="prefered timeline (we can talk if you need it sooner)"
+              placeholder="when would you prefer it by?"
+              value={order.timeline?.toISOString().split("T")[0]}
+              onChange={handleTimelineChange}
+            />
+          )}
+          {isBulkOrder && earliestDate && (
+            <div className="w-full p-4 bg-blue-100 border border-blue-300 rounded-xl">
+              <p className="font-label text-earth-dark text-sm">
+                COMPLETION DATE
+              </p>
+              <p className="font-body text-earth-dark mt-1">
+                {earliestDate.toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </p>
+            </div>
+          )}
         </div>
       </div>
       <Form.Footer canGoNext={isValid} />
