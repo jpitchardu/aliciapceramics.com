@@ -217,6 +217,58 @@ func GetNextStatus(taskType string) (string, error) {
 	return nextStatus, nil
 }
 
+type BulkCodeService struct {
+	repository bulkCodeRepository
+}
+
+func NewBulkCodeService() *BulkCodeService {
+	return &BulkCodeService{
+		repository: &supabaseBulkCodeRepository{},
+	}
+}
+
+func (s *BulkCodeService) ValidateCode(code string) (*BulkCodeDTO, error) {
+	if code == "" {
+		return nil, fmt.Errorf("code is required")
+	}
+
+	bulkCodes, err := s.repository.GetByCode(code)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(bulkCodes) == 0 {
+		return nil, fmt.Errorf("invalid code")
+	}
+
+	bulkCode := bulkCodes[0]
+
+	if bulkCode.RedeemedAt != nil {
+		return nil, fmt.Errorf("code has already been redeemed")
+	}
+
+	redeemedAt := ""
+	if bulkCode.RedeemedAt != nil {
+		redeemedAt = *bulkCode.RedeemedAt
+	}
+
+	return &BulkCodeDTO{
+		ID:                     bulkCode.ID,
+		Code:                   bulkCode.Code,
+		Name:                   bulkCode.Name,
+		EarliestCompletionDate: bulkCode.EarliestCompletionDate,
+		RedeemedAt:             redeemedAt,
+	}, nil
+}
+
+func (s *BulkCodeService) MarkAsRedeemed(bulkCodeID string) error {
+	if bulkCodeID == "" {
+		return fmt.Errorf("bulk code ID is required")
+	}
+
+	return s.repository.MarkAsRedeemed(bulkCodeID)
+}
+
 func CalculateOrderStatus(ctx context.Context, tx pgx.Tx, orderID string) (string, error) {
 	rows, err := tx.Query(ctx, `
 		SELECT status
