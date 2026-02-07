@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "vercel dev",
     "build": "oxlint && next build",
     "start": "next start",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@upstash/ratelimit": "^2.0.6",
@@ -23,12 +25,14 @@
     "zod": "^4.0.17"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "lefthook": "^1.12.3",
     "oxlint": "^1.7.0",
+    "playwright": "^1.58.2",
     "prettier": "3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5"

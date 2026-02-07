@@ -12,11 +12,11 @@ import { OrderConfirmedFormStep } from "@/app/commisions/_components/OrderConfir
 import { useEffect } from "react";
 
 const FORM_STEPS = [
-  "client-details",
-  "add-pieces",
-  "order-details",
-  "terms",
-  "confirmed",
+  ClientDetailsFormStep.stepKey,
+  AddPiecesFormStep.stepKey,
+  AddOrderDetailsFormStep.stepKey,
+  AcceptTermsAndConditionsFormStep.stepKey,
+  OrderConfirmedFormStep.stepKey,
 ] as const;
 
 type FormStep = (typeof FORM_STEPS)[number];
@@ -59,47 +59,21 @@ export default function BulkCommissionPage() {
 
   return (
     <div className="min-h-screen bg-earth-form flex flex-col items-center justify-center px-6 py-12">
-      <div className="mb-6 text-center">
-        <h2 className="font-heading text-xl text-earth-dark">
-          BULK ORDER: {bulkCodeData.name}
-        </h2>
-        <p className="font-body text-sm text-earth-dark mt-2">
-          Code: {bulkCodeData.code}
-        </p>
-        <p className="font-body text-sm text-earth-dark">
-          Minimum 10 pieces required
-        </p>
-      </div>
-
       <Form<FormStep>
         stepKeys={FORM_STEPS}
         initialStep="client-details"
         isValid={isBulkOrderValid}
       >
-        <Form.StepPage stepKey="client-details">
-          <ClientDetailsFormStep />
-        </Form.StepPage>
-
-        <Form.StepPage stepKey="add-pieces">
-          <AddPiecesFormStep />
-        </Form.StepPage>
-
-        <Form.StepPage stepKey="order-details">
-          <AddOrderDetailsFormStep
-            earliestDate={new Date(bulkCodeData.earliestCompletionDate)}
-            isBulkOrder={true}
-          />
-        </Form.StepPage>
-
-        <Form.StepPage stepKey="terms">
-          <AcceptTermsAndConditionsFormStep
-            bulkCommissionCodeId={bulkCodeData.id}
-          />
-        </Form.StepPage>
-
-        <Form.StepPage stepKey="confirmed">
-          <OrderConfirmedFormStep />
-        </Form.StepPage>
+        <ClientDetailsFormStep />
+        <AddPiecesFormStep />
+        <AddOrderDetailsFormStep
+          earliestDate={new Date(bulkCodeData.earliestCompletionDate)}
+          isBulkOrder={true}
+        />
+        <AcceptTermsAndConditionsFormStep
+          bulkCommissionCodeId={bulkCodeData.id}
+        />
+        <OrderConfirmedFormStep />
       </Form>
 
       {getTotalPieceCount() > 0 && getTotalPieceCount() < 10 && (

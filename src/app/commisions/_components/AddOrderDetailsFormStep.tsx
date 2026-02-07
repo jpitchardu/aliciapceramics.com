@@ -48,7 +48,6 @@ export function AddOrderDetailsFormStep({
       payload: { timeline: new Date(value) },
     });
   };
-
   const errors = error
     ? {
         inspiration: z.treeifyError(error)?.properties?.inspiration,
