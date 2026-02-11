@@ -17,7 +17,10 @@ const statusToErrorCodeMap: Record<number, ErrorCode> = {
   500: "SERVER_ERROR",
 };
 
-export async function createOrder(order: Order): Promise<ApiResponse> {
+export async function createOrder(
+  order: Order,
+  bulkCommissionCodeId?: string,
+): Promise<ApiResponse> {
   const parsedOrder = orderSchema.parse(order);
 
   const res = await fetch("/api/order", {
@@ -29,6 +32,7 @@ export async function createOrder(order: Order): Promise<ApiResponse> {
       order: {
         ...parsedOrder,
         timeline: parsedOrder.timeline?.toISOString().slice(0, 10),
+        bulkCommissionCodeId: bulkCommissionCodeId || undefined,
       },
     }),
   });

@@ -34,6 +34,7 @@ type Order struct {
 	Inspiration           string        `json:"inspiration"`
 	SpecialConsiderations string        `json:"specialConsiderations"`
 	Consent               bool          `json:"consent"`
+	BulkCommissionCodeID  *string       `json:"bulkCommissionCodeId,omitempty"`
 }
 
 type OrderRequest struct {
@@ -224,6 +225,17 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		RespondWithError(w, http.StatusInternalServerError, "Failed to save order details", "ORDER_DETAILS_ERROR")
 		return
+	}
+
+	if req.Order.BulkCommissionCodeID != nil && *req.Order.BulkCommissionCodeID != "" {
+		bulkCodeService := orders.NewBulkCodeService()
+		err = bulkCodeService.MarkAsRedeemed(*req.Order.BulkCommissionCodeID)
+		if err != nil {
+			LogError("mark_bulk_code_redeemed", err, map[string]any{
+				"bulk_code_id": *req.Order.BulkCommissionCodeID,
+				"order_id":     orderId,
+			})
+		}
 	}
 
 	// Create SMS consent record for TCPA compliance if SMS was selected

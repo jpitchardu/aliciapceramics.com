@@ -50,3 +50,15 @@ type UpdateOrderDTO struct {
 
 type CancelOrderDTO struct {
 }
+
+type BulkCodeDTO struct {
+	ID                      string
+	Code                    string
+	Name                    string
+	EarliestCompletionDate  string
+	RedeemedAt              string
+}
+
+type ValidateBulkCodeDTO struct {
+	Code string
+}
