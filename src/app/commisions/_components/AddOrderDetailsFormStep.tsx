@@ -57,7 +57,7 @@ export function AddOrderDetailsFormStep({
       }
     : {};
 
-  const isValid = Object.values(errors).every((v) => !!v);
+  const isValid = Object.values(errors).every((v) => !v);
 
   return (
     <Form.StepPage stepKey={stepKey}>
