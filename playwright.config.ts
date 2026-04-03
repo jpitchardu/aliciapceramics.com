@@ -18,7 +18,12 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         launchOptions: {
-          executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+          // In local dev this environment has a mismatched Playwright/browser version.
+          // Override the executable path so tests can run. In CI, Playwright installs
+          // the correct browser version so no override is needed.
+          executablePath: process.env.CI
+            ? undefined
+            : "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
           args: ["--no-sandbox", "--disable-setuid-sandbox"],
         },
       },
@@ -26,7 +31,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "pnpm dev",
+    // Use next dev directly — pnpm dev uses vercel dev which isn't available in CI.
+    command: "pnpm exec next dev --port 3000",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
   },
