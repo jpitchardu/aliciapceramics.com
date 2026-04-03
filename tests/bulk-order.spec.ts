@@ -181,6 +181,50 @@ test.describe("Bulk Order Form - Your Vision Step", () => {
 
     await expect(page.getByText(/more pieces needed/i)).toBeVisible();
   });
+
+  test("continue button is enabled when bulk code has a near-term completion date (under 2 months)", async ({
+    page,
+  }) => {
+    // Bulk orders can have completion dates less than 2 months away — the 2-month
+    // minimum in orderSchema is for regular commissions only. This test reproduces
+    // the real bug where the timeline schema error disables the Your Vision continue button.
+    await page.route("**/api/validateBulkCode", (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          valid: true,
+          data: {
+            id: "mock-bulk-id-near",
+            code: "NEAR2026",
+            name: "Near Term Bulk Order",
+            earliestCompletionDate: "2026-05-01", // 4 weeks away, under the 2-month minimum
+          },
+        }),
+      });
+    });
+
+    await page.goto("/bulk");
+    await enterBulkCode(page, "NEAR2026");
+    await fillClientDetails(page);
+    await page.getByRole("button", { name: "continue →" }).click();
+
+    await expect(page.getByText("what are you looking for?")).toBeVisible();
+    await addDinnwarePieces(page, 10);
+    await page.getByRole("button", { name: "continue →" }).click();
+
+    await expect(page.getByText("Your vision")).toBeVisible();
+
+    // The completion date info should be visible (read-only, not a date input)
+    await expect(page.getByText("COMPLETION DATE")).toBeVisible();
+    await expect(page.getByText("May 1, 2026")).toBeVisible();
+
+    // Continue should be enabled — timeline is not user-editable in bulk orders
+    await expect(
+      page.getByRole("button", { name: "continue →" }),
+    ).toBeEnabled();
+  });
 });
 
 test.describe("Bulk Order Form - Code Input Step", () => {

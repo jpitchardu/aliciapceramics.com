@@ -48,16 +48,18 @@ export function AddOrderDetailsFormStep({
       payload: { timeline: new Date(value) },
     });
   };
-  const errors = error
+  const treeified = error ? z.treeifyError(error) : null;
+  const errors = treeified
     ? {
-        inspiration: z.treeifyError(error)?.properties?.inspiration,
-        specialConsiderations:
-          z.treeifyError(error)?.properties?.specialConsiderations,
-        timeline: z.treeifyError(error)?.properties?.timeline,
+        inspiration: treeified.properties?.inspiration,
+        specialConsiderations: treeified.properties?.specialConsiderations,
+        // For bulk orders the timeline is set automatically and not editable,
+        // so timeline errors should not block this step.
+        ...(isBulkOrder ? {} : { timeline: treeified.properties?.timeline }),
       }
     : {};
 
-  const isValid = Object.values(errors).every((v) => !!v);
+  const isValid = Object.values(errors).every((v) => !v);
 
   return (
     <Form.StepPage stepKey={stepKey}>
