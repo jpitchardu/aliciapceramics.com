@@ -1,4 +1,5 @@
 import { CSSProperties } from "react";
+import Image from "next/image";
 
 interface PhotoProps {
   src?: string;
@@ -16,10 +17,19 @@ export function Photo({
       style={{
         width: "100%",
         aspectRatio: ratio,
-        background: `url(${src}) center / cover no-repeat`,
+        position: "relative",
         display: "block",
+        overflow: "hidden",
         ...style,
       }}
-    />
+    >
+      <Image
+        src={src}
+        alt=""
+        fill
+        sizes="(max-width: 1024px) 50vw, 33vw"
+        style={{ objectFit: "cover" }}
+      />
+    </div>
   );
 }

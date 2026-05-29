@@ -2,10 +2,13 @@ import Link from "next/link";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
-import { PLACEHOLDER_PIECES } from "@/lib/placeholder-pieces";
-import { DROP } from "@/lib/config";
+import { DROP, MEDIA_BASE_URL } from "@/lib/config";
 
-const drop = PLACEHOLDER_PIECES;
+const HERO = `${MEDIA_BASE_URL}/hero.jpg`;
+const EDITORIAL = Array.from(
+  { length: 7 },
+  (_, i) => `${MEDIA_BASE_URL}/editorial-${i + 1}.jpg`,
+);
 
 export default function HomePage() {
   return (
@@ -14,7 +17,7 @@ export default function HomePage() {
       <div className="lg:hidden">
         {/* hero */}
         <div style={{ padding: "8px 16px 0" }}>
-          <Photo ratio="5 / 4" src="/assets/hero-square.png" />
+          <Photo ratio="5 / 4" src={HERO} />
           <div style={{ paddingTop: 18, textAlign: "center" }}>
             <span
               style={{
@@ -44,18 +47,12 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* scatter — 3 images, compact stagger */}
+        {/* scatter — 3 editorial images, compact stagger */}
         <div style={{ padding: "40px 20px 0" }}>
           {[
-            { src: drop[0].src, w: 64, ratio: "3 / 4", align: "left", mt: 0 },
-            {
-              src: drop[2].src,
-              w: 50,
-              ratio: "1 / 1",
-              align: "right",
-              mt: -48,
-            },
-            { src: drop[5].src, w: 72, ratio: "4 / 5", align: "left", mt: 32 },
+            { src: EDITORIAL[0], w: 64, ratio: "3 / 4", align: "left", mt: 0 },
+            { src: EDITORIAL[1], w: 50, ratio: "1 / 1", align: "right", mt: -48 },
+            { src: EDITORIAL[2], w: 72, ratio: "4 / 5", align: "left", mt: 32 },
           ].map((s, i) => (
             <div
               key={i}
@@ -114,7 +111,7 @@ export default function HomePage() {
         {/* hero */}
         <div style={{ padding: "20px 56px 0", position: "relative" }}>
           <div style={{ position: "relative" }}>
-            <Photo ratio="16 / 9" src="/assets/banner.png" />
+            <Photo ratio="16 / 9" src={HERO} />
             <div
               style={{
                 position: "absolute",
@@ -198,47 +195,17 @@ export default function HomePage() {
           }}
         >
           {[
-            { src: drop[0].src, left: "0%", top: 0, w: "26%", ratio: "3 / 4" },
-            {
-              src: drop[1].src,
-              left: "28%",
-              top: 48,
-              w: "20%",
-              ratio: "4 / 5",
-            },
-            { src: drop[2].src, left: "52%", top: 0, w: "22%", ratio: "1 / 1" },
-            {
-              src: drop[3].src,
-              left: "76%",
-              top: 32,
-              w: "24%",
-              ratio: "3 / 4",
-            },
-            {
-              src: drop[4].src,
-              left: "6%",
-              top: 380,
-              w: "22%",
-              ratio: "3 / 4",
-            },
-            {
-              src: drop[5].src,
-              left: "32%",
-              top: 340,
-              w: "24%",
-              ratio: "4 / 5",
-            },
-            {
-              src: drop[6].src,
-              left: "60%",
-              top: 360,
-              w: "20%",
-              ratio: "3 / 4",
-            },
+            { src: EDITORIAL[0], left: "0%",  top: 0,   w: "26%", ratio: "3 / 4" },
+            { src: EDITORIAL[1], left: "28%", top: 48,  w: "20%", ratio: "4 / 5" },
+            { src: EDITORIAL[2], left: "52%", top: 0,   w: "22%", ratio: "1 / 1" },
+            { src: EDITORIAL[3], left: "76%", top: 32,  w: "24%", ratio: "3 / 4" },
+            { src: EDITORIAL[4], left: "6%",  top: 380, w: "22%", ratio: "3 / 4" },
+            { src: EDITORIAL[5], left: "32%", top: 340, w: "24%", ratio: "4 / 5" },
+            { src: EDITORIAL[6], left: "60%", top: 360, w: "20%", ratio: "3 / 4" },
           ].map((p, i) => (
             <Link
               key={i}
-              href={`/shop/${drop[i].id}`}
+              href="/shop"
               style={{ textDecoration: "none" }}
             >
               <div
