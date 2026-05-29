@@ -188,37 +188,23 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* desktop scatter — 4 images, reduced height so text stays visible */}
+        {/* desktop scatter — 7 images, all contained within fixed height */}
         <div
           style={{
             position: "relative",
-            height: 680,
+            height: 820,
             margin: "64px 56px 0",
+            overflow: "hidden",
           }}
         >
           {[
-            { src: drop[0].src, left: "0%", top: 0, w: "30%", ratio: "3 / 4" },
-            {
-              src: drop[2].src,
-              left: "38%",
-              top: 80,
-              w: "24%",
-              ratio: "1 / 1",
-            },
-            {
-              src: drop[5].src,
-              left: "68%",
-              top: 20,
-              w: "20%",
-              ratio: "3 / 4",
-            },
-            {
-              src: drop[3].src,
-              left: "18%",
-              top: 320,
-              w: "22%",
-              ratio: "3 / 4",
-            },
+            { src: drop[0].src, left: "0%",  top: 0,   w: "26%", ratio: "3 / 4" },
+            { src: drop[1].src, left: "28%", top: 48,  w: "20%", ratio: "4 / 5" },
+            { src: drop[2].src, left: "52%", top: 0,   w: "22%", ratio: "1 / 1" },
+            { src: drop[3].src, left: "76%", top: 32,  w: "24%", ratio: "3 / 4" },
+            { src: drop[4].src, left: "6%",  top: 380, w: "22%", ratio: "3 / 4" },
+            { src: drop[5].src, left: "32%", top: 340, w: "24%", ratio: "4 / 5" },
+            { src: drop[6].src, left: "60%", top: 360, w: "20%", ratio: "3 / 4" },
           ].map((p, i) => (
             <Link
               key={i}
