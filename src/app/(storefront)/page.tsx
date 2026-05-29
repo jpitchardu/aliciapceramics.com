@@ -117,7 +117,7 @@ export default function HomePage() {
         {/* hero */}
         <div style={{ padding: "20px 56px 0", position: "relative" }}>
           <div style={{ position: "relative" }}>
-            <Photo ratio="16 / 9" src={HERO} />
+            <Photo ratio="2 / 3" src={HERO} />
             <div
               style={{
                 position: "absolute",
