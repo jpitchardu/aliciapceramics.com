@@ -118,10 +118,10 @@ describe("cartReducer", () => {
 
 describe("cart total", () => {
   it("sums prices across all items", () => {
-    const state = cartReducer(
-      cartReducer(empty, { type: "ADD", piece: mug }),
-      { type: "ADD", piece: bowl },
-    );
+    const state = cartReducer(cartReducer(empty, { type: "ADD", piece: mug }), {
+      type: "ADD",
+      piece: bowl,
+    });
     const total = state.items.reduce(
       (s, i) => s + i.piece.price * i.quantity,
       0,

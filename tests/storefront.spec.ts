@@ -3,8 +3,12 @@ import { test, expect } from "@playwright/test";
 test.describe("home page", () => {
   test("renders logo and enter the shop link", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator('img[alt="Alicia P Ceramics"]').first()).toBeVisible();
-    await expect(page.getByRole("link", { name: /enter the shop/i })).toBeVisible();
+    await expect(
+      page.locator('img[alt="Alicia P Ceramics"]').first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /enter the shop/i }),
+    ).toBeVisible();
   });
 
   test("enter the shop link navigates to /shop", async ({ page }) => {
@@ -33,7 +37,9 @@ test.describe("shop page", () => {
   test("nav ceramics link returns to shop", async ({ page }) => {
     await page.goto("/shop");
     // TopNav on mobile or DesktopNav on desktop — both have a ceramics link
-    await expect(page.getByRole("link", { name: /ceramics/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /ceramics/i }).first(),
+    ).toBeVisible();
   });
 });
 
@@ -45,7 +51,9 @@ test.describe("piece detail page", () => {
     await page.waitForLoadState("networkidle");
 
     // Page should show an "add to cart" action
-    await expect(page.getByRole("button", { name: /add to cart/i })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /add to cart/i }),
+    ).toBeVisible();
   });
 
   test("add to cart navigates to /cart", async ({ page }) => {
