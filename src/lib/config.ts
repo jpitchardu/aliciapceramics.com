@@ -16,7 +16,7 @@ export const DROP = {
   date: "jun 2026",
   subtitle: "revelations of creation.",
   description: "made of earth, full of His spirit.",
-  opensAt: "2026-05-30T09:00:00-06:00", // 9am CST
+  opensAt: "2026-05-30T09:00:00-05:00", // 9am CDT (Dallas)
 };
 
 export const PICKUP_SLOTS = [

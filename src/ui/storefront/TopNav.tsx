@@ -12,26 +12,20 @@ export function TopNav() {
         alignItems: "center",
       }}
     >
-      <Link
-        href="/shop"
-        style={{ textDecoration: "none", justifySelf: "start" }}
-      >
-        <CeramicLabel color="var(--ink-soft)">shop</CeramicLabel>
-      </Link>
+      <div style={{ display: "flex", gap: 20 }}>
+        <Link href="/shop" style={{ textDecoration: "none" }}>
+          <CeramicLabel color="var(--ink-soft)">shop</CeramicLabel>
+        </Link>
+        <Link href="/shop?collection=archive" style={{ textDecoration: "none" }}>
+          <CeramicLabel color="var(--ink-soft)">archive</CeramicLabel>
+        </Link>
+      </div>
       <Link href="/">
         <Logo width={108} />
       </Link>
-      <div style={{ justifySelf: "end", display: "flex", gap: 20 }}>
-        <Link
-          href="/shop?collection=archive"
-          style={{ textDecoration: "none" }}
-        >
-          <CeramicLabel color="var(--ink-soft)">archive</CeramicLabel>
-        </Link>
-        <Link href="/cart" style={{ textDecoration: "none" }}>
-          <CeramicLabel color="var(--ink-soft)">cart</CeramicLabel>
-        </Link>
-      </div>
+      <Link href="/cart" style={{ textDecoration: "none", justifySelf: "end" }}>
+        <CeramicLabel color="var(--ink-soft)">cart</CeramicLabel>
+      </Link>
     </div>
   );
 }
