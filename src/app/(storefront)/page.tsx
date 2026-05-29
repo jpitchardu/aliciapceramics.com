@@ -191,58 +191,71 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* desktop scatter — 7 images, all contained within fixed height */}
+        {/* desktop scatter — 7 images, alternating z-index, funky layout */}
         <div
           style={{
             position: "relative",
-            height: 820,
+            height: 860,
             margin: "64px 56px 0",
             overflow: "hidden",
           }}
         >
           {[
-            { src: EDITORIAL[0], left: "0%", top: 0, w: "26%", ratio: "3 / 4" },
+            {
+              src: EDITORIAL[0],
+              left: "2%",
+              top: 0,
+              w: "28%",
+              ratio: "3 / 4",
+              z: 2,
+            },
             {
               src: EDITORIAL[1],
-              left: "28%",
-              top: 48,
-              w: "20%",
+              left: "22%",
+              top: 120,
+              w: "18%",
               ratio: "4 / 5",
+              z: 1,
             },
             {
               src: EDITORIAL[2],
-              left: "52%",
-              top: 0,
-              w: "22%",
-              ratio: "1 / 1",
+              left: "44%",
+              top: 20,
+              w: "25%",
+              ratio: "3 / 4",
+              z: 2,
             },
             {
               src: EDITORIAL[3],
-              left: "76%",
-              top: 32,
-              w: "24%",
-              ratio: "3 / 4",
+              left: "65%",
+              top: 180,
+              w: "20%",
+              ratio: "1 / 1",
+              z: 1,
             },
             {
               src: EDITORIAL[4],
-              left: "6%",
-              top: 380,
+              left: "10%",
+              top: 420,
               w: "22%",
-              ratio: "3 / 4",
+              ratio: "4 / 5",
+              z: 2,
             },
             {
               src: EDITORIAL[5],
-              left: "32%",
-              top: 340,
-              w: "24%",
-              ratio: "4 / 5",
+              left: "36%",
+              top: 380,
+              w: "28%",
+              ratio: "3 / 4",
+              z: 1,
             },
             {
               src: EDITORIAL[6],
-              left: "60%",
-              top: 360,
-              w: "20%",
-              ratio: "3 / 4",
+              left: "68%",
+              top: 350,
+              w: "21%",
+              ratio: "4 / 5",
+              z: 2,
             },
           ].map((p, i) => (
             <Link key={i} href="/shop" style={{ textDecoration: "none" }}>
@@ -250,6 +263,7 @@ export default function HomePage() {
                 style={{
                   position: "absolute",
                   left: p.left,
+                  zIndex: p.z,
                   top: p.top,
                   width: p.w,
                 }}
