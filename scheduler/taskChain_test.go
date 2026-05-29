@@ -1,7 +1,7 @@
 package scheduler
 
 import (
-	"aliciapceramics/server/orders"
+	"aliciapceramics/legacy/server/orders"
 	"testing"
 	"time"
 

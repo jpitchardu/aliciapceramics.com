@@ -1,8 +1,8 @@
 package scheduler
 
 import (
-	"aliciapceramics/server/availability"
-	"aliciapceramics/server/orders"
+	"aliciapceramics/legacy/server/availability"
+	"aliciapceramics/legacy/server/orders"
 	"fmt"
 	"log"
 	"time"

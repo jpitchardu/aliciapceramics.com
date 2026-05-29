@@ -1,0 +1,247 @@
+import Link from "next/link";
+import { Photo } from "@/ui/Photo";
+import { CeramicLabel } from "@/ui/CeramicLabel";
+import { Badge } from "@/ui/Badge";
+import { Sig } from "@/ui/Sig";
+import { Piece } from "@/types/piece";
+import { DROP } from "@/lib/config";
+
+async function getPieces(): Promise<Piece[]> {
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  try {
+    const res = await fetch(`${base}/api/catalog`, {
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
+
+export default async function ShopPage() {
+  const pieces = await getPieces();
+  const hereCount = pieces.filter((p) => p.state === "here").length;
+  const goneCount = pieces.filter((p) => p.state === "gone").length;
+
+  return (
+    <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
+      {/* ── MOBILE ─────────────────────────────────────────────────── */}
+      <div className="lg:hidden">
+        <div
+          style={{
+            padding: "8px 24px 22px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+          }}
+        >
+          <CeramicLabel color="var(--ink-faint)">
+            {DROP.name} · {pieces.length} pieces
+          </CeramicLabel>
+          <CeramicLabel color="var(--ink-faint)">tap a piece</CeramicLabel>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            padding: "0 16px",
+          }}
+        >
+          {pieces.map((p) => (
+            <Link
+              key={p.id}
+              href={`/shop/${p.id}`}
+              style={{ textDecoration: "none" }}
+            >
+              <figure
+                style={{ margin: 0, position: "relative", cursor: "pointer" }}
+              >
+                <Badge state={p.state} compact />
+                <Photo
+                  ratio="4 / 5"
+                  src={p.src}
+                  style={{ opacity: p.state === "gone" ? 0.5 : 1 }}
+                />
+              </figure>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ── DESKTOP ────────────────────────────────────────────────── */}
+      <div className="hidden lg:block">
+        {/* collection header */}
+        <div style={{ padding: "64px 56px 0", textAlign: "center" }}>
+          <CeramicLabel color="var(--ink-faint)">
+            a new drop · {DROP.date}
+          </CeramicLabel>
+          <div style={{ marginTop: 22 }}>
+            <span
+              style={{
+                fontFamily: "var(--serif)",
+                fontSize: 32,
+                fontWeight: 300,
+                letterSpacing: "0.6em",
+                textTransform: "uppercase",
+                color: "var(--ink)",
+              }}
+            >
+              {DROP.name}
+            </span>
+          </div>
+          <p
+            style={{
+              marginTop: 22,
+              fontFamily: "var(--serif)",
+              fontSize: 22,
+              fontStyle: "italic",
+              fontWeight: 300,
+              color: "var(--ink-soft)",
+              lineHeight: 1.4,
+              margin: "22px auto 0",
+              maxWidth: 640,
+              letterSpacing: "-0.005em",
+            }}
+          >
+            made of earth, full of His spirit — {pieces.length} new pieces,
+            revelations of creation.
+          </p>
+        </div>
+
+        {/* meta row / filters */}
+        <div
+          style={{
+            margin: "64px 56px 0",
+            paddingBottom: 18,
+            borderBottom: "1px solid var(--rule-strong)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+          }}
+        >
+          <div style={{ display: "flex", gap: 26 }}>
+            {["all", "mugs", "bowls", "pitchers", "small things"].map(
+              (f, i) => (
+                <CeramicLabel
+                  key={f}
+                  color={i === 0 ? "var(--ink)" : "var(--ink-faint)"}
+                  style={
+                    i === 0
+                      ? {
+                          borderBottom: "1px solid var(--ink)",
+                          paddingBottom: 4,
+                        }
+                      : {}
+                  }
+                >
+                  {f}
+                </CeramicLabel>
+              ),
+            )}
+          </div>
+          <CeramicLabel color="var(--ink-faint)">
+            {hereCount} still here · {goneCount} taken
+          </CeramicLabel>
+        </div>
+
+        {/* grid */}
+        <div
+          style={{
+            padding: "40px 56px 0",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 48,
+          }}
+        >
+          {pieces.map((p) => (
+            <Link
+              key={p.id}
+              href={`/shop/${p.id}`}
+              style={{ textDecoration: "none" }}
+            >
+              <figure style={{ margin: 0, cursor: "pointer" }}>
+                <div style={{ position: "relative" }}>
+                  <Badge state={p.state} />
+                  <Photo
+                    ratio="4 / 5"
+                    src={p.src}
+                    style={{ opacity: p.state === "gone" ? 0.5 : 1 }}
+                  />
+                </div>
+                <div
+                  style={{
+                    marginTop: 14,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                    gap: 12,
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontFamily: "var(--serif)",
+                        fontSize: 16,
+                        fontStyle: "italic",
+                        fontWeight: 300,
+                        color:
+                          p.state === "gone"
+                            ? "var(--ink-faint)"
+                            : "var(--ink)",
+                        lineHeight: 1.2,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {p.title}
+                    </div>
+                    <div style={{ marginTop: 4 }}>
+                      <CeramicLabel
+                        color="var(--ink-faint)"
+                        style={{ fontSize: 9 }}
+                      >
+                        no. {p.n}
+                      </CeramicLabel>
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      fontFamily: "var(--serif)",
+                      fontSize: 15,
+                      fontWeight: 300,
+                      color:
+                        p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
+                      textDecoration:
+                        p.state === "gone" ? "line-through" : "none",
+                      flexShrink: 0,
+                    }}
+                  >
+                    ${p.price}
+                  </span>
+                </div>
+              </figure>
+            </Link>
+          ))}
+        </div>
+
+        {/* end of drop */}
+        <div style={{ padding: "80px 56px 0", textAlign: "center" }}>
+          <CeramicLabel color="var(--ink-faint)">
+            end of drop · {DROP.name} · {DROP.date}
+          </CeramicLabel>
+          <Sig
+            size={32}
+            color="var(--ink)"
+            style={{ marginTop: 18, display: "inline-block" }}
+          >
+            — AP
+          </Sig>
+        </div>
+      </div>
+    </div>
+  );
+}

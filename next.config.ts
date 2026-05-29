@@ -1,14 +1,21 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  async redirects() {
-    return [
+  images: {
+    remotePatterns: [
       {
-        source: "/",
-        destination: "/commisions",
-        permanent: false,
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
       },
-    ];
+      {
+        protocol: "https",
+        hostname: "*.squarecdn.com",
+      },
+      {
+        protocol: "https",
+        hostname: "items-images-production.s3.us-west-2.amazonaws.com",
+      },
+    ],
   },
 };
 
