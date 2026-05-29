@@ -55,7 +55,9 @@ export function CartClient() {
     setError("");
 
     const slot = delivery === "pickup" ? TIME_SLOTS[selectedSlot] : null;
-    const pickupSlot = slot ? `${slot.day} ${slot.date} ${slot.window}` : undefined;
+    const pickupSlot = slot
+      ? `${slot.day} ${slot.date} ${slot.window}`
+      : undefined;
 
     try {
       const res = await fetch("/api/checkout", {
