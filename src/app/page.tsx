@@ -33,17 +33,22 @@ export default function HomePage() {
             href="/shop"
             style={{ textDecoration: "none", justifySelf: "start" }}
           >
-            <CeramicLabel color="var(--ink-soft)">ceramics</CeramicLabel>
+            <CeramicLabel color="var(--ink-soft)">shop</CeramicLabel>
           </Link>
           <Link href="/">
             <Logo width={108} />
           </Link>
-          <Link
-            href="/shop?collection=archive"
-            style={{ textDecoration: "none", justifySelf: "end" }}
-          >
-            <CeramicLabel color="var(--ink-soft)">archive</CeramicLabel>
-          </Link>
+          <div style={{ justifySelf: "end", display: "flex", gap: 20 }}>
+            <Link
+              href="/shop?collection=archive"
+              style={{ textDecoration: "none" }}
+            >
+              <CeramicLabel color="var(--ink-soft)">archive</CeramicLabel>
+            </Link>
+            <Link href="/cart" style={{ textDecoration: "none" }}>
+              <CeramicLabel color="var(--ink-soft)">cart</CeramicLabel>
+            </Link>
+          </div>
         </div>
 
         {/* hero */}
@@ -78,28 +83,24 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* scatter */}
-        <div style={{ padding: "64px 20px 0", position: "relative" }}>
+        {/* scatter — 3 images, compact stagger */}
+        <div style={{ padding: "40px 20px 0" }}>
           {[
-            { src: drop[0].src, w: 62, ratio: "3 / 4", align: "left", mt: 0 },
+            { src: drop[0].src, w: 64, ratio: "3 / 4", align: "left", mt: 0 },
             {
               src: drop[2].src,
-              w: 48,
-              ratio: "1 / 1",
-              align: "right",
-              mt: -72,
-            },
-            { src: drop[5].src, w: 84, ratio: "4 / 5", align: "left", mt: 84 },
-            { src: drop[3].src, w: 42, ratio: "3 / 4", align: "left", mt: 48 },
-            {
-              src: drop[7].src,
               w: 50,
               ratio: "1 / 1",
               align: "right",
-              mt: -110,
+              mt: -48,
             },
-            { src: drop[8].src, w: 72, ratio: "4 / 5", align: "right", mt: 72 },
-            { src: drop[10].src, w: 56, ratio: "3 / 4", align: "left", mt: 56 },
+            {
+              src: drop[5].src,
+              w: 72,
+              ratio: "4 / 5",
+              align: "left",
+              mt: 32,
+            },
           ].map((s, i) => (
             <div
               key={i}
@@ -116,7 +117,7 @@ export default function HomePage() {
         </div>
 
         {/* quote */}
-        <div style={{ padding: "88px 36px 0", textAlign: "center" }}>
+        <div style={{ padding: "56px 36px 0", textAlign: "center" }}>
           <p
             style={{
               fontFamily: "var(--serif)",
@@ -147,7 +148,7 @@ export default function HomePage() {
         </div>
 
         {/* enter the shop */}
-        <div style={{ padding: "80px 24px 0", textAlign: "center" }}>
+        <div style={{ padding: "56px 24px 0", textAlign: "center" }}>
           <Link href="/shop" className="ds-action">
             enter the shop
           </Link>
