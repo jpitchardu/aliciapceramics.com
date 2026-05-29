@@ -666,7 +666,7 @@ export function CartClient() {
             {SITE.name} · est. {SITE.estYear}
           </CeramicLabel>
           <Sig size={26} color="var(--ink-soft)">
-            a.
+            AP
           </Sig>
         </div>
       </div>
