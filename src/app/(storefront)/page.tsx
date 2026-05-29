@@ -3,6 +3,7 @@ import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
 import { DROP, MEDIA_BASE_URL } from "@/lib/config";
+import { Countdown } from "@/ui/Countdown";
 
 const HERO = `${MEDIA_BASE_URL}/hero.jpg`;
 const EDITORIAL = Array.from(
@@ -10,7 +11,19 @@ const EDITORIAL = Array.from(
   (_, i) => `${MEDIA_BASE_URL}/editorial-${i + 1}.jpg`,
 );
 
+const isOpen = Date.now() >= new Date(DROP.opensAt).getTime();
+
 export default function HomePage() {
+  if (!isOpen) {
+    return (
+      <Countdown
+        opensAt={DROP.opensAt}
+        dropName={DROP.name}
+        dropSubtitle={DROP.subtitle}
+      />
+    );
+  }
+
   return (
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
