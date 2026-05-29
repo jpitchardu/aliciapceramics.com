@@ -45,6 +45,9 @@ export function DesktopNav() {
           <Link href="/shop" style={{ textDecoration: "none" }}>
             <CeramicLabel color="var(--ink-soft)">enter the shop</CeramicLabel>
           </Link>
+          <Link href="/cart" style={{ textDecoration: "none" }}>
+            <CeramicLabel color="var(--ink-soft)">cart</CeramicLabel>
+          </Link>
         </div>
       </div>
     </div>
