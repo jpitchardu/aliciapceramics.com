@@ -4,16 +4,11 @@ import {
   mapCatalogItemToPiece,
   safeSerialize,
 } from "@/lib/square";
-import { PLACEHOLDER_PIECES } from "@/lib/placeholder-pieces";
 import { CatalogObject } from "square";
 
 export const revalidate = 300;
 
 export async function GET() {
-  if (!process.env.SQUARE_ACCESS_TOKEN) {
-    return NextResponse.json(PLACEHOLDER_PIECES);
-  }
-
   try {
     const page = await squareClient.catalog.list({ types: "ITEM,IMAGE" });
     const objects: CatalogObject[] = [];
@@ -34,8 +29,7 @@ export async function GET() {
       .filter(Boolean);
 
     return NextResponse.json(safeSerialize(pieces));
-  } catch (err) {
-    console.error("Square catalog error:", err);
-    return NextResponse.json(PLACEHOLDER_PIECES);
+  } catch {
+    return NextResponse.json([]);
   }
 }

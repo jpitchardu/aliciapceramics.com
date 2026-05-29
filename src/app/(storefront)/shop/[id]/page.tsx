@@ -6,7 +6,6 @@ import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
 import { AddToCartButton } from "./_components/AddToCartButton";
 import { Piece } from "@/types/piece";
-import { PLACEHOLDER_PIECES } from "@/lib/placeholder-pieces";
 
 async function getPiece(id: string): Promise<Piece | null> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -17,7 +16,7 @@ async function getPiece(id: string): Promise<Piece | null> {
     if (!res.ok) return null;
     return res.json();
   } catch {
-    return PLACEHOLDER_PIECES.find((p) => p.id === id) ?? null;
+    return null;
   }
 }
 
@@ -27,10 +26,10 @@ async function getAllPieces(): Promise<Piece[]> {
     const res = await fetch(`${base}/api/catalog`, {
       next: { revalidate: 300 },
     });
-    if (!res.ok) return PLACEHOLDER_PIECES;
+    if (!res.ok) return [];
     return res.json();
   } catch {
-    return PLACEHOLDER_PIECES;
+    return [];
   }
 }
 
@@ -154,16 +153,6 @@ export default async function PieceDetailPage({
             </div>
           </div>
           <AddToCartButton piece={piece} />
-        </div>
-
-        {/* second photo */}
-        <div style={{ padding: "40px 0 0" }}>
-          <Photo ratio="1 / 1" src="/assets/piece-cream.png" />
-          <div style={{ padding: "12px 28px" }}>
-            <CeramicLabel color="var(--ink-faint)">
-              fig. 02 · in the studio
-            </CeramicLabel>
-          </div>
         </div>
 
         {/* more from the drop — 2-col on mobile */}
@@ -385,42 +374,6 @@ export default async function PieceDetailPage({
               <AddToCartButton piece={piece} />
             </div>
           </div>
-        </div>
-
-        {/* second photo */}
-        <div
-          style={{
-            margin: "120px 56px 0",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 64,
-            alignItems: "center",
-          }}
-        >
-          <div>
-            <CeramicLabel color="var(--ink-faint)">
-              fig. 02 · in the studio
-            </CeramicLabel>
-            <p
-              style={{
-                marginTop: 18,
-                fontFamily: "var(--serif)",
-                fontSize: 22,
-                fontStyle: "italic",
-                fontWeight: 300,
-                lineHeight: 1.45,
-                color: "var(--ink)",
-                margin: "18px 0 0",
-                letterSpacing: "-0.005em",
-                maxWidth: 480,
-              }}
-            >
-              photographed on the windowsill the morning it came out of the
-              kiln, next to a cream pitcher (no. 016) that didn&apos;t make this
-              drop.
-            </p>
-          </div>
-          <Photo ratio="1 / 1" src="/assets/piece-cream.png" />
         </div>
 
         {/* more from the drop */}

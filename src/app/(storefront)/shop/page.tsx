@@ -12,11 +12,10 @@ async function getPieces(): Promise<Piece[]> {
     const res = await fetch(`${base}/api/catalog`, {
       next: { revalidate: 300 },
     });
-    if (!res.ok) throw new Error("catalog fetch failed");
+    if (!res.ok) return [];
     return res.json();
   } catch {
-    const { PLACEHOLDER_PIECES } = await import("@/lib/placeholder-pieces");
-    return PLACEHOLDER_PIECES;
+    return [];
   }
 }
 
