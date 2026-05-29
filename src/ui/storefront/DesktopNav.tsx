@@ -17,7 +17,10 @@ export function DesktopNav() {
         <Link href="/shop" style={{ textDecoration: "none" }}>
           <CeramicLabel color="var(--ink-soft)">shop</CeramicLabel>
         </Link>
-        <Link href="/shop?collection=archive" style={{ textDecoration: "none" }}>
+        <Link
+          href="/shop?collection=archive"
+          style={{ textDecoration: "none" }}
+        >
           <CeramicLabel color="var(--ink-soft)">archive</CeramicLabel>
         </Link>
         <a
@@ -26,9 +29,7 @@ export function DesktopNav() {
           rel="noopener noreferrer"
           style={{ textDecoration: "none" }}
         >
-          <CeramicLabel color="var(--ink-soft)">
-            @{SITE.instagram}
-          </CeramicLabel>
+          <CeramicLabel color="var(--ink-soft)">@{SITE.instagram}</CeramicLabel>
         </a>
       </div>
 
