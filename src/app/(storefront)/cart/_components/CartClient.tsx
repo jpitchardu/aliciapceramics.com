@@ -8,6 +8,7 @@ import { useCart } from "@/ui/cart/CartContext";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
+import { SITE, PICKUP_SLOTS } from "@/lib/config";
 
 declare global {
   interface Window {
@@ -16,12 +17,7 @@ declare global {
   }
 }
 
-const TIME_SLOTS = [
-  { day: "wed", date: "jun 18", window: "2 – 5 pm" },
-  { day: "sat", date: "jun 21", window: "11 am – 3 pm" },
-  { day: "wed", date: "jun 25", window: "2 – 5 pm" },
-  { day: "sat", date: "jun 28", window: "11 am – 3 pm" },
-];
+const TIME_SLOTS = PICKUP_SLOTS;
 
 function RadioDot({ active }: { active: boolean }) {
   return (
@@ -352,7 +348,7 @@ export function CartClient() {
                   fontWeight: 300,
                 }}
               >
-                packed by hand from brooklyn
+                packed by hand from {SITE.city}
               </div>
             </div>
             <span
@@ -389,7 +385,7 @@ export function CartClient() {
                     delivery === "pickup" ? "var(--ink)" : "var(--ink-soft)",
                 }}
               >
-                pick up in brooklyn
+                pick up in {SITE.city}
               </span>
               <div
                 style={{
@@ -401,7 +397,7 @@ export function CartClient() {
                   fontWeight: 300,
                 }}
               >
-                47 india street, greenpoint
+                {SITE.studio.address}
               </div>
 
               {delivery === "pickup" && (
@@ -734,7 +730,7 @@ export function CartClient() {
           }}
         >
           <CeramicLabel color="var(--ink-faint)">
-            aliciapceramics · brooklyn · est. 2024
+            {SITE.name} · {SITE.city} · est. {SITE.estYear}
           </CeramicLabel>
           <Sig size={26} color="var(--ink-soft)">
             a.

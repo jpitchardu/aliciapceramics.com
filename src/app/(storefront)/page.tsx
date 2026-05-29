@@ -3,6 +3,7 @@ import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
 import { PLACEHOLDER_PIECES } from "@/lib/placeholder-pieces";
+import { DROP } from "@/lib/config";
 
 const drop = PLACEHOLDER_PIECES;
 
@@ -25,7 +26,7 @@ export default function HomePage() {
                 color: "var(--ink)",
               }}
             >
-              creating spring
+              {DROP.name}
             </span>
             <div
               style={{
@@ -38,7 +39,7 @@ export default function HomePage() {
                 lineHeight: 1.3,
               }}
             >
-              the warm rooms of a slow morning.
+              {DROP.subtitle}
             </div>
           </div>
         </div>
@@ -54,13 +55,7 @@ export default function HomePage() {
               align: "right",
               mt: -48,
             },
-            {
-              src: drop[5].src,
-              w: 72,
-              ratio: "4 / 5",
-              align: "left",
-              mt: 32,
-            },
+            { src: drop[5].src, w: 72, ratio: "4 / 5", align: "left", mt: 32 },
           ].map((s, i) => (
             <div
               key={i}
@@ -107,7 +102,6 @@ export default function HomePage() {
           </Sig>
         </div>
 
-        {/* enter the shop */}
         <div style={{ padding: "56px 24px 0", textAlign: "center" }}>
           <Link href="/shop" className="ds-action">
             enter the shop
@@ -128,7 +122,6 @@ export default function HomePage() {
                 right: 0,
                 bottom: "8%",
                 textAlign: "center",
-                color: "var(--paper)",
                 textShadow: "0 2px 24px rgba(0,0,0,0.35)",
               }}
             >
@@ -142,7 +135,7 @@ export default function HomePage() {
                   color: "var(--paper)",
                 }}
               >
-                creating spring
+                {DROP.name}
               </span>
               <div
                 style={{
@@ -156,7 +149,7 @@ export default function HomePage() {
                   opacity: 0.92,
                 }}
               >
-                made of earth, full of His spirit.
+                {DROP.description}
               </div>
             </div>
           </div>
@@ -173,7 +166,7 @@ export default function HomePage() {
           }}
         >
           <CeramicLabel color="var(--ink-faint)">
-            a new drop · jun 2026
+            a new drop · {DROP.date}
           </CeramicLabel>
           <div style={{ textAlign: "center" }}>
             <span
@@ -185,7 +178,7 @@ export default function HomePage() {
                 color: "var(--ink-soft)",
               }}
             >
-              the warm rooms of a slow morning.
+              {DROP.subtitle}
             </span>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -195,58 +188,36 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* desktop scatter */}
+        {/* desktop scatter — 4 images, reduced height so text stays visible */}
         <div
           style={{
             position: "relative",
-            height: 1400,
-            margin: "80px 56px 0",
-            cursor: "pointer",
+            height: 680,
+            margin: "64px 56px 0",
           }}
         >
           {[
-            { src: drop[0].src, left: "0%", top: 0, w: "32%", ratio: "3 / 4" },
+            { src: drop[0].src, left: "0%", top: 0, w: "30%", ratio: "3 / 4" },
             {
               src: drop[2].src,
-              left: "44%",
-              top: 120,
-              w: "26%",
+              left: "38%",
+              top: 80,
+              w: "24%",
               ratio: "1 / 1",
             },
             {
               src: drop[5].src,
-              left: "76%",
-              top: 40,
-              w: "22%",
-              ratio: "3 / 4",
-            },
-            {
-              src: drop[3].src,
-              left: "20%",
-              top: 620,
+              left: "68%",
+              top: 20,
               w: "20%",
               ratio: "3 / 4",
             },
             {
-              src: drop[7].src,
-              left: "48%",
-              top: 580,
-              w: "28%",
-              ratio: "1 / 1",
-            },
-            {
-              src: drop[8].src,
-              left: "4%",
-              top: 920,
-              w: "24%",
+              src: drop[3].src,
+              left: "18%",
+              top: 320,
+              w: "22%",
               ratio: "3 / 4",
-            },
-            {
-              src: drop[10].src,
-              left: "62%",
-              top: 880,
-              w: "32%",
-              ratio: "4 / 5",
             },
           ].map((p, i) => (
             <Link
@@ -269,7 +240,7 @@ export default function HomePage() {
         </div>
 
         {/* quote */}
-        <div style={{ padding: "120px 56px 0", textAlign: "center" }}>
+        <div style={{ padding: "80px 56px 0", textAlign: "center" }}>
           <p
             style={{
               fontFamily: "var(--serif)",
@@ -298,8 +269,7 @@ export default function HomePage() {
           </Sig>
         </div>
 
-        {/* enter the shop */}
-        <div style={{ padding: "120px 56px 0", textAlign: "center" }}>
+        <div style={{ padding: "80px 56px 0", textAlign: "center" }}>
           <Link
             href="/shop"
             className="ds-action"

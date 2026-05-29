@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/ui/Logo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
+import { SITE } from "@/lib/config";
 
 export function DesktopNav() {
   return (
@@ -33,13 +34,13 @@ export function DesktopNav() {
         </div>
         <div style={{ display: "flex", gap: 36 }}>
           <a
-            href="https://instagram.com/aliciapceramics"
+            href={`https://instagram.com/${SITE.instagram}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{ textDecoration: "none" }}
           >
             <CeramicLabel color="var(--ink-soft)">
-              @aliciapceramics
+              @{SITE.instagram}
             </CeramicLabel>
           </a>
           <Link href="/cart" style={{ textDecoration: "none" }}>

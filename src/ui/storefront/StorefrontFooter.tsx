@@ -1,5 +1,6 @@
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
+import { SITE } from "@/lib/config";
 
 interface StorefrontFooterProps {
   pad?: number;
@@ -25,7 +26,7 @@ export function StorefrontFooter({
     >
       <div>
         <CeramicLabel color="var(--ink-faint)">
-          aliciapceramics · brooklyn · est. 2024
+          {SITE.name} · {SITE.city} · est. {SITE.estYear}
         </CeramicLabel>
         <div
           style={{
@@ -39,7 +40,7 @@ export function StorefrontFooter({
         >
           new pieces show up first on instagram —{" "}
           <a
-            href="https://instagram.com/aliciapceramics"
+            href={`https://instagram.com/${SITE.instagram}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -48,7 +49,7 @@ export function StorefrontFooter({
               textDecoration: "none",
             }}
           >
-            @aliciapceramics
+            @{SITE.instagram}
           </a>
         </div>
       </div>

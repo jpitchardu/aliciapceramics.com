@@ -4,6 +4,7 @@ import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
 import { Sig } from "@/ui/Sig";
 import { Piece } from "@/types/piece";
+import { DROP, SITE } from "@/lib/config";
 
 async function getPieces(): Promise<Piece[]> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -37,7 +38,7 @@ export default async function ShopPage() {
           }}
         >
           <CeramicLabel color="var(--ink-faint)">
-            creating spring · {pieces.length} pieces
+            {DROP.name} · {pieces.length} pieces
           </CeramicLabel>
           <CeramicLabel color="var(--ink-faint)">tap a piece</CeramicLabel>
         </div>
@@ -76,7 +77,7 @@ export default async function ShopPage() {
         {/* collection header */}
         <div style={{ padding: "64px 56px 0", textAlign: "center" }}>
           <CeramicLabel color="var(--ink-faint)">
-            a new drop · jun 2026
+            a new drop · {DROP.date}
           </CeramicLabel>
           <div style={{ marginTop: 22 }}>
             <span
@@ -89,7 +90,7 @@ export default async function ShopPage() {
                 color: "var(--ink)",
               }}
             >
-              creating spring
+              {DROP.name}
             </span>
           </div>
           <p
@@ -231,7 +232,7 @@ export default async function ShopPage() {
         {/* end of drop */}
         <div style={{ padding: "80px 56px 0", textAlign: "center" }}>
           <CeramicLabel color="var(--ink-faint)">
-            end of drop · creating spring · jun 2026
+            end of drop · {DROP.name} · {DROP.date}
           </CeramicLabel>
           <Sig
             size={32}
