@@ -308,7 +308,7 @@ export function CartClient() {
                   fontWeight: 300,
                 }}
               >
-                packed by hand from {SITE.city}
+                packed by hand with care
               </div>
             </div>
             <span
@@ -345,7 +345,7 @@ export function CartClient() {
                     delivery === "pickup" ? "var(--ink)" : "var(--ink-soft)",
                 }}
               >
-                pick up in {SITE.city}
+                pick up in studio
               </span>
               <div
                 style={{
@@ -663,7 +663,7 @@ export function CartClient() {
           }}
         >
           <CeramicLabel color="var(--ink-faint)">
-            {SITE.name} · {SITE.city} · est. {SITE.estYear}
+            {SITE.name} · est. {SITE.estYear}
           </CeramicLabel>
           <Sig size={26} color="var(--ink-soft)">
             a.

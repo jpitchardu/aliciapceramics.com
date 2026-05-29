@@ -4,11 +4,9 @@ export const MEDIA_BASE_URL =
 
 export const SITE = {
   name: "aliciapceramics",
-  city: "brooklyn",
   estYear: "2024",
   studio: {
     address: "47 india street, greenpoint",
-    city: "brooklyn",
   },
   instagram: "aliciapceramics",
 };
@@ -16,7 +14,7 @@ export const SITE = {
 export const DROP = {
   name: "creating spring",
   date: "jun 2026",
-  subtitle: "the warm rooms of a slow morning.",
+  subtitle: "revelations of creation.",
   description: "made of earth, full of His spirit.",
   opensAt: "2026-05-30T09:00:00-06:00", // 9am CST
 };

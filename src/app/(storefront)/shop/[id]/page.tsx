@@ -1,4 +1,4 @@
-import { DROP, SITE } from "@/lib/config";
+import { DROP } from "@/lib/config";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Photo } from "@/ui/Photo";
@@ -117,7 +117,7 @@ export default async function PieceDetailPage({
             {piece.glaze && <li>glazed in {piece.glaze}</li>}
             {piece.dim && <li>{piece.dim}, wheel-thrown stoneware</li>}
             <li>food safe, dishwasher fine</li>
-            <li>ships from {SITE.city} — or pick up in studio</li>
+            <li>ships — or pick up in studio</li>
           </ul>
         </div>
 
@@ -334,7 +334,7 @@ export default async function PieceDetailPage({
                 {piece.glaze && <li>glazed in {piece.glaze}</li>}
                 {piece.dim && <li>{piece.dim}, wheel-thrown stoneware</li>}
                 <li>food safe, dishwasher fine</li>
-                <li>ships from {SITE.city} — or pick up in studio</li>
+                <li>ships — or pick up in studio</li>
               </ul>
             </div>
 

@@ -107,7 +107,7 @@ export default async function ShopPage() {
             }}
           >
             made of earth, full of His spirit — {pieces.length} new pieces,
-            mugs, bowls, pitchers, the warm rooms of a slow morning.
+            revelations of creation.
           </p>
         </div>
 
@@ -238,7 +238,7 @@ export default async function ShopPage() {
             color="var(--ink)"
             style={{ marginTop: 18, display: "inline-block" }}
           >
-            — a.
+            — AP
           </Sig>
         </div>
       </div>

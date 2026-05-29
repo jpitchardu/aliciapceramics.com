@@ -61,7 +61,7 @@ export default function OrderConfirmedPage() {
         color="var(--ink)"
         style={{ marginTop: 36, display: "inline-block" }}
       >
-        — alicia
+        — AP
       </Sig>
 
       <div style={{ marginTop: 56 }}>
@@ -79,9 +79,7 @@ export default function OrderConfirmedPage() {
           maxWidth: 480,
         }}
       >
-        <CeramicLabel color="var(--ink-faint)">
-          aliciapceramics · brooklyn
-        </CeramicLabel>
+        <CeramicLabel color="var(--ink-faint)">aliciapceramics</CeramicLabel>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { CartProvider } from "@/ui/cart/CartContext";
 
 export const metadata: Metadata = {
   title: "alicia p. ceramics",
-  description: "handmade ceramics by alicia p. — brooklyn.",
+  description: "handmade ceramics by alicia p. — revelations of creation.",
 };
 
 export default function RootLayout({

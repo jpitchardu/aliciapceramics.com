@@ -26,7 +26,7 @@ export function StorefrontFooter({
     >
       <div>
         <CeramicLabel color="var(--ink-faint)">
-          {SITE.name} · {SITE.city} · est. {SITE.estYear}
+          {SITE.name} · est. {SITE.estYear}
         </CeramicLabel>
         <div
           style={{
@@ -54,7 +54,7 @@ export function StorefrontFooter({
         </div>
       </div>
       <Sig size={26} color="var(--ink-soft)">
-        a.
+        AP
       </Sig>
     </div>
   );

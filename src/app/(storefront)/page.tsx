@@ -114,7 +114,7 @@ export default function HomePage() {
             color="var(--ink)"
             style={{ marginTop: 22, display: "inline-block" }}
           >
-            — alicia
+            — AP
           </Sig>
         </div>
 
@@ -313,7 +313,7 @@ export default function HomePage() {
             color="var(--ink)"
             style={{ marginTop: 32, display: "inline-block" }}
           >
-            — alicia
+            — AP
           </Sig>
         </div>
 
