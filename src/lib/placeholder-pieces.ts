@@ -58,7 +58,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     glaze: "oat satin",
     dim: "20×9 cm",
     price: 94,
-    state: "held",
+    state: "here",
     collection: "creating spring",
   },
   {

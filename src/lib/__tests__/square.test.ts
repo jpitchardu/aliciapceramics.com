@@ -69,7 +69,7 @@ describe("mapCatalogItemToPiece", () => {
     ).toBeNull();
   });
 
-  it("infers state 'held' from custom attribute", () => {
+  it("treats 'held' attribute as 'here' (first come first serve)", () => {
     const item = makeItem({
       customAttributeValues: {
         glaze: { stringValue: "" },
@@ -79,7 +79,7 @@ describe("mapCatalogItemToPiece", () => {
       },
     });
     const piece = mapCatalogItemToPiece(item, noImages);
-    expect(piece!.state).toBe("held");
+    expect(piece!.state).toBe("here");
   });
 
   it("infers state 'gone' from custom attribute", () => {

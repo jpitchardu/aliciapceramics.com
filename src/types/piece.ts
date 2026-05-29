@@ -1,4 +1,4 @@
-export type PieceState = "here" | "held" | "gone";
+export type PieceState = "here" | "gone";
 
 export interface Piece {
   id: string;

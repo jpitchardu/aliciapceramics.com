@@ -16,7 +16,7 @@ export function TopNav() {
         href="/shop"
         style={{ textDecoration: "none", justifySelf: "start" }}
       >
-        <CeramicLabel color="var(--ink-soft)">ceramics</CeramicLabel>
+        <CeramicLabel color="var(--ink-soft)">shop</CeramicLabel>
       </Link>
       <Link href="/">
         <Logo width={108} />

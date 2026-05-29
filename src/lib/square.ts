@@ -19,8 +19,8 @@ export function safeSerialize<T>(value: T): T {
 
 function inferState(inventoryNote: string): PieceState {
   const n = inventoryNote.toLowerCase();
-  if (n.includes("held")) return "held";
-  if (n.includes("gone") || n.includes("taken")) return "gone";
+  if (n.includes("gone") || n.includes("taken") || n.includes("sold"))
+    return "gone";
   return "here";
 }
 
