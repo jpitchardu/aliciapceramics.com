@@ -17,7 +17,7 @@ export default function HomePage() {
       <div className="lg:hidden">
         {/* hero */}
         <div style={{ padding: "8px 16px 0" }}>
-          <Photo ratio="5 / 4" src={HERO} />
+          <Photo ratio="5 / 4" src={HERO} rotate={90} />
           <div style={{ paddingTop: 18, textAlign: "center" }}>
             <span
               style={{
@@ -117,7 +117,7 @@ export default function HomePage() {
         {/* hero */}
         <div style={{ padding: "20px 56px 0", position: "relative" }}>
           <div style={{ position: "relative" }}>
-            <Photo ratio="2 / 3" src={HERO} />
+            <Photo ratio="2 / 3" src={HERO} rotate={90} />
             <div
               style={{
                 position: "absolute",
