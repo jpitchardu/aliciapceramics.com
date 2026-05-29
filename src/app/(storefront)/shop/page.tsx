@@ -4,7 +4,7 @@ import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
 import { Sig } from "@/ui/Sig";
 import { Piece } from "@/types/piece";
-import { DROP, SITE } from "@/lib/config";
+import { DROP } from "@/lib/config";
 
 async function getPieces(): Promise<Piece[]> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
