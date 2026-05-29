@@ -128,7 +128,7 @@ export function Countdown({ opensAt, dropName, dropSubtitle }: CountdownProps) {
       )}
 
       <Sig size={26} color="var(--ink-soft)" style={{ marginTop: 64 }}>
-        a.
+        AP
       </Sig>
     </div>
   );
