@@ -1,21 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
-import Script from "next/script";
 import { useCart } from "@/ui/cart/CartContext";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
 import { SITE, PICKUP_SLOTS } from "@/lib/config";
-
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Square?: any;
-  }
-}
 
 const TIME_SLOTS = PICKUP_SLOTS;
 
@@ -48,83 +39,50 @@ function RadioDot({ active }: { active: boolean }) {
 }
 
 export function CartClient() {
-  const { items, removeItem, clearCart, total } = useCart();
-  const router = useRouter();
+  const { items, removeItem, total } = useCart();
 
   const [delivery, setDelivery] = useState<"ship" | "pickup">("pickup");
-  const [selectedSlot, setSelectedSlot] = useState(1);
+  const [selectedSlot, setSelectedSlot] = useState(0);
   const [note, setNote] = useState("");
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
-  const [sdkLoaded, setSdkLoaded] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cardRef = useRef<any>(null);
 
   const shipping = delivery === "ship" ? 18 : 0;
   const orderTotal = total + shipping;
 
-  const appId = process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID;
-  const locationId = process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID;
-  const sdkUrl =
-    process.env.SQUARE_ENVIRONMENT === "production"
-      ? "https://web.squarecdn.com/v1/square.js"
-      : "https://sandbox.web.squarecdn.com/v1/square.js";
-
-  useEffect(() => {
-    if (!sdkLoaded || !appId || !locationId || !window.Square) return;
-    let mounted = true;
-
-    window.Square.payments(appId, locationId).then(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      async (payments: any) => {
-        const card = await payments.card();
-        await card.attach("#card-container");
-        if (mounted) cardRef.current = card;
-      },
-    );
-
-    return () => {
-      mounted = false;
-    };
-  }, [sdkLoaded, appId, locationId]);
-
   async function handleCheckout() {
-    if (!cardRef.current) {
-      setError("payment form not ready — please wait a moment.");
-      return;
-    }
-
     setProcessing(true);
     setError("");
 
-    try {
-      const result = await cardRef.current.tokenize();
-      if (result.status !== "OK") {
-        setError(result.errors?.[0]?.message ?? "card error");
-        setProcessing(false);
-        return;
-      }
+    const slot = delivery === "pickup" ? TIME_SLOTS[selectedSlot] : null;
+    const pickupSlot = slot ? `${slot.day} ${slot.date} ${slot.window}` : undefined;
 
-      const res = await fetch("/api/payments", {
+    try {
+      const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sourceId: result.token,
-          amount: orderTotal,
+          items: items.map((i) => ({
+            name: i.piece.title,
+            price: i.piece.price,
+            quantity: i.quantity,
+          })),
+          shipping,
           note,
-          idempotencyKey: crypto.randomUUID(),
+          delivery,
+          pickupSlot,
         }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? "payment failed");
+        setError(data.error ?? "something went wrong.");
         setProcessing(false);
         return;
       }
 
-      clearCart();
-      router.push("/order-confirmed");
+      const { url } = await res.json();
+      window.location.href = url;
     } catch {
       setError("something went wrong. please try again.");
       setProcessing(false);
@@ -539,52 +497,6 @@ export function CartClient() {
         </span>
       </div>
 
-      {/* Square card form */}
-      {appId && locationId ? (
-        <div style={{ marginTop: 24 }}>
-          <div id="card-container" style={{ minHeight: 90 }} />
-          {error && (
-            <p
-              style={{
-                marginTop: 10,
-                fontFamily: "var(--serif)",
-                fontSize: 13,
-                color: "var(--topaze)",
-                fontStyle: "italic",
-              }}
-            >
-              {error}
-            </p>
-          )}
-          <button
-            className="ds-checkout-btn"
-            style={{ marginTop: 16 }}
-            onClick={handleCheckout}
-            disabled={processing}
-          >
-            {processing ? "processing…" : "check out"}
-          </button>
-        </div>
-      ) : (
-        <div style={{ marginTop: 24 }}>
-          <p
-            style={{
-              fontFamily: "var(--serif)",
-              fontSize: 13,
-              fontStyle: "italic",
-              color: "var(--ink-faint)",
-              marginBottom: 12,
-            }}
-          >
-            Square is not configured — set NEXT_PUBLIC_SQUARE_APPLICATION_ID and
-            NEXT_PUBLIC_SQUARE_LOCATION_ID to enable payments.
-          </p>
-          <button className="ds-checkout-btn" disabled>
-            check out
-          </button>
-        </div>
-      )}
-
       {/* note for alicia */}
       <div
         style={{
@@ -622,6 +534,29 @@ export function CartClient() {
           }}
         />
       </div>
+
+      {error && (
+        <p
+          style={{
+            marginTop: 12,
+            fontFamily: "var(--serif)",
+            fontSize: 13,
+            color: "var(--topaze)",
+            fontStyle: "italic",
+          }}
+        >
+          {error}
+        </p>
+      )}
+
+      <button
+        className="ds-checkout-btn"
+        style={{ marginTop: 20 }}
+        onClick={handleCheckout}
+        disabled={processing}
+      >
+        {processing ? "redirecting…" : "check out"}
+      </button>
     </div>
   );
 
@@ -629,10 +564,6 @@ export function CartClient() {
 
   return (
     <>
-      {appId && locationId && (
-        <Script src={sdkUrl} onLoad={() => setSdkLoaded(true)} />
-      )}
-
       {/* ── MOBILE ───────────────────────────────────────────────── */}
       <div className="lg:hidden" style={{ padding: "0 20px" }}>
         <div style={{ marginBottom: 32 }}>
