@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Footer } from "@/ui/Footer";
+import { CartProvider } from "@/ui/cart/CartContext";
 
 export const metadata: Metadata = {
-  title: "aliciap Ceramics",
-  description: "Handmade ceramics by Alicia P.",
+  title: "alicia p. ceramics",
+  description: "handmade ceramics by alicia p. — brooklyn.",
 };
 
 export default function RootLayout({
@@ -14,11 +14,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased h-screen overflow-hidden">
-        <div className="h-full flex flex-col">
-          <main className="flex-1 min-h-0">{children}</main>
-          <Footer />
-        </div>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Caveat:wght@400&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );
