@@ -1,12 +1,27 @@
 import { test, expect } from "@playwright/test";
 
+// All tests set the bypass cookie so the gate doesn't block navigation.
+// The gate itself is tested in tests/gate.spec.ts.
+
+const BYPASS_KEY = process.env.GATE_BYPASS_KEY ?? "test-bypass";
+
+test.beforeEach(async ({ context }) => {
+  await context.addCookies([
+    {
+      name: "gate_bypass",
+      value: BYPASS_KEY,
+      domain: "localhost",
+      path: "/",
+    },
+  ]);
+});
+
 // Desktop Chrome viewport (1280×720): "hidden lg:block" content visible,
 // "lg:hidden" content hidden.
 
 test.describe("home page", () => {
   test("renders logo and enter the shop link", async ({ page }) => {
     await page.goto("/");
-    // Desktop logo is the second img (first is in lg:hidden TopNav)
     await expect(
       page.locator('img[alt="alicia p. ceramics"]').nth(1),
     ).toBeVisible();
@@ -28,7 +43,6 @@ test.describe("home page", () => {
 test.describe("shop page", () => {
   test("renders collection grid with pieces", async ({ page }) => {
     await page.goto("/shop");
-    // At least one piece link exists in the DOM (desktop grid)
     await expect(page.locator("a[href^='/shop/']").first()).toBeAttached();
   });
 
@@ -43,10 +57,10 @@ test.describe("shop page", () => {
     await expect(page).toHaveURL(href!);
   });
 
-  test("nav ceramics link is present", async ({ page }) => {
+  test("nav shop link is present", async ({ page }) => {
     await page.goto("/shop");
     await expect(
-      page.getByRole("link", { name: /ceramics/i }).first(),
+      page.getByRole("link", { name: /^shop$/i }).first(),
     ).toBeVisible();
   });
 });
@@ -81,8 +95,6 @@ test.describe("cart page", () => {
     await page.getByRole("button", { name: /add to cart/i }).click();
     await expect(page).toHaveURL("/cart");
     await page.waitForLoadState("networkidle");
-
-    // Cart should have at least one item row (× remove button present)
     await expect(
       page.locator("button", { hasText: "×" }).first(),
     ).toBeVisible();
@@ -94,9 +106,7 @@ test.describe("cart page", () => {
     await page.getByRole("button", { name: /add to cart/i }).click();
     await expect(page).toHaveURL("/cart");
     await page.waitForLoadState("networkidle");
-
     await page.locator("button", { hasText: "×" }).first().click();
-
     await expect(page.getByText(/your cart is empty/i)).toBeVisible();
   });
 
@@ -106,14 +116,12 @@ test.describe("cart page", () => {
     await page.getByRole("button", { name: /add to cart/i }).click();
     await expect(page).toHaveURL("/cart");
     await page.waitForLoadState("networkidle");
-
     await expect(page.getByText(/ship to me|pick up/i).first()).toBeVisible();
   });
 
   test("keep looking link navigates back to shop", async ({ page }) => {
     await page.goto("/cart");
     await page.waitForLoadState("networkidle");
-    // "← keep looking" is a Link rendered client-side; find by href
     await page.locator('a[href="/shop"]').first().click();
     await expect(page).toHaveURL("/shop");
   });
@@ -122,7 +130,6 @@ test.describe("cart page", () => {
 test.describe("navigation", () => {
   test("logo link goes to home", async ({ page }) => {
     await page.goto("/shop");
-    // Desktop nav logo link (second a[href="/"]) — first is in hidden TopNav
     await page.locator('a[href="/"]').nth(1).click();
     await expect(page).toHaveURL("/");
   });

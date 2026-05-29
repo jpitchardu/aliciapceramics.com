@@ -11,18 +11,7 @@ interface CountdownProps {
   dropSubtitle: string;
 }
 
-function pad(n: number) {
-  return String(n).padStart(2, "0");
-}
-
-function getTimeLeft(target: number) {
-  const diff = Math.max(0, target - Date.now());
-  const totalSeconds = Math.floor(diff / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return { hours, minutes, seconds, done: diff <= 0 };
-}
+import { getTimeLeft, pad } from "@/lib/countdown";
 
 export function Countdown({ opensAt, dropName, dropSubtitle }: CountdownProps) {
   const target = new Date(opensAt).getTime();
