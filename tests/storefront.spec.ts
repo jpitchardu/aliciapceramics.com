@@ -17,7 +17,10 @@ test.describe("home page", () => {
 
   test("enter the shop link navigates to /shop", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: /enter the shop/i }).first().click();
+    await page
+      .getByRole("link", { name: /enter the shop/i })
+      .first()
+      .click();
     await expect(page).toHaveURL("/shop");
   });
 });
@@ -26,9 +29,7 @@ test.describe("shop page", () => {
   test("renders collection grid with pieces", async ({ page }) => {
     await page.goto("/shop");
     // At least one piece link exists in the DOM (desktop grid)
-    await expect(
-      page.locator("a[href^='/shop/']").first(),
-    ).toBeAttached();
+    await expect(page.locator("a[href^='/shop/']").first()).toBeAttached();
   });
 
   test("piece link navigates to detail page", async ({ page }) => {
@@ -82,7 +83,9 @@ test.describe("cart page", () => {
     await page.waitForLoadState("networkidle");
 
     // Cart should have at least one item row (× remove button present)
-    await expect(page.locator("button", { hasText: "×" }).first()).toBeVisible();
+    await expect(
+      page.locator("button", { hasText: "×" }).first(),
+    ).toBeVisible();
   });
 
   test("removing item from cart empties it", async ({ page }) => {
