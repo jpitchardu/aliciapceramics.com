@@ -11,7 +11,9 @@ import { Piece } from "@/types/piece";
 async function getPieces(): Promise<Piece[]> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   try {
-    const res = await fetch(`${base}/api/catalog`, { next: { revalidate: 300 } });
+    const res = await fetch(`${base}/api/catalog`, {
+      next: { revalidate: 300 },
+    });
     if (!res.ok) throw new Error("catalog fetch failed");
     return res.json();
   } catch {
@@ -27,7 +29,13 @@ export default async function ShopPage() {
   const goneCount = pieces.filter((p) => p.state === "gone").length;
 
   return (
-    <div style={{ background: "var(--paper)", color: "var(--ink)", fontFamily: "var(--serif)" }}>
+    <div
+      style={{
+        background: "var(--paper)",
+        color: "var(--ink)",
+        fontFamily: "var(--serif)",
+      }}
+    >
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
         <TopNav />
@@ -46,10 +54,23 @@ export default async function ShopPage() {
           <CeramicLabel color="var(--ink-faint)">tap a piece</CeramicLabel>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "0 16px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            padding: "0 16px",
+          }}
+        >
           {pieces.map((p) => (
-            <Link key={p.id} href={`/shop/${p.id}`} style={{ textDecoration: "none" }}>
-              <figure style={{ margin: 0, position: "relative", cursor: "pointer" }}>
+            <Link
+              key={p.id}
+              href={`/shop/${p.id}`}
+              style={{ textDecoration: "none" }}
+            >
+              <figure
+                style={{ margin: 0, position: "relative", cursor: "pointer" }}
+              >
                 <Badge state={p.state} compact />
                 <Photo
                   ratio="4 / 5"
@@ -61,9 +82,22 @@ export default async function ShopPage() {
           ))}
         </div>
 
-        <div style={{ margin: "56px 24px 0", padding: "28px 0 48px", borderTop: "1px solid var(--rule-soft)", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-          <CeramicLabel color="var(--ink-faint)">aliciapceramics · brooklyn</CeramicLabel>
-          <Sig size={22} color="var(--ink-soft)">a.</Sig>
+        <div
+          style={{
+            margin: "56px 24px 0",
+            padding: "28px 0 48px",
+            borderTop: "1px solid var(--rule-soft)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+          }}
+        >
+          <CeramicLabel color="var(--ink-faint)">
+            aliciapceramics · brooklyn
+          </CeramicLabel>
+          <Sig size={22} color="var(--ink-soft)">
+            a.
+          </Sig>
         </div>
       </div>
 
@@ -73,7 +107,9 @@ export default async function ShopPage() {
 
         {/* collection header */}
         <div style={{ padding: "64px 56px 0", textAlign: "center" }}>
-          <CeramicLabel color="var(--ink-faint)">a new drop · jun 2026</CeramicLabel>
+          <CeramicLabel color="var(--ink-faint)">
+            a new drop · jun 2026
+          </CeramicLabel>
           <div style={{ marginTop: 22 }}>
             <span
               style={{
@@ -102,8 +138,8 @@ export default async function ShopPage() {
               letterSpacing: "-0.005em",
             }}
           >
-            made of earth, full of His spirit — {pieces.length} new pieces, mugs,
-            bowls, pitchers, the warm rooms of a slow morning.
+            made of earth, full of His spirit — {pieces.length} new pieces,
+            mugs, bowls, pitchers, the warm rooms of a slow morning.
           </p>
         </div>
 
@@ -119,15 +155,24 @@ export default async function ShopPage() {
           }}
         >
           <div style={{ display: "flex", gap: 26 }}>
-            {["all", "mugs", "bowls", "pitchers", "small things"].map((f, i) => (
-              <CeramicLabel
-                key={f}
-                color={i === 0 ? "var(--ink)" : "var(--ink-faint)"}
-                style={i === 0 ? { borderBottom: "1px solid var(--ink)", paddingBottom: 4 } : {}}
-              >
-                {f}
-              </CeramicLabel>
-            ))}
+            {["all", "mugs", "bowls", "pitchers", "small things"].map(
+              (f, i) => (
+                <CeramicLabel
+                  key={f}
+                  color={i === 0 ? "var(--ink)" : "var(--ink-faint)"}
+                  style={
+                    i === 0
+                      ? {
+                          borderBottom: "1px solid var(--ink)",
+                          paddingBottom: 4,
+                        }
+                      : {}
+                  }
+                >
+                  {f}
+                </CeramicLabel>
+              ),
+            )}
           </div>
           <CeramicLabel color="var(--ink-faint)">
             {hereCount} still here · {heldCount} held · {goneCount} taken
@@ -144,7 +189,11 @@ export default async function ShopPage() {
           }}
         >
           {pieces.map((p) => (
-            <Link key={p.id} href={`/shop/${p.id}`} style={{ textDecoration: "none" }}>
+            <Link
+              key={p.id}
+              href={`/shop/${p.id}`}
+              style={{ textDecoration: "none" }}
+            >
               <figure style={{ margin: 0, cursor: "pointer" }}>
                 <div style={{ position: "relative" }}>
                   <Badge state={p.state} />
@@ -170,7 +219,10 @@ export default async function ShopPage() {
                         fontSize: 16,
                         fontStyle: "italic",
                         fontWeight: 300,
-                        color: p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
+                        color:
+                          p.state === "gone"
+                            ? "var(--ink-faint)"
+                            : "var(--ink)",
                         lineHeight: 1.2,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -180,7 +232,10 @@ export default async function ShopPage() {
                       {p.title}
                     </div>
                     <div style={{ marginTop: 4 }}>
-                      <CeramicLabel color="var(--ink-faint)" style={{ fontSize: 9 }}>
+                      <CeramicLabel
+                        color="var(--ink-faint)"
+                        style={{ fontSize: 9 }}
+                      >
                         no. {p.n}
                       </CeramicLabel>
                     </div>
@@ -190,8 +245,10 @@ export default async function ShopPage() {
                       fontFamily: "var(--serif)",
                       fontSize: 15,
                       fontWeight: 300,
-                      color: p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
-                      textDecoration: p.state === "gone" ? "line-through" : "none",
+                      color:
+                        p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
+                      textDecoration:
+                        p.state === "gone" ? "line-through" : "none",
                       flexShrink: 0,
                     }}
                   >
@@ -208,7 +265,11 @@ export default async function ShopPage() {
           <CeramicLabel color="var(--ink-faint)">
             end of drop · creating spring · jun 2026
           </CeramicLabel>
-          <Sig size={32} color="var(--ink)" style={{ marginTop: 18, display: "inline-block" }}>
+          <Sig
+            size={32}
+            color="var(--ink)"
+            style={{ marginTop: 18, display: "inline-block" }}
+          >
             — a.
           </Sig>
         </div>

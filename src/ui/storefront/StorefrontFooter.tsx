@@ -6,7 +6,10 @@ interface StorefrontFooterProps {
   topGap?: number;
 }
 
-export function StorefrontFooter({ pad = 56, topGap = 120 }: StorefrontFooterProps) {
+export function StorefrontFooter({
+  pad = 56,
+  topGap = 120,
+}: StorefrontFooterProps) {
   return (
     <div
       style={{

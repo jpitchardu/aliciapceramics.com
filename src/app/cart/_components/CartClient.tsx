@@ -17,9 +17,9 @@ declare global {
 }
 
 const TIME_SLOTS = [
-  { day: "wed", date: "jun 18", window: "2 – 5 pm",     selected: false },
-  { day: "sat", date: "jun 21", window: "11 am – 3 pm", selected: true  },
-  { day: "wed", date: "jun 25", window: "2 – 5 pm",     selected: false },
+  { day: "wed", date: "jun 18", window: "2 – 5 pm", selected: false },
+  { day: "sat", date: "jun 21", window: "11 am – 3 pm", selected: true },
+  { day: "wed", date: "jun 25", window: "2 – 5 pm", selected: false },
   { day: "sat", date: "jun 28", window: "11 am – 3 pm", selected: false },
 ];
 
@@ -56,10 +56,12 @@ export function CartClient() {
         const card = await payments.card();
         await card.attach("#card-container");
         if (mounted) cardRef.current = card;
-      }
+      },
     );
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [sdkLoaded, appId, locationId]);
 
   async function handleCheckout() {
@@ -147,7 +149,8 @@ export function CartClient() {
           <CeramicLabel color="var(--ink-soft)">← keep looking</CeramicLabel>
         </Link>
         <CeramicLabel color="var(--ink-faint)">
-          {items.length} {items.length === 1 ? "piece" : "pieces"} · held for 24 hours
+          {items.length} {items.length === 1 ? "piece" : "pieces"} · held for 24
+          hours
         </CeramicLabel>
       </div>
 
@@ -195,7 +198,9 @@ export function CartClient() {
         }}
       >
         {/* items */}
-        <div style={{ paddingTop: 18, borderTop: "1px solid var(--rule-strong)" }}>
+        <div
+          style={{ paddingTop: 18, borderTop: "1px solid var(--rule-strong)" }}
+        >
           <div
             style={{
               paddingBottom: 14,
@@ -206,7 +211,12 @@ export function CartClient() {
           >
             <CeramicLabel color="var(--ink-faint)">piece</CeramicLabel>
             <span />
-            <CeramicLabel color="var(--ink-faint)" style={{ textAlign: "right" }}>price</CeramicLabel>
+            <CeramicLabel
+              color="var(--ink-faint)"
+              style={{ textAlign: "right" }}
+            >
+              price
+            </CeramicLabel>
             <span />
           </div>
 
@@ -296,113 +306,361 @@ export function CartClient() {
         </div>
 
         {/* summary */}
-        <div style={{ paddingTop: 18, borderTop: "1px solid var(--rule-strong)" }}>
+        <div
+          style={{ paddingTop: 18, borderTop: "1px solid var(--rule-strong)" }}
+        >
           <CeramicLabel color="var(--ink-faint)">order</CeramicLabel>
 
-          <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 14 }}>
+          <div
+            style={{
+              marginTop: 28,
+              display: "flex",
+              flexDirection: "column",
+              gap: 14,
+            }}
+          >
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ fontFamily: "var(--serif)", fontSize: 15, fontStyle: "italic", fontWeight: 300, color: "var(--ink-soft)" }}>
-                subtotal · {items.length} {items.length === 1 ? "piece" : "pieces"}
+              <span
+                style={{
+                  fontFamily: "var(--serif)",
+                  fontSize: 15,
+                  fontStyle: "italic",
+                  fontWeight: 300,
+                  color: "var(--ink-soft)",
+                }}
+              >
+                subtotal · {items.length}{" "}
+                {items.length === 1 ? "piece" : "pieces"}
               </span>
-              <span style={{ fontFamily: "var(--serif)", fontSize: 15, fontWeight: 300, color: "var(--ink)" }}>
+              <span
+                style={{
+                  fontFamily: "var(--serif)",
+                  fontSize: 15,
+                  fontWeight: 300,
+                  color: "var(--ink)",
+                }}
+              >
                 ${total}
               </span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ fontFamily: "var(--serif)", fontSize: 15, fontStyle: "italic", fontWeight: 300, color: "var(--ink-soft)" }}>
+              <span
+                style={{
+                  fontFamily: "var(--serif)",
+                  fontSize: 15,
+                  fontStyle: "italic",
+                  fontWeight: 300,
+                  color: "var(--ink-soft)",
+                }}
+              >
                 tax
               </span>
-              <span style={{ fontFamily: "var(--serif)", fontSize: 15, fontStyle: "italic", fontWeight: 300, color: "var(--ink-faint)" }}>
+              <span
+                style={{
+                  fontFamily: "var(--serif)",
+                  fontSize: 15,
+                  fontStyle: "italic",
+                  fontWeight: 300,
+                  color: "var(--ink-faint)",
+                }}
+              >
                 at checkout
               </span>
             </div>
           </div>
 
           {/* delivery */}
-          <div style={{ marginTop: 28, paddingTop: 22, borderTop: "1px solid var(--rule-soft)" }}>
+          <div
+            style={{
+              marginTop: 28,
+              paddingTop: 22,
+              borderTop: "1px solid var(--rule-soft)",
+            }}
+          >
             <CeramicLabel color="var(--ink-faint)">delivery</CeramicLabel>
 
-            <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+            <div
+              style={{
+                marginTop: 18,
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+              }}
+            >
               {/* ship */}
               <div
-                style={{ display: "grid", gridTemplateColumns: "20px 1fr auto", gap: 12, alignItems: "baseline", cursor: "pointer" }}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "20px 1fr auto",
+                  gap: 12,
+                  alignItems: "baseline",
+                  cursor: "pointer",
+                }}
                 onClick={() => setDelivery("ship")}
               >
                 <span
                   style={{
-                    width: 14, height: 14, borderRadius: 999,
-                    border: delivery === "ship" ? "1px solid var(--ink)" : "1px solid var(--ink-soft)",
-                    display: "inline-block", marginTop: 4, position: "relative",
+                    width: 14,
+                    height: 14,
+                    borderRadius: 999,
+                    border:
+                      delivery === "ship"
+                        ? "1px solid var(--ink)"
+                        : "1px solid var(--ink-soft)",
+                    display: "inline-block",
+                    marginTop: 4,
+                    position: "relative",
                   }}
                 >
                   {delivery === "ship" && (
-                    <span style={{ position: "absolute", inset: 3, background: "var(--ink)", borderRadius: 999 }} />
+                    <span
+                      style={{
+                        position: "absolute",
+                        inset: 3,
+                        background: "var(--ink)",
+                        borderRadius: 999,
+                      }}
+                    />
                   )}
                 </span>
                 <div>
-                  <span style={{ fontFamily: "var(--serif)", fontSize: 16, fontStyle: "italic", fontWeight: 300, color: delivery === "ship" ? "var(--ink)" : "var(--ink-soft)" }}>
+                  <span
+                    style={{
+                      fontFamily: "var(--serif)",
+                      fontSize: 16,
+                      fontStyle: "italic",
+                      fontWeight: 300,
+                      color:
+                        delivery === "ship" ? "var(--ink)" : "var(--ink-soft)",
+                    }}
+                  >
                     ship to me
                   </span>
-                  <div style={{ marginTop: 4, fontFamily: "var(--serif)", fontSize: 13, lineHeight: 1.5, color: "var(--ink-faint)", fontWeight: 300, fontStyle: "italic" }}>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontFamily: "var(--serif)",
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      color: "var(--ink-faint)",
+                      fontWeight: 300,
+                      fontStyle: "italic",
+                    }}
+                  >
                     posted from brooklyn within a week, packed by hand.
                   </div>
                 </div>
-                <span style={{ fontFamily: "var(--serif)", fontSize: 15, fontWeight: 300, color: "var(--ink-soft)" }}>$18</span>
+                <span
+                  style={{
+                    fontFamily: "var(--serif)",
+                    fontSize: 15,
+                    fontWeight: 300,
+                    color: "var(--ink-soft)",
+                  }}
+                >
+                  $18
+                </span>
               </div>
 
               {/* pickup */}
               <div
-                style={{ display: "grid", gridTemplateColumns: "20px 1fr auto", gap: 12, alignItems: "baseline", cursor: "pointer" }}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "20px 1fr auto",
+                  gap: 12,
+                  alignItems: "baseline",
+                  cursor: "pointer",
+                }}
                 onClick={() => setDelivery("pickup")}
               >
                 <span
                   style={{
-                    width: 14, height: 14, borderRadius: 999,
-                    border: delivery === "pickup" ? "1px solid var(--ink)" : "1px solid var(--ink-soft)",
-                    display: "inline-block", marginTop: 4, position: "relative",
+                    width: 14,
+                    height: 14,
+                    borderRadius: 999,
+                    border:
+                      delivery === "pickup"
+                        ? "1px solid var(--ink)"
+                        : "1px solid var(--ink-soft)",
+                    display: "inline-block",
+                    marginTop: 4,
+                    position: "relative",
                   }}
                 >
                   {delivery === "pickup" && (
-                    <span style={{ position: "absolute", inset: 3, background: "var(--ink)", borderRadius: 999 }} />
+                    <span
+                      style={{
+                        position: "absolute",
+                        inset: 3,
+                        background: "var(--ink)",
+                        borderRadius: 999,
+                      }}
+                    />
                   )}
                 </span>
                 <div>
-                  <span style={{ fontFamily: "var(--serif)", fontSize: 16, fontStyle: "italic", fontWeight: 300, color: delivery === "pickup" ? "var(--ink)" : "var(--ink-soft)" }}>
+                  <span
+                    style={{
+                      fontFamily: "var(--serif)",
+                      fontSize: 16,
+                      fontStyle: "italic",
+                      fontWeight: 300,
+                      color:
+                        delivery === "pickup"
+                          ? "var(--ink)"
+                          : "var(--ink-soft)",
+                    }}
+                  >
                     pick up in brooklyn
                   </span>
-                  <div style={{ marginTop: 4, fontFamily: "var(--serif)", fontSize: 13, lineHeight: 1.5, color: "var(--ink-soft)", fontWeight: 300, fontStyle: "italic" }}>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontFamily: "var(--serif)",
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      color: "var(--ink-soft)",
+                      fontWeight: 300,
+                      fontStyle: "italic",
+                    }}
+                  >
                     from the greenpoint studio — 47 india street, brooklyn.
                   </div>
 
                   {delivery === "pickup" && (
-                    <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px dashed rgba(36,35,34,0.25)" }}>
-                      <CeramicLabel color="var(--ink-faint)" style={{ fontSize: 9 }}>pick a time</CeramicLabel>
-                      <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div
+                      style={{
+                        marginTop: 16,
+                        paddingTop: 14,
+                        borderTop: "1px dashed rgba(36,35,34,0.25)",
+                      }}
+                    >
+                      <CeramicLabel
+                        color="var(--ink-faint)"
+                        style={{ fontSize: 9 }}
+                      >
+                        pick a time
+                      </CeramicLabel>
+                      <div
+                        style={{
+                          marginTop: 12,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 8,
+                        }}
+                      >
                         {TIME_SLOTS.map((s, idx) => (
                           <div
                             key={s.date}
-                            style={{ display: "grid", gridTemplateColumns: "14px 38px 1fr auto", gap: 10, alignItems: "baseline", cursor: "pointer" }}
-                            onClick={(e) => { e.stopPropagation(); setSelectedSlot(idx); }}
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "14px 38px 1fr auto",
+                              gap: 10,
+                              alignItems: "baseline",
+                              cursor: "pointer",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedSlot(idx);
+                            }}
                           >
-                            <span style={{ width: 8, height: 8, borderRadius: 999, border: selectedSlot === idx ? "1px solid var(--ink)" : "1px solid var(--ink-faint)", background: selectedSlot === idx ? "var(--ink)" : "transparent", display: "inline-block", marginTop: 4 }} />
-                            <CeramicLabel color={selectedSlot === idx ? "var(--ink)" : "var(--ink-soft)"} style={{ fontSize: 10 }}>{s.day}</CeramicLabel>
-                            <span style={{ fontFamily: "var(--serif)", fontSize: 14, fontStyle: "italic", fontWeight: 300, color: selectedSlot === idx ? "var(--ink)" : "var(--ink-soft)" }}>{s.date}</span>
-                            <span style={{ fontFamily: "var(--serif)", fontSize: 13, fontWeight: 300, color: selectedSlot === idx ? "var(--ink)" : "var(--ink-faint)" }}>{s.window}</span>
+                            <span
+                              style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: 999,
+                                border:
+                                  selectedSlot === idx
+                                    ? "1px solid var(--ink)"
+                                    : "1px solid var(--ink-faint)",
+                                background:
+                                  selectedSlot === idx
+                                    ? "var(--ink)"
+                                    : "transparent",
+                                display: "inline-block",
+                                marginTop: 4,
+                              }}
+                            />
+                            <CeramicLabel
+                              color={
+                                selectedSlot === idx
+                                  ? "var(--ink)"
+                                  : "var(--ink-soft)"
+                              }
+                              style={{ fontSize: 10 }}
+                            >
+                              {s.day}
+                            </CeramicLabel>
+                            <span
+                              style={{
+                                fontFamily: "var(--serif)",
+                                fontSize: 14,
+                                fontStyle: "italic",
+                                fontWeight: 300,
+                                color:
+                                  selectedSlot === idx
+                                    ? "var(--ink)"
+                                    : "var(--ink-soft)",
+                              }}
+                            >
+                              {s.date}
+                            </span>
+                            <span
+                              style={{
+                                fontFamily: "var(--serif)",
+                                fontSize: 13,
+                                fontWeight: 300,
+                                color:
+                                  selectedSlot === idx
+                                    ? "var(--ink)"
+                                    : "var(--ink-faint)",
+                              }}
+                            >
+                              {s.window}
+                            </span>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
                 </div>
-                <span style={{ fontFamily: "var(--serif)", fontSize: 14, fontStyle: "italic", fontWeight: 300, color: "var(--ink-soft)" }}>free</span>
+                <span
+                  style={{
+                    fontFamily: "var(--serif)",
+                    fontSize: 14,
+                    fontStyle: "italic",
+                    fontWeight: 300,
+                    color: "var(--ink-soft)",
+                  }}
+                >
+                  free
+                </span>
               </div>
             </div>
           </div>
 
           {/* total */}
-          <div style={{ marginTop: 26, paddingTop: 22, borderTop: "1px solid var(--rule-soft)", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <div
+            style={{
+              marginTop: 26,
+              paddingTop: 22,
+              borderTop: "1px solid var(--rule-soft)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+            }}
+          >
             <CeramicLabel color="var(--ink)">total</CeramicLabel>
-            <span style={{ fontFamily: "var(--serif)", fontSize: 32, fontStyle: "italic", fontWeight: 300, color: "var(--ink)", letterSpacing: "-0.005em" }}>
+            <span
+              style={{
+                fontFamily: "var(--serif)",
+                fontSize: 32,
+                fontStyle: "italic",
+                fontWeight: 300,
+                color: "var(--ink)",
+                letterSpacing: "-0.005em",
+              }}
+            >
               ${orderTotal}
             </span>
           </div>
@@ -412,7 +670,15 @@ export function CartClient() {
             <div style={{ marginTop: 28 }}>
               <div id="card-container" style={{ minHeight: 90 }} />
               {error && (
-                <p style={{ marginTop: 10, fontFamily: "var(--serif)", fontSize: 13, color: "var(--topaze)", fontStyle: "italic" }}>
+                <p
+                  style={{
+                    marginTop: 10,
+                    fontFamily: "var(--serif)",
+                    fontSize: 13,
+                    color: "var(--topaze)",
+                    fontStyle: "italic",
+                  }}
+                >
                   {error}
                 </p>
               )}
@@ -427,8 +693,17 @@ export function CartClient() {
             </div>
           ) : (
             <div style={{ marginTop: 28 }}>
-              <p style={{ fontFamily: "var(--serif)", fontSize: 13, fontStyle: "italic", color: "var(--ink-faint)", marginBottom: 12 }}>
-                Square is not configured — set NEXT_PUBLIC_SQUARE_APPLICATION_ID and NEXT_PUBLIC_SQUARE_LOCATION_ID to enable payments.
+              <p
+                style={{
+                  fontFamily: "var(--serif)",
+                  fontSize: 13,
+                  fontStyle: "italic",
+                  color: "var(--ink-faint)",
+                  marginBottom: 12,
+                }}
+              >
+                Square is not configured — set NEXT_PUBLIC_SQUARE_APPLICATION_ID
+                and NEXT_PUBLIC_SQUARE_LOCATION_ID to enable payments.
               </p>
               <button className="ds-checkout-btn" disabled>
                 check out
@@ -436,13 +711,33 @@ export function CartClient() {
             </div>
           )}
 
-          <p style={{ marginTop: 22, fontFamily: "var(--serif)", fontSize: 13, lineHeight: 1.65, color: "var(--ink-soft)", fontStyle: "italic", fontWeight: 300, margin: "22px 0 0" }}>
-            pieces in your cart are held for 24 hours. after that, they return to the drop for someone else to find.
+          <p
+            style={{
+              marginTop: 22,
+              fontFamily: "var(--serif)",
+              fontSize: 13,
+              lineHeight: 1.65,
+              color: "var(--ink-soft)",
+              fontStyle: "italic",
+              fontWeight: 300,
+              margin: "22px 0 0",
+            }}
+          >
+            pieces in your cart are held for 24 hours. after that, they return
+            to the drop for someone else to find.
           </p>
 
           {/* note for alicia */}
-          <div style={{ marginTop: 28, paddingTop: 22, borderTop: "1px solid var(--rule-soft)" }}>
-            <CeramicLabel color="var(--ink-faint)">a note for alicia (optional)</CeramicLabel>
+          <div
+            style={{
+              marginTop: 28,
+              paddingTop: 22,
+              borderTop: "1px solid var(--rule-soft)",
+            }}
+          >
+            <CeramicLabel color="var(--ink-faint)">
+              a note for alicia (optional)
+            </CeramicLabel>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -473,9 +768,24 @@ export function CartClient() {
       </div>
 
       {/* footer */}
-      <div style={{ margin: "80px 56px 0", paddingTop: 26, paddingBottom: 48, borderTop: "1px solid var(--rule-soft)", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 24 }}>
-        <CeramicLabel color="var(--ink-faint)">aliciapceramics · brooklyn · est. 2024</CeramicLabel>
-        <Sig size={26} color="var(--ink-soft)">a.</Sig>
+      <div
+        style={{
+          margin: "80px 56px 0",
+          paddingTop: 26,
+          paddingBottom: 48,
+          borderTop: "1px solid var(--rule-soft)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          gap: 24,
+        }}
+      >
+        <CeramicLabel color="var(--ink-faint)">
+          aliciapceramics · brooklyn · est. 2024
+        </CeramicLabel>
+        <Sig size={26} color="var(--ink-soft)">
+          a.
+        </Sig>
       </div>
     </>
   );

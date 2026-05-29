@@ -12,13 +12,19 @@ export function TopNav() {
         alignItems: "center",
       }}
     >
-      <Link href="/shop" style={{ textDecoration: "none", justifySelf: "start" }}>
+      <Link
+        href="/shop"
+        style={{ textDecoration: "none", justifySelf: "start" }}
+      >
         <CeramicLabel color="var(--ink-soft)">ceramics</CeramicLabel>
       </Link>
       <Link href="/">
         <Logo width={108} />
       </Link>
-      <Link href="/shop?collection=archive" style={{ textDecoration: "none", justifySelf: "end" }}>
+      <Link
+        href="/shop?collection=archive"
+        style={{ textDecoration: "none", justifySelf: "end" }}
+      >
         <CeramicLabel color="var(--ink-soft)">archive</CeramicLabel>
       </Link>
     </div>

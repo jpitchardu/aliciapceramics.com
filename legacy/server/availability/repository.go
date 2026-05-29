@@ -1,7 +1,7 @@
 package availability
 
 import (
-	"aliciapceramics/server/database"
+	"aliciapceramics/legacy/server/database"
 	"bytes"
 	"encoding/json"
 	"fmt"

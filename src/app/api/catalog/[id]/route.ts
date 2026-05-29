@@ -1,21 +1,29 @@
 import { NextResponse } from "next/server";
-import { squareClient, mapCatalogItemToPiece, safeSerialize } from "@/lib/square";
+import {
+  squareClient,
+  mapCatalogItemToPiece,
+  safeSerialize,
+} from "@/lib/square";
 import { PLACEHOLDER_PIECES } from "@/lib/placeholder-pieces";
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
 
   if (!process.env.SQUARE_ACCESS_TOKEN) {
     const piece = PLACEHOLDER_PIECES.find((p) => p.id === id);
-    if (!piece) return NextResponse.json({ error: "not found" }, { status: 404 });
+    if (!piece)
+      return NextResponse.json({ error: "not found" }, { status: 404 });
     return NextResponse.json(piece);
   }
 
   try {
-    const response = await squareClient.catalog.object.get({ objectId: id, includeRelatedObjects: true });
+    const response = await squareClient.catalog.object.get({
+      objectId: id,
+      includeRelatedObjects: true,
+    });
     const item = response.object;
     const relatedObjects = response.relatedObjects ?? [];
 
@@ -27,7 +35,8 @@ export async function GET(
     }
 
     const piece = mapCatalogItemToPiece(item, images);
-    if (!piece) return NextResponse.json({ error: "not found" }, { status: 404 });
+    if (!piece)
+      return NextResponse.json({ error: "not found" }, { status: 404 });
 
     return NextResponse.json(safeSerialize(piece));
   } catch {

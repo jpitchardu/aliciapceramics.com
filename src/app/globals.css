@@ -1,28 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --paper:    #EDE3D0;
-  --paper-2:  #E1D4BD;
-  --paper-3:  #D4C5AA;
+  --paper: #ede3d0;
+  --paper-2: #e1d4bd;
+  --paper-3: #d4c5aa;
 
-  --ink:       #242322;
-  --ink-soft:  #5C5955;
-  --ink-faint: #9A938B;
+  --ink: #242322;
+  --ink-soft: #5c5955;
+  --ink-faint: #9a938b;
 
-  --wasabi:  #C8C765;
-  --topaze:  #D86A3A;
-  --blue:    #95AFCB;
-  --cassis:  #93405D;
-  --sauge:   #9BA56A;
+  --wasabi: #c8c765;
+  --topaze: #d86a3a;
+  --blue: #95afcb;
+  --cassis: #93405d;
+  --sauge: #9ba56a;
 
   --serif: "Fraunces", "Cormorant Garamond", Georgia, serif;
-  --hand:  "Caveat", cursive;
+  --hand: "Caveat", cursive;
 
   --rule-strong: rgba(36, 35, 34, 0.45);
-  --rule-soft:   rgba(36, 35, 34, 0.18);
+  --rule-soft: rgba(36, 35, 34, 0.18);
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   background: var(--paper);
@@ -31,7 +32,9 @@ html, body {
   font-weight: 300;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 

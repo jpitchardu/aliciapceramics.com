@@ -11,7 +11,13 @@ const drop = PLACEHOLDER_PIECES;
 
 export default function HomePage() {
   return (
-    <div style={{ background: "var(--paper)", color: "var(--ink)", fontFamily: "var(--serif)" }}>
+    <div
+      style={{
+        background: "var(--paper)",
+        color: "var(--ink)",
+        fontFamily: "var(--serif)",
+      }}
+    >
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
         {/* mobile nav */}
@@ -23,13 +29,19 @@ export default function HomePage() {
             alignItems: "center",
           }}
         >
-          <Link href="/shop" style={{ textDecoration: "none", justifySelf: "start" }}>
+          <Link
+            href="/shop"
+            style={{ textDecoration: "none", justifySelf: "start" }}
+          >
             <CeramicLabel color="var(--ink-soft)">ceramics</CeramicLabel>
           </Link>
           <Link href="/">
             <Logo width={108} />
           </Link>
-          <Link href="/shop?collection=archive" style={{ textDecoration: "none", justifySelf: "end" }}>
+          <Link
+            href="/shop?collection=archive"
+            style={{ textDecoration: "none", justifySelf: "end" }}
+          >
             <CeramicLabel color="var(--ink-soft)">archive</CeramicLabel>
           </Link>
         </div>
@@ -69,13 +81,25 @@ export default function HomePage() {
         {/* scatter */}
         <div style={{ padding: "64px 20px 0", position: "relative" }}>
           {[
-            { src: drop[0].src, w: 62, ratio: "3 / 4", align: "left",   mt: 0 },
-            { src: drop[2].src, w: 48, ratio: "1 / 1", align: "right",  mt: -72 },
-            { src: drop[5].src, w: 84, ratio: "4 / 5", align: "left",   mt: 84 },
-            { src: drop[3].src, w: 42, ratio: "3 / 4", align: "left",   mt: 48 },
-            { src: drop[7].src, w: 50, ratio: "1 / 1", align: "right",  mt: -110 },
-            { src: drop[8].src, w: 72, ratio: "4 / 5", align: "right",  mt: 72 },
-            { src: drop[10].src,w: 56, ratio: "3 / 4", align: "left",   mt: 56 },
+            { src: drop[0].src, w: 62, ratio: "3 / 4", align: "left", mt: 0 },
+            {
+              src: drop[2].src,
+              w: 48,
+              ratio: "1 / 1",
+              align: "right",
+              mt: -72,
+            },
+            { src: drop[5].src, w: 84, ratio: "4 / 5", align: "left", mt: 84 },
+            { src: drop[3].src, w: 42, ratio: "3 / 4", align: "left", mt: 48 },
+            {
+              src: drop[7].src,
+              w: 50,
+              ratio: "1 / 1",
+              align: "right",
+              mt: -110,
+            },
+            { src: drop[8].src, w: 72, ratio: "4 / 5", align: "right", mt: 72 },
+            { src: drop[10].src, w: 56, ratio: "3 / 4", align: "left", mt: 56 },
           ].map((s, i) => (
             <div
               key={i}
@@ -113,7 +137,11 @@ export default function HomePage() {
             <br />
             as they come out of the kiln.
           </p>
-          <Sig size={32} color="var(--ink)" style={{ marginTop: 22, display: "inline-block" }}>
+          <Sig
+            size={32}
+            color="var(--ink)"
+            style={{ marginTop: 22, display: "inline-block" }}
+          >
             — alicia
           </Sig>
         </div>
@@ -187,7 +215,9 @@ export default function HomePage() {
             gap: 32,
           }}
         >
-          <CeramicLabel color="var(--ink-faint)">a new drop · jun 2026</CeramicLabel>
+          <CeramicLabel color="var(--ink-faint)">
+            a new drop · jun 2026
+          </CeramicLabel>
           <div style={{ textAlign: "center" }}>
             <span
               style={{
@@ -218,15 +248,55 @@ export default function HomePage() {
           }}
         >
           {[
-            { src: drop[0].src,  left: "0%",  top: 0,    w: "32%", ratio: "3 / 4" },
-            { src: drop[2].src,  left: "44%", top: 120,  w: "26%", ratio: "1 / 1" },
-            { src: drop[5].src,  left: "76%", top: 40,   w: "22%", ratio: "3 / 4" },
-            { src: drop[3].src,  left: "20%", top: 620,  w: "20%", ratio: "3 / 4" },
-            { src: drop[7].src,  left: "48%", top: 580,  w: "28%", ratio: "1 / 1" },
-            { src: drop[8].src,  left: "4%",  top: 920,  w: "24%", ratio: "3 / 4" },
-            { src: drop[10].src, left: "62%", top: 880,  w: "32%", ratio: "4 / 5" },
+            { src: drop[0].src, left: "0%", top: 0, w: "32%", ratio: "3 / 4" },
+            {
+              src: drop[2].src,
+              left: "44%",
+              top: 120,
+              w: "26%",
+              ratio: "1 / 1",
+            },
+            {
+              src: drop[5].src,
+              left: "76%",
+              top: 40,
+              w: "22%",
+              ratio: "3 / 4",
+            },
+            {
+              src: drop[3].src,
+              left: "20%",
+              top: 620,
+              w: "20%",
+              ratio: "3 / 4",
+            },
+            {
+              src: drop[7].src,
+              left: "48%",
+              top: 580,
+              w: "28%",
+              ratio: "1 / 1",
+            },
+            {
+              src: drop[8].src,
+              left: "4%",
+              top: 920,
+              w: "24%",
+              ratio: "3 / 4",
+            },
+            {
+              src: drop[10].src,
+              left: "62%",
+              top: 880,
+              w: "32%",
+              ratio: "4 / 5",
+            },
           ].map((p, i) => (
-            <Link key={i} href={`/shop/${drop[i].id}`} style={{ textDecoration: "none" }}>
+            <Link
+              key={i}
+              href={`/shop/${drop[i].id}`}
+              style={{ textDecoration: "none" }}
+            >
               <div
                 style={{
                   position: "absolute",
@@ -262,14 +332,22 @@ export default function HomePage() {
             <br />
             and put them here as they come out of the kiln.
           </p>
-          <Sig size={42} color="var(--ink)" style={{ marginTop: 32, display: "inline-block" }}>
+          <Sig
+            size={42}
+            color="var(--ink)"
+            style={{ marginTop: 32, display: "inline-block" }}
+          >
             — alicia
           </Sig>
         </div>
 
         {/* enter the shop */}
         <div style={{ padding: "120px 56px 0", textAlign: "center" }}>
-          <Link href="/shop" className="ds-action" style={{ fontSize: 13, paddingBottom: 8 }}>
+          <Link
+            href="/shop"
+            className="ds-action"
+            style={{ fontSize: 13, paddingBottom: 8 }}
+          >
             enter the shop
           </Link>
         </div>

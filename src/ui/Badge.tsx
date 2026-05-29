@@ -6,9 +6,9 @@ interface BadgeProps {
 }
 
 const META: Record<PieceState, { dot: string; text: string; ink: string }> = {
-  here: { dot: "var(--sauge)",     text: "still here",  ink: "var(--ink)" },
-  held: { dot: "var(--topaze)",    text: "held · 14m",  ink: "var(--ink)" },
-  gone: { dot: "var(--ink-faint)", text: "taken",        ink: "var(--ink-soft)" },
+  here: { dot: "var(--sauge)", text: "still here", ink: "var(--ink)" },
+  held: { dot: "var(--topaze)", text: "held · 14m", ink: "var(--ink)" },
+  gone: { dot: "var(--ink-faint)", text: "taken", ink: "var(--ink-soft)" },
 };
 
 export function Badge({ state, compact = false }: BadgeProps) {

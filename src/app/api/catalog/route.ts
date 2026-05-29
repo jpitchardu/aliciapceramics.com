@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { squareClient, mapCatalogItemToPiece, safeSerialize } from "@/lib/square";
+import {
+  squareClient,
+  mapCatalogItemToPiece,
+  safeSerialize,
+} from "@/lib/square";
 import { PLACEHOLDER_PIECES } from "@/lib/placeholder-pieces";
 import { CatalogObject } from "square";
 

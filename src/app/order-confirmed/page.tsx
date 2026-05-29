@@ -52,11 +52,15 @@ export default function OrderConfirmedPage() {
           margin: "24px auto 0",
         }}
       >
-        thank you. I&apos;ll have your piece packed and posted the morning after.
-        you&apos;ll hear from me when it&apos;s on its way.
+        thank you. I&apos;ll have your piece packed and posted the morning
+        after. you&apos;ll hear from me when it&apos;s on its way.
       </p>
 
-      <Sig size={36} color="var(--ink)" style={{ marginTop: 36, display: "inline-block" }}>
+      <Sig
+        size={36}
+        color="var(--ink)"
+        style={{ marginTop: 36, display: "inline-block" }}
+      >
         — alicia
       </Sig>
 
@@ -66,8 +70,18 @@ export default function OrderConfirmedPage() {
         </Link>
       </div>
 
-      <div style={{ marginTop: 80, paddingTop: 24, borderTop: "1px solid var(--rule-soft)", width: "100%", maxWidth: 480 }}>
-        <CeramicLabel color="var(--ink-faint)">aliciapceramics · brooklyn</CeramicLabel>
+      <div
+        style={{
+          marginTop: 80,
+          paddingTop: 24,
+          borderTop: "1px solid var(--rule-soft)",
+          width: "100%",
+          maxWidth: 480,
+        }}
+      >
+        <CeramicLabel color="var(--ink-faint)">
+          aliciapceramics · brooklyn
+        </CeramicLabel>
       </div>
     </div>
   );

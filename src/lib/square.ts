@@ -25,7 +25,10 @@ function inferState(inventoryNote: string): PieceState {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function mapCatalogItemToPiece(item: any, images: Map<string, string>): Piece | null {
+export function mapCatalogItemToPiece(
+  item: any,
+  images: Map<string, string>,
+): Piece | null {
   if (!item || item.type !== "ITEM") return null;
   const data = item.itemData;
   if (!data) return null;
@@ -37,11 +40,14 @@ export function mapCatalogItemToPiece(item: any, images: Map<string, string>): P
   const customAttrs = data.customAttributeValues ?? {};
   const glaze = customAttrs["glaze"]?.stringValue ?? "";
   const dim = customAttrs["dim"]?.stringValue ?? "";
-  const pieceNum = customAttrs["piece_number"]?.stringValue ?? item.id.slice(-3);
+  const pieceNum =
+    customAttrs["piece_number"]?.stringValue ?? item.id.slice(-3);
   const inventoryNote = customAttrs["state"]?.stringValue ?? "";
 
   const imageId = data.imageIds?.[0];
-  const src = imageId ? (images.get(imageId) ?? "/assets/photo-placeholder.png") : "/assets/photo-placeholder.png";
+  const src = imageId
+    ? (images.get(imageId) ?? "/assets/photo-placeholder.png")
+    : "/assets/photo-placeholder.png";
 
   return {
     id: item.id,

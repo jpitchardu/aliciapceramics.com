@@ -12,7 +12,9 @@ import { PLACEHOLDER_PIECES } from "@/lib/placeholder-pieces";
 async function getPiece(id: string): Promise<Piece | null> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   try {
-    const res = await fetch(`${base}/api/catalog/${id}`, { next: { revalidate: 300 } });
+    const res = await fetch(`${base}/api/catalog/${id}`, {
+      next: { revalidate: 300 },
+    });
     if (!res.ok) return null;
     return res.json();
   } catch {
@@ -23,7 +25,9 @@ async function getPiece(id: string): Promise<Piece | null> {
 async function getAllPieces(): Promise<Piece[]> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   try {
-    const res = await fetch(`${base}/api/catalog`, { next: { revalidate: 300 } });
+    const res = await fetch(`${base}/api/catalog`, {
+      next: { revalidate: 300 },
+    });
     if (!res.ok) return PLACEHOLDER_PIECES;
     return res.json();
   } catch {
@@ -45,7 +49,13 @@ export default async function PieceDetailPage({
   const pieceIndex = allPieces.findIndex((p) => p.id === id);
 
   return (
-    <div style={{ background: "var(--paper)", color: "var(--ink)", fontFamily: "var(--serif)" }}>
+    <div
+      style={{
+        background: "var(--paper)",
+        color: "var(--ink)",
+        fontFamily: "var(--serif)",
+      }}
+    >
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
         {/* nav: back → wordmark */}
@@ -57,11 +67,17 @@ export default async function PieceDetailPage({
             alignItems: "center",
           }}
         >
-          <Link href="/shop" style={{ textDecoration: "none", justifySelf: "start" }}>
+          <Link
+            href="/shop"
+            style={{ textDecoration: "none", justifySelf: "start" }}
+          >
             <CeramicLabel color="var(--ink-soft)">← all pieces</CeramicLabel>
           </Link>
           <Link href="/">
-            <CeramicLabel color="var(--ink)" style={{ fontSize: 14, letterSpacing: "0.15em" }}>
+            <CeramicLabel
+              color="var(--ink)"
+              style={{ fontSize: 14, letterSpacing: "0.15em" }}
+            >
               alicia p.
             </CeramicLabel>
           </Link>
@@ -153,8 +169,10 @@ export default async function PieceDetailPage({
                 fontSize: 28,
                 fontStyle: "italic",
                 fontWeight: 300,
-                color: piece.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
-                textDecoration: piece.state === "gone" ? "line-through" : "none",
+                color:
+                  piece.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
+                textDecoration:
+                  piece.state === "gone" ? "line-through" : "none",
                 letterSpacing: "-0.005em",
               }}
             >
@@ -168,7 +186,9 @@ export default async function PieceDetailPage({
         <div style={{ padding: "40px 0 0" }}>
           <Photo ratio="1 / 1" src="/assets/piece-cream.png" />
           <div style={{ padding: "12px 28px" }}>
-            <CeramicLabel color="var(--ink-faint)">fig. 02 · in the studio</CeramicLabel>
+            <CeramicLabel color="var(--ink-faint)">
+              fig. 02 · in the studio
+            </CeramicLabel>
           </div>
         </div>
 
@@ -181,7 +201,9 @@ export default async function PieceDetailPage({
           }}
         >
           <Link href="/shop" style={{ textDecoration: "none" }}>
-            <CeramicLabel color="var(--ink-faint)">← back to all pieces</CeramicLabel>
+            <CeramicLabel color="var(--ink-faint)">
+              ← back to all pieces
+            </CeramicLabel>
           </Link>
         </div>
       </div>
@@ -200,7 +222,9 @@ export default async function PieceDetailPage({
           }}
         >
           <Link href="/shop" style={{ textDecoration: "none" }}>
-            <CeramicLabel color="var(--ink-soft)">← creating spring</CeramicLabel>
+            <CeramicLabel color="var(--ink-soft)">
+              ← creating spring
+            </CeramicLabel>
           </Link>
           <CeramicLabel color="var(--ink-faint)">
             no. {piece.n} · piece {pieceIndex + 1} of {allPieces.length}
@@ -223,7 +247,9 @@ export default async function PieceDetailPage({
           </div>
 
           <div style={{ paddingTop: 24 }}>
-            <CeramicLabel color="var(--ink-faint)">no. {piece.n} · creating spring</CeramicLabel>
+            <CeramicLabel color="var(--ink-faint)">
+              no. {piece.n} · creating spring
+            </CeramicLabel>
             <div
               style={{
                 marginTop: 18,
@@ -256,7 +282,9 @@ export default async function PieceDetailPage({
 
             {/* specs */}
             <div style={{ marginTop: 44 }}>
-              <CeramicLabel color="var(--ink-faint)">about this piece</CeramicLabel>
+              <CeramicLabel color="var(--ink-faint)">
+                about this piece
+              </CeramicLabel>
               <ul
                 style={{
                   listStyle: "none",
@@ -299,8 +327,12 @@ export default async function PieceDetailPage({
                     fontSize: 36,
                     fontStyle: "italic",
                     fontWeight: 300,
-                    color: piece.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
-                    textDecoration: piece.state === "gone" ? "line-through" : "none",
+                    color:
+                      piece.state === "gone"
+                        ? "var(--ink-faint)"
+                        : "var(--ink)",
+                    textDecoration:
+                      piece.state === "gone" ? "line-through" : "none",
                     letterSpacing: "-0.005em",
                   }}
                 >
@@ -338,7 +370,9 @@ export default async function PieceDetailPage({
           }}
         >
           <div>
-            <CeramicLabel color="var(--ink-faint)">fig. 02 · in the studio</CeramicLabel>
+            <CeramicLabel color="var(--ink-faint)">
+              fig. 02 · in the studio
+            </CeramicLabel>
             <p
               style={{
                 marginTop: 18,
@@ -353,8 +387,9 @@ export default async function PieceDetailPage({
                 maxWidth: 480,
               }}
             >
-              photographed on the windowsill the morning it came out of the kiln,
-              next to a cream pitcher (no. 016) that didn&apos;t make this drop.
+              photographed on the windowsill the morning it came out of the
+              kiln, next to a cream pitcher (no. 016) that didn&apos;t make this
+              drop.
             </p>
           </div>
           <Photo ratio="1 / 1" src="/assets/piece-cream.png" />
@@ -387,7 +422,10 @@ export default async function PieceDetailPage({
               <Link href="/shop" style={{ textDecoration: "none" }}>
                 <CeramicLabel
                   color="var(--ink-soft)"
-                  style={{ borderBottom: "1px solid var(--ink)", paddingBottom: 4 }}
+                  style={{
+                    borderBottom: "1px solid var(--ink)",
+                    paddingBottom: 4,
+                  }}
                 >
                   see all {allPieces.length} →
                 </CeramicLabel>
@@ -402,7 +440,11 @@ export default async function PieceDetailPage({
               }}
             >
               {morePieces.map((m) => (
-                <Link key={m.id} href={`/shop/${m.id}`} style={{ textDecoration: "none" }}>
+                <Link
+                  key={m.id}
+                  href={`/shop/${m.id}`}
+                  style={{ textDecoration: "none" }}
+                >
                   <figure style={{ margin: 0, cursor: "pointer" }}>
                     <div style={{ position: "relative" }}>
                       <Badge state={m.state} compact />
@@ -427,7 +469,10 @@ export default async function PieceDetailPage({
                           fontSize: 14,
                           fontStyle: "italic",
                           fontWeight: 300,
-                          color: m.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
+                          color:
+                            m.state === "gone"
+                              ? "var(--ink-faint)"
+                              : "var(--ink)",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -440,8 +485,12 @@ export default async function PieceDetailPage({
                           fontFamily: "var(--serif)",
                           fontSize: 13,
                           fontWeight: 300,
-                          color: m.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
-                          textDecoration: m.state === "gone" ? "line-through" : "none",
+                          color:
+                            m.state === "gone"
+                              ? "var(--ink-faint)"
+                              : "var(--ink)",
+                          textDecoration:
+                            m.state === "gone" ? "line-through" : "none",
                           flexShrink: 0,
                         }}
                       >
