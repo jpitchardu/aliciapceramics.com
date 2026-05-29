@@ -18,6 +18,7 @@ export const DROP = {
   date: "jun 2026",
   subtitle: "the warm rooms of a slow morning.",
   description: "made of earth, full of His spirit.",
+  opensAt: "2026-05-30T09:00:00-06:00", // 9am CST
 };
 
 export const PICKUP_SLOTS = [
