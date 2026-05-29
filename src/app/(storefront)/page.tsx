@@ -1,56 +1,16 @@
 import Link from "next/link";
-import { Logo } from "@/ui/Logo";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
-import { StorefrontFooter } from "@/ui/storefront/StorefrontFooter";
-import { DesktopNav } from "@/ui/storefront/DesktopNav";
 import { PLACEHOLDER_PIECES } from "@/lib/placeholder-pieces";
 
 const drop = PLACEHOLDER_PIECES;
 
 export default function HomePage() {
   return (
-    <div
-      style={{
-        background: "var(--paper)",
-        color: "var(--ink)",
-        fontFamily: "var(--serif)",
-      }}
-    >
+    <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
-        {/* mobile nav */}
-        <div
-          style={{
-            padding: "20px 24px 18px",
-            display: "grid",
-            gridTemplateColumns: "1fr auto 1fr",
-            alignItems: "center",
-          }}
-        >
-          <Link
-            href="/shop"
-            style={{ textDecoration: "none", justifySelf: "start" }}
-          >
-            <CeramicLabel color="var(--ink-soft)">shop</CeramicLabel>
-          </Link>
-          <Link href="/">
-            <Logo width={108} />
-          </Link>
-          <div style={{ justifySelf: "end", display: "flex", gap: 20 }}>
-            <Link
-              href="/shop?collection=archive"
-              style={{ textDecoration: "none" }}
-            >
-              <CeramicLabel color="var(--ink-soft)">archive</CeramicLabel>
-            </Link>
-            <Link href="/cart" style={{ textDecoration: "none" }}>
-              <CeramicLabel color="var(--ink-soft)">cart</CeramicLabel>
-            </Link>
-          </div>
-        </div>
-
         {/* hero */}
         <div style={{ padding: "8px 16px 0" }}>
           <Photo ratio="5 / 4" src="/assets/hero-square.png" />
@@ -153,14 +113,10 @@ export default function HomePage() {
             enter the shop
           </Link>
         </div>
-
-        <StorefrontFooter pad={28} topGap={100} />
       </div>
 
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
       <div className="hidden lg:block">
-        <DesktopNav />
-
         {/* hero */}
         <div style={{ padding: "20px 56px 0", position: "relative" }}>
           <div style={{ position: "relative" }}>
@@ -352,8 +308,6 @@ export default function HomePage() {
             enter the shop
           </Link>
         </div>
-
-        <StorefrontFooter />
       </div>
     </div>
   );

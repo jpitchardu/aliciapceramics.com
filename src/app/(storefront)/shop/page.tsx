@@ -3,9 +3,6 @@ import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
 import { Sig } from "@/ui/Sig";
-import { DesktopNav } from "@/ui/storefront/DesktopNav";
-import { TopNav } from "@/ui/storefront/TopNav";
-import { StorefrontFooter } from "@/ui/storefront/StorefrontFooter";
 import { Piece } from "@/types/piece";
 
 async function getPieces(): Promise<Piece[]> {
@@ -25,21 +22,12 @@ async function getPieces(): Promise<Piece[]> {
 export default async function ShopPage() {
   const pieces = await getPieces();
   const hereCount = pieces.filter((p) => p.state === "here").length;
-  const heldCount = pieces.filter((p) => p.state === "held").length;
   const goneCount = pieces.filter((p) => p.state === "gone").length;
 
   return (
-    <div
-      style={{
-        background: "var(--paper)",
-        color: "var(--ink)",
-        fontFamily: "var(--serif)",
-      }}
-    >
+    <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
-        <TopNav />
-
         <div
           style={{
             padding: "8px 24px 22px",
@@ -81,30 +69,10 @@ export default async function ShopPage() {
             </Link>
           ))}
         </div>
-
-        <div
-          style={{
-            margin: "56px 24px 0",
-            padding: "28px 0 48px",
-            borderTop: "1px solid var(--rule-soft)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "baseline",
-          }}
-        >
-          <CeramicLabel color="var(--ink-faint)">
-            aliciapceramics · brooklyn
-          </CeramicLabel>
-          <Sig size={22} color="var(--ink-soft)">
-            a.
-          </Sig>
-        </div>
       </div>
 
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
       <div className="hidden lg:block">
-        <DesktopNav />
-
         {/* collection header */}
         <div style={{ padding: "64px 56px 0", textAlign: "center" }}>
           <CeramicLabel color="var(--ink-faint)">
@@ -175,7 +143,7 @@ export default async function ShopPage() {
             )}
           </div>
           <CeramicLabel color="var(--ink-faint)">
-            {hereCount} still here · {heldCount} held · {goneCount} taken
+            {hereCount} still here · {goneCount} taken
           </CeramicLabel>
         </div>
 
@@ -273,8 +241,6 @@ export default async function ShopPage() {
             — a.
           </Sig>
         </div>
-
-        <StorefrontFooter />
       </div>
     </div>
   );

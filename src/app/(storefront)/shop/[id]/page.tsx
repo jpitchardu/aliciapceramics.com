@@ -3,8 +3,6 @@ import { notFound } from "next/navigation";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
-import { DesktopNav } from "@/ui/storefront/DesktopNav";
-import { StorefrontFooter } from "@/ui/storefront/StorefrontFooter";
 import { AddToCartButton } from "./_components/AddToCartButton";
 import { Piece } from "@/types/piece";
 import { PLACEHOLDER_PIECES } from "@/lib/placeholder-pieces";
@@ -49,39 +47,14 @@ export default async function PieceDetailPage({
   const pieceIndex = allPieces.findIndex((p) => p.id === id);
 
   return (
-    <div
-      style={{
-        background: "var(--paper)",
-        color: "var(--ink)",
-        fontFamily: "var(--serif)",
-      }}
-    >
+    <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
-        {/* nav: back → wordmark */}
-        <div
-          style={{
-            padding: "20px 24px 14px",
-            display: "grid",
-            gridTemplateColumns: "1fr auto 1fr",
-            alignItems: "center",
-          }}
-        >
-          <Link
-            href="/shop"
-            style={{ textDecoration: "none", justifySelf: "start" }}
-          >
+        {/* back breadcrumb */}
+        <div style={{ padding: "0 24px 16px" }}>
+          <Link href="/shop" style={{ textDecoration: "none" }}>
             <CeramicLabel color="var(--ink-soft)">← all pieces</CeramicLabel>
           </Link>
-          <Link href="/">
-            <CeramicLabel
-              color="var(--ink)"
-              style={{ fontSize: 14, letterSpacing: "0.15em" }}
-            >
-              alicia p.
-            </CeramicLabel>
-          </Link>
-          <span />
         </div>
 
         {/* hero */}
@@ -192,26 +165,99 @@ export default async function PieceDetailPage({
           </div>
         </div>
 
-        {/* back */}
-        <div
-          style={{
-            margin: "40px 28px 0",
-            padding: "28px 0 48px",
-            borderTop: "1px solid var(--rule-soft)",
-          }}
-        >
-          <Link href="/shop" style={{ textDecoration: "none" }}>
-            <CeramicLabel color="var(--ink-faint)">
-              ← back to all pieces
-            </CeramicLabel>
-          </Link>
-        </div>
+        {/* more from the drop — 2-col on mobile */}
+        {morePieces.length > 0 && (
+          <div style={{ padding: "40px 16px 0" }}>
+            <div
+              style={{
+                paddingBottom: 16,
+                borderBottom: "1px solid var(--rule-strong)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                marginBottom: 20,
+              }}
+            >
+              <CeramicLabel color="var(--ink)">more pieces</CeramicLabel>
+              <Link href="/shop" style={{ textDecoration: "none" }}>
+                <CeramicLabel color="var(--ink-soft)">
+                  see all {allPieces.length} →
+                </CeramicLabel>
+              </Link>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 10,
+              }}
+            >
+              {morePieces.map((m) => (
+                <Link
+                  key={m.id}
+                  href={`/shop/${m.id}`}
+                  style={{ textDecoration: "none" }}
+                >
+                  <figure style={{ margin: 0, position: "relative" }}>
+                    <Badge state={m.state} compact />
+                    <Photo
+                      ratio="4 / 5"
+                      src={m.src}
+                      style={{ opacity: m.state === "gone" ? 0.5 : 1 }}
+                    />
+                    <div
+                      style={{
+                        marginTop: 8,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "baseline",
+                        gap: 6,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "var(--serif)",
+                          fontSize: 13,
+                          fontStyle: "italic",
+                          fontWeight: 300,
+                          color:
+                            m.state === "gone"
+                              ? "var(--ink-faint)"
+                              : "var(--ink)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {m.title}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: "var(--serif)",
+                          fontSize: 12,
+                          fontWeight: 300,
+                          color:
+                            m.state === "gone"
+                              ? "var(--ink-faint)"
+                              : "var(--ink)",
+                          textDecoration:
+                            m.state === "gone" ? "line-through" : "none",
+                          flexShrink: 0,
+                        }}
+                      >
+                        ${m.price}
+                      </span>
+                    </div>
+                  </figure>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
       <div className="hidden lg:block">
-        <DesktopNav />
-
         {/* breadcrumb */}
         <div
           style={{
@@ -231,7 +277,7 @@ export default async function PieceDetailPage({
           </CeramicLabel>
         </div>
 
-        {/* hero — large photo + info */}
+        {/* hero */}
         <div
           style={{
             padding: "0 56px",
@@ -280,7 +326,6 @@ export default async function PieceDetailPage({
               {piece.note}
             </p>
 
-            {/* specs */}
             <div style={{ marginTop: 44 }}>
               <CeramicLabel color="var(--ink-faint)">
                 about this piece
@@ -305,7 +350,6 @@ export default async function PieceDetailPage({
               </ul>
             </div>
 
-            {/* action */}
             <div
               style={{
                 marginTop: 48,
@@ -341,25 +385,10 @@ export default async function PieceDetailPage({
               </div>
               <AddToCartButton piece={piece} />
             </div>
-
-            <p
-              style={{
-                marginTop: 18,
-                fontFamily: "var(--serif)",
-                fontSize: 14,
-                lineHeight: 1.6,
-                color: "var(--ink-soft)",
-                fontStyle: "italic",
-                fontWeight: 300,
-                margin: "18px 0 0",
-              }}
-            >
-              held for you for 24 hours. ships from brooklyn the morning after.
-            </p>
           </div>
         </div>
 
-        {/* second photo — in context */}
+        {/* second photo */}
         <div
           style={{
             margin: "120px 56px 0",
@@ -503,8 +532,6 @@ export default async function PieceDetailPage({
             </div>
           </div>
         )}
-
-        <StorefrontFooter />
       </div>
     </div>
   );
