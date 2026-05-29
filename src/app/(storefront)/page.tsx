@@ -51,7 +51,13 @@ export default function HomePage() {
         <div style={{ padding: "40px 20px 0" }}>
           {[
             { src: EDITORIAL[0], w: 64, ratio: "3 / 4", align: "left", mt: 0 },
-            { src: EDITORIAL[1], w: 50, ratio: "1 / 1", align: "right", mt: -48 },
+            {
+              src: EDITORIAL[1],
+              w: 50,
+              ratio: "1 / 1",
+              align: "right",
+              mt: -48,
+            },
             { src: EDITORIAL[2], w: 72, ratio: "4 / 5", align: "left", mt: 32 },
           ].map((s, i) => (
             <div
@@ -195,19 +201,51 @@ export default function HomePage() {
           }}
         >
           {[
-            { src: EDITORIAL[0], left: "0%",  top: 0,   w: "26%", ratio: "3 / 4" },
-            { src: EDITORIAL[1], left: "28%", top: 48,  w: "20%", ratio: "4 / 5" },
-            { src: EDITORIAL[2], left: "52%", top: 0,   w: "22%", ratio: "1 / 1" },
-            { src: EDITORIAL[3], left: "76%", top: 32,  w: "24%", ratio: "3 / 4" },
-            { src: EDITORIAL[4], left: "6%",  top: 380, w: "22%", ratio: "3 / 4" },
-            { src: EDITORIAL[5], left: "32%", top: 340, w: "24%", ratio: "4 / 5" },
-            { src: EDITORIAL[6], left: "60%", top: 360, w: "20%", ratio: "3 / 4" },
+            { src: EDITORIAL[0], left: "0%", top: 0, w: "26%", ratio: "3 / 4" },
+            {
+              src: EDITORIAL[1],
+              left: "28%",
+              top: 48,
+              w: "20%",
+              ratio: "4 / 5",
+            },
+            {
+              src: EDITORIAL[2],
+              left: "52%",
+              top: 0,
+              w: "22%",
+              ratio: "1 / 1",
+            },
+            {
+              src: EDITORIAL[3],
+              left: "76%",
+              top: 32,
+              w: "24%",
+              ratio: "3 / 4",
+            },
+            {
+              src: EDITORIAL[4],
+              left: "6%",
+              top: 380,
+              w: "22%",
+              ratio: "3 / 4",
+            },
+            {
+              src: EDITORIAL[5],
+              left: "32%",
+              top: 340,
+              w: "24%",
+              ratio: "4 / 5",
+            },
+            {
+              src: EDITORIAL[6],
+              left: "60%",
+              top: 360,
+              w: "20%",
+              ratio: "3 / 4",
+            },
           ].map((p, i) => (
-            <Link
-              key={i}
-              href="/shop"
-              style={{ textDecoration: "none" }}
-            >
+            <Link key={i} href="/shop" style={{ textDecoration: "none" }}>
               <div
                 style={{
                   position: "absolute",
