@@ -76,7 +76,23 @@ async function fetchObjects(): Promise<CatalogObject[]> {
   for await (const obj of page) {
     objects.push(obj);
   }
-  return objects;
+
+  // catalog.list() omits customAttributeValues — re-fetch items in batch to get them
+  const itemIds = objects
+    .filter((o) => o.type === "ITEM")
+    .map((o) => o.id!)
+    .filter(Boolean);
+
+  if (itemIds.length === 0) return objects;
+
+  const { objects: fullItems = [] } = await squareClient.catalog.batchGet({
+    objectIds: itemIds,
+  });
+
+  return [
+    ...objects.filter((o) => o.type !== "ITEM"),
+    ...fullItems,
+  ];
 }
 
 export async function fetchCatalog(): Promise<{
@@ -174,7 +190,7 @@ export function mapCatalogItemToPiece(
   const priceAmount = variation?.itemVariationData?.priceMoney?.amount;
   const price = priceAmount ? Number(priceAmount) / 100 : 0;
 
-  const customAttrs = data.customAttributeValues ?? {};
+  const customAttrs = item.customAttributeValues ?? {};
   const glaze = findAttr(customAttrs, "glaze");
   const dim = findAttr(customAttrs, "dim");
   const pieceNum = findAttr(customAttrs, "piece_number") || item.id.slice(-3);
