@@ -7,9 +7,6 @@ export const BYPASS_COOKIE = "gate_bypass";
 export const SITE = {
   name: "aliciapceramics",
   estYear: "2024",
-  studio: {
-    address: "47 india street, greenpoint",
-  },
   instagram: "aliciapceramics",
 };
 
