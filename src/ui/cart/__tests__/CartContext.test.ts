@@ -22,6 +22,7 @@ type CartAction =
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD": {
+      if (action.piece.state === "gone") return state;
       const existing = state.items.find((i) => i.piece.id === action.piece.id);
       if (existing) return state;
       return { items: [...state.items, { piece: action.piece, quantity: 1 }] };
@@ -39,6 +40,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
 const mug: Piece = {
   id: "014",
+  variationId: "",
   n: "014",
   title: "small cobalt mug",
   note: "test note",
@@ -52,6 +54,7 @@ const mug: Piece = {
 
 const bowl: Piece = {
   id: "019",
+  variationId: "",
   n: "019",
   title: "olive serving bowl",
   note: "test note",
@@ -71,6 +74,12 @@ describe("cartReducer", () => {
     expect(next.items).toHaveLength(1);
     expect(next.items[0].piece.id).toBe("014");
     expect(next.items[0].quantity).toBe(1);
+  });
+
+  it("does not add a sold piece", () => {
+    const sold = { ...mug, state: "gone" as const };
+    const next = cartReducer(empty, { type: "ADD", piece: sold });
+    expect(next.items).toHaveLength(0);
   });
 
   it("does not add the same piece twice", () => {
