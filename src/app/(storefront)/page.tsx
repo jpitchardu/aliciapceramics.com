@@ -2,12 +2,11 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
-import { Sig } from "@/ui/Sig";
 import { DROP, MEDIA_BASE_URL, BYPASS_COOKIE } from "@/lib/config";
 import { isGateOpen } from "@/lib/countdown";
 import { Countdown } from "@/ui/Countdown";
 
-const HERO = `${MEDIA_BASE_URL}/hero.jpg`;
+const HERO = `${MEDIA_BASE_URL}/hero-2.jpg`;
 const EDITORIAL = Array.from(
   { length: 7 },
   (_, i) => `${MEDIA_BASE_URL}/editorial-${i + 1}.jpg`,
@@ -32,116 +31,50 @@ export default async function HomePage() {
       <h1 className="sr-only">alicia p. ceramics — {DROP.name}</h1>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
-        {/* hero */}
-        <div style={{ padding: "8px 16px 0" }}>
-          <Photo
-            ratio="5 / 4"
-            src={HERO}
-            rotate={90}
-            sizes="(max-width: 1023px) 125vw, 1px"
-          />
-          <div style={{ paddingTop: 18, textAlign: "center" }}>
-            <span
-              style={{
-                fontFamily: "var(--serif)",
-                fontSize: 16,
-                fontWeight: 300,
-                letterSpacing: "0.6em",
-                textTransform: "uppercase",
-                color: "var(--ink)",
-              }}
-            >
-              {DROP.name}
-            </span>
-            <div
-              style={{
-                marginTop: 14,
-                fontFamily: "var(--serif)",
-                fontSize: 19,
-                fontStyle: "italic",
-                fontWeight: 300,
-                color: "var(--ink-soft)",
-                lineHeight: 1.3,
-              }}
-            >
-              {DROP.subtitle}
-            </div>
-          </div>
-        </div>
-
-        {/* scatter — 3 editorial images, compact stagger */}
-        <div style={{ padding: "40px 20px 0" }}>
-          {[
-            { src: EDITORIAL[0], w: 64, ratio: "3 / 4", align: "left", mt: 0 },
-            {
-              src: EDITORIAL[1],
-              w: 50,
-              ratio: "1 / 1",
-              align: "right",
-              mt: -48,
-            },
-            { src: EDITORIAL[2], w: 72, ratio: "4 / 5", align: "left", mt: 32 },
-          ].map((s, i) => (
-            <div
-              key={i}
-              style={{
-                marginTop: s.mt,
-                width: `${s.w}%`,
-                marginLeft: s.align === "right" ? "auto" : 0,
-                marginRight: s.align === "left" ? "auto" : 0,
-              }}
-            >
-              <Photo
-                ratio={s.ratio}
-                src={s.src}
-                sizes={`(max-width: 1023px) ${Math.round(s.w * 0.95)}vw, 1px`}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* quote */}
-        <div style={{ padding: "56px 36px 0", textAlign: "center" }}>
-          <p
+        <Photo
+          ratio="5 / 4"
+          src={HERO}
+          rotate={90}
+          sizes="(max-width: 1023px) 125vw, 1px"
+        />
+        <div style={{ paddingTop: 18, textAlign: "center" }}>
+          <span
             style={{
               fontFamily: "var(--serif)",
-              fontSize: 22,
-              fontStyle: "italic",
+              fontSize: 16,
               fontWeight: 300,
-              lineHeight: 1.45,
+              letterSpacing: "0.6em",
+              textTransform: "uppercase",
               color: "var(--ink)",
-              margin: 0,
-              letterSpacing: "-0.005em",
             }}
           >
-            I make them slowly,
-            <br />
-            one at a time,
-            <br />
-            and put them here
-            <br />
-            as they come out of the kiln.
-          </p>
-          <Sig
-            size={32}
-            color="var(--ink)"
-            style={{ marginTop: 22, display: "inline-block" }}
+            {DROP.name}
+          </span>
+          <div
+            style={{
+              marginTop: 14,
+              fontFamily: "var(--serif)",
+              fontSize: 19,
+              fontStyle: "italic",
+              fontWeight: 300,
+              color: "var(--ink-soft)",
+              lineHeight: 1.3,
+            }}
           >
-            — AP
-          </Sig>
-        </div>
-
-        <div style={{ padding: "56px 24px 0", textAlign: "center" }}>
-          <Link href="/shop" className="ds-action">
-            enter the shop
-          </Link>
+            {DROP.subtitle}
+          </div>
+          <div style={{ marginTop: 28 }}>
+            <Link href="/shop" className="ds-action">
+              enter the shop
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
       <div className="hidden lg:block">
-        {/* hero */}
-        <div style={{ padding: "20px 56px 0", position: "relative" }}>
+        {/* hero — full width */}
+        <div style={{ position: "relative" }}>
           <div style={{ position: "relative" }}>
             <Photo
               ratio="3 / 2"
@@ -311,36 +244,6 @@ export default async function HomePage() {
               </div>
             </Link>
           ))}
-        </div>
-
-        {/* quote */}
-        <div style={{ padding: "80px 56px 0", textAlign: "center" }}>
-          <p
-            style={{
-              fontFamily: "var(--serif)",
-              fontSize: 48,
-              fontStyle: "italic",
-              fontWeight: 300,
-              lineHeight: 1.15,
-              color: "var(--ink)",
-              margin: 0,
-              letterSpacing: "-0.015em",
-              maxWidth: 860,
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          >
-            I make them slowly, one at a time,
-            <br />
-            and put them here as they come out of the kiln.
-          </p>
-          <Sig
-            size={42}
-            color="var(--ink)"
-            style={{ marginTop: 32, display: "inline-block" }}
-          >
-            — AP
-          </Sig>
         </div>
 
         <div style={{ padding: "80px 56px 0", textAlign: "center" }}>

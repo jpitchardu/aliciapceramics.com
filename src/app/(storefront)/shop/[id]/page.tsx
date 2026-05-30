@@ -86,8 +86,8 @@ export default async function PieceDetailPage({
             </CeramicLabel>
             <ul
               style={{
-                listStyle: "none",
-                padding: 0,
+                listStyle: "disc",
+                paddingLeft: 20,
                 margin: "16px 0 0",
                 fontFamily: "var(--serif)",
                 fontSize: 16,
@@ -328,8 +328,8 @@ export default async function PieceDetailPage({
                 </CeramicLabel>
                 <ul
                   style={{
-                    listStyle: "none",
-                    padding: 0,
+                    listStyle: "disc",
+                    paddingLeft: 20,
                     margin: "18px 0 0",
                     fontFamily: "var(--serif)",
                     fontSize: 17,

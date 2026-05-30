@@ -11,6 +11,7 @@ const META: Record<PieceState, { dot: string; text: string; ink: string }> = {
 };
 
 export function Badge({ state, compact = false }: BadgeProps) {
+  if (state !== "gone") return null;
   const meta = META[state];
   return (
     <div

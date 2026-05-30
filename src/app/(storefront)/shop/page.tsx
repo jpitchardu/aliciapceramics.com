@@ -15,10 +15,15 @@ export default async function ShopPage({
   const { cat } = await searchParams;
   const { pieces, categories } = await fetchCatalog();
 
-  const filtered =
+  const base =
     cat && cat !== "all"
       ? pieces.filter((p) => p.collections.includes(cat))
       : pieces;
+
+  const filtered = [
+    ...base.filter((p) => p.state === "here").sort((a, b) => a.price - b.price),
+    ...base.filter((p) => p.state === "gone").sort((a, b) => a.price - b.price),
+  ];
 
   const hereCount = filtered.filter((p) => p.state === "here").length;
   const goneCount = filtered.filter((p) => p.state === "gone").length;
