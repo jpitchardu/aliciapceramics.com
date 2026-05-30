@@ -8,6 +8,9 @@ export const SITE = {
   name: "aliciapceramics",
   estYear: "2024",
   instagram: "aliciapceramics",
+  studio: {
+    address: "1300 South Polk St. unit 287, Dallas TX 75224",
+  },
 };
 
 export const DROP = {
@@ -19,8 +22,8 @@ export const DROP = {
 };
 
 export const PICKUP_SLOTS = [
-  { day: "wed", date: "jun 18", window: "2 – 5 pm" },
-  { day: "sat", date: "jun 21", window: "11 am – 3 pm" },
-  { day: "wed", date: "jun 25", window: "2 – 5 pm" },
-  { day: "sat", date: "jun 28", window: "11 am – 3 pm" },
+  { day: "wed", date: "jun 3", window: "3 – 5 pm" },
+  { day: "thu", date: "jun 4", window: "10 am – 2 pm" },
+  { day: "fri", date: "jun 5", window: "10 am – 2 pm" },
+  { day: "other", date: "", window: "i'll text you to coordinate" },
 ];

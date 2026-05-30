@@ -6,7 +6,9 @@ import { useCart } from "@/ui/cart/CartContext";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
-import { SITE } from "@/lib/config";
+import { SITE, PICKUP_SLOTS } from "@/lib/config";
+
+const TIME_SLOTS = PICKUP_SLOTS;
 
 function RadioDot({ active }: { active: boolean }) {
   return (
@@ -40,6 +42,7 @@ export function CartClient() {
   const { items, removeItem, total } = useCart();
 
   const [delivery, setDelivery] = useState<"ship" | "pickup">("pickup");
+  const [selectedSlot, setSelectedSlot] = useState(0);
   const [note, setNote] = useState("");
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
@@ -50,7 +53,12 @@ export function CartClient() {
     setProcessing(true);
     setError("");
 
-    const pickupSlot = undefined;
+    const slot = delivery === "pickup" ? TIME_SLOTS[selectedSlot] : null;
+    const pickupSlot = slot
+      ? slot.day === "other"
+        ? "other — coordinate via text"
+        : `${slot.day} ${slot.date} ${slot.window}`
+      : undefined;
 
     try {
       const res = await fetch("/api/checkout", {
@@ -344,13 +352,129 @@ export function CartClient() {
                   marginTop: 3,
                   fontFamily: "var(--serif)",
                   fontSize: 13,
-                  color: "var(--ink-soft)",
+                  color: "var(--ink-faint)",
                   fontStyle: "italic",
                   fontWeight: 300,
                 }}
               >
-                i&apos;ll send you the address after your purchase
+                {SITE.studio.address}
               </div>
+
+              {delivery === "pickup" && (
+                <div
+                  style={{
+                    marginTop: 14,
+                    paddingTop: 12,
+                    borderTop: "1px dashed rgba(36,35,34,0.25)",
+                  }}
+                >
+                  <CeramicLabel
+                    color="var(--ink-faint)"
+                    style={{ fontSize: 9 }}
+                  >
+                    pick a time
+                  </CeramicLabel>
+                  <div
+                    style={{
+                      marginTop: 10,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                    }}
+                  >
+                    {TIME_SLOTS.map((s, idx) => (
+                      <div
+                        key={s.day}
+                        style={{
+                          display: "flex",
+                          gap: 10,
+                          alignItems: "baseline",
+                          cursor: "pointer",
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSlot(idx);
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 999,
+                            border:
+                              selectedSlot === idx
+                                ? "1px solid var(--ink)"
+                                : "1px solid var(--ink-faint)",
+                            background:
+                              selectedSlot === idx
+                                ? "var(--ink)"
+                                : "transparent",
+                            display: "inline-block",
+                            flexShrink: 0,
+                            marginTop: 4,
+                          }}
+                        />
+                        {s.day !== "other" ? (
+                          <>
+                            <CeramicLabel
+                              color={
+                                selectedSlot === idx
+                                  ? "var(--ink)"
+                                  : "var(--ink-soft)"
+                              }
+                              style={{ fontSize: 10 }}
+                            >
+                              {s.day}
+                            </CeramicLabel>
+                            <span
+                              style={{
+                                fontFamily: "var(--serif)",
+                                fontSize: 13,
+                                fontStyle: "italic",
+                                fontWeight: 300,
+                                color:
+                                  selectedSlot === idx
+                                    ? "var(--ink)"
+                                    : "var(--ink-soft)",
+                              }}
+                            >
+                              {s.date}
+                            </span>
+                            <span
+                              style={{
+                                fontFamily: "var(--serif)",
+                                fontSize: 13,
+                                fontWeight: 300,
+                                color:
+                                  selectedSlot === idx
+                                    ? "var(--ink)"
+                                    : "var(--ink-faint)",
+                              }}
+                            >
+                              {s.window}
+                            </span>
+                          </>
+                        ) : (
+                          <span
+                            style={{
+                              fontFamily: "var(--serif)",
+                              fontSize: 13,
+                              fontStyle: "italic",
+                              fontWeight: 300,
+                              color:
+                                selectedSlot === idx
+                                  ? "var(--ink)"
+                                  : "var(--ink-soft)",
+                            }}
+                          >
+                            {s.window}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <span
               style={{
