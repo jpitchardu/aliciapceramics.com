@@ -44,7 +44,7 @@ export default async function ShopPage({
 
   const base =
     cat && cat !== "all"
-      ? pieces.filter((p) => p.collections.includes(cat))
+      ? pieces.filter((p) => p.collections.includes(cat!))
       : pieces;
 
   const filtered = [
