@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
+import { NoScroll } from "@/ui/NoScroll";
 import { DROP, MEDIA_BASE_URL, BYPASS_COOKIE } from "@/lib/config";
 import { isGateOpen } from "@/lib/countdown";
 import { Countdown } from "@/ui/Countdown";
@@ -24,18 +25,20 @@ export default async function HomePage() {
 
   return (
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
+      <NoScroll />
       <h1 className="sr-only">alicia p. ceramics — {DROP.name}</h1>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
+      {/* 104px = TopNav: 20pt + 18pb + logo(108w × 364/600) */}
       <div
         className="lg:hidden"
-        style={{ position: "relative", height: "100dvh" }}
+        style={{ position: "relative", height: "calc(100dvh - 104px)" }}
       >
         <Photo
           src={HERO}
           objectFit="contain"
           objectPosition="bottom center"
           sizes="(max-width: 1023px) 100vw, 1px"
-          style={{ height: "100dvh", aspectRatio: "unset" }}
+          style={{ height: "calc(100dvh - 104px)", aspectRatio: "unset" }}
         />
         <div
           style={{
@@ -80,14 +83,15 @@ export default async function HomePage() {
       </div>
 
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
+      {/* 185px = DesktopNav: 40pt + 24pb + logo(200w × 364/600) */}
       <div
         className="hidden lg:block"
-        style={{ position: "relative", height: "100dvh" }}
+        style={{ position: "relative", height: "calc(100dvh - 185px)" }}
       >
         <Photo
           src={HERO}
           sizes="(min-width: 1024px) 100vw, 1px"
-          style={{ height: "100dvh", aspectRatio: "unset" }}
+          style={{ height: "calc(100dvh - 185px)", aspectRatio: "unset" }}
         />
 
         {/* drop name + description */}
