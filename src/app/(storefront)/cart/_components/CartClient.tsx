@@ -355,7 +355,7 @@ export function CartClient() {
                   fontWeight: 300,
                 }}
               >
-                {SITE.studio.address}
+                we&apos;ll reach out to you
               </div>
 
               {delivery === "pickup" && (
