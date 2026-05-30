@@ -80,58 +80,62 @@ export default async function HomePage() {
       </div>
 
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
-      <div className="hidden lg:block">
-        {/* hero — full width */}
-        <div style={{ position: "relative" }}>
-          <div style={{ position: "relative" }}>
-            <Photo
-              ratio="3 / 2"
-              src={HERO}
-              sizes="(min-width: 1024px) 100vw, 1px"
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                bottom: "8%",
-                textAlign: "center",
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "var(--serif)",
-                  fontSize: 28,
-                  fontWeight: 300,
-                  letterSpacing: "0.6em",
-                  textTransform: "uppercase",
-                  color: "var(--ink)",
-                }}
-              >
-                {DROP.name}
-              </span>
-              <div
-                style={{
-                  marginTop: 18,
-                  fontFamily: "var(--serif)",
-                  fontSize: 20,
-                  fontStyle: "italic",
-                  fontWeight: 300,
-                  color: "var(--ink)",
-                  letterSpacing: "-0.005em",
-                  opacity: 0.92,
-                }}
-              >
-                {DROP.description}
-              </div>
-            </div>
+      <div
+        className="hidden lg:block"
+        style={{ position: "relative", height: "100dvh" }}
+      >
+        <Photo
+          src={HERO}
+          sizes="(min-width: 1024px) 100vw, 1px"
+          style={{ height: "100dvh", aspectRatio: "unset" }}
+        />
+
+        {/* drop name + description */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: "18%",
+            textAlign: "center",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--serif)",
+              fontSize: 28,
+              fontWeight: 300,
+              letterSpacing: "0.6em",
+              textTransform: "uppercase",
+              color: "var(--ink)",
+            }}
+          >
+            {DROP.name}
+          </span>
+          <div
+            style={{
+              marginTop: 18,
+              fontFamily: "var(--serif)",
+              fontSize: 20,
+              fontStyle: "italic",
+              fontWeight: 300,
+              color: "var(--ink)",
+              letterSpacing: "-0.005em",
+              opacity: 0.92,
+            }}
+          >
+            {DROP.description}
           </div>
         </div>
 
-        {/* meta row */}
+        {/* meta row — pinned to bottom */}
         <div
           style={{
-            padding: "36px 56px 0",
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            padding: "0 56px 36px",
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr",
             alignItems: "baseline",
