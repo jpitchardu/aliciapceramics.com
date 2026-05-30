@@ -94,7 +94,7 @@ test.describe("cart page", () => {
     await expect(page).toHaveURL("/cart");
     await page.waitForLoadState("networkidle");
     await expect(
-      page.locator("button", { hasText: "×" }).first(),
+      page.locator("button:visible").filter({ hasText: "×" }).first(),
     ).toBeVisible();
   });
 
@@ -104,7 +104,11 @@ test.describe("cart page", () => {
     await page.getByRole("button", { name: /add to cart/i }).click();
     await expect(page).toHaveURL("/cart");
     await page.waitForLoadState("networkidle");
-    await page.locator("button", { hasText: "×" }).first().click();
+    await page
+      .locator("button:visible")
+      .filter({ hasText: "×" })
+      .first()
+      .click();
     await expect(page.getByText(/your cart is empty/i)).toBeVisible();
   });
 
@@ -114,13 +118,18 @@ test.describe("cart page", () => {
     await page.getByRole("button", { name: /add to cart/i }).click();
     await expect(page).toHaveURL("/cart");
     await page.waitForLoadState("networkidle");
-    await expect(page.getByText(/ship to me|pick up/i).first()).toBeVisible();
+    await expect(
+      page
+        .getByText(/ship to me|pick up/i)
+        .filter({ visible: true })
+        .first(),
+    ).toBeVisible();
   });
 
   test("keep looking link navigates back to shop", async ({ page }) => {
     await page.goto("/cart");
     await page.waitForLoadState("networkidle");
-    await page.locator('a[href="/shop"]').first().click();
+    await page.locator('a[href="/shop"]:visible').first().click();
     await expect(page).toHaveURL("/shop");
   });
 });
