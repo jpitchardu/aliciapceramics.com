@@ -72,7 +72,8 @@ for (const { name, violations } of allResults) {
     const badge = `[${(v.impact || "?").toUpperCase()}]`.padEnd(12);
     console.log(`  ${badge} ${v.id}`);
     console.log(`             ${v.help}`);
-    if (v.nodes.length <= 3) v.nodes.forEach((n) => console.log(`             → ${n}`));
+    if (v.nodes.length <= 3)
+      v.nodes.forEach((n) => console.log(`             → ${n}`));
     else console.log(`             → ${v.nodes.length} elements`);
   }
 }
