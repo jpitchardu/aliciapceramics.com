@@ -27,6 +27,7 @@ type CartAction =
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD": {
+      if (action.piece.state === "gone") return state;
       const existing = state.items.find((i) => i.piece.id === action.piece.id);
       if (existing) return state;
       return { items: [...state.items, { piece: action.piece, quantity: 1 }] };
