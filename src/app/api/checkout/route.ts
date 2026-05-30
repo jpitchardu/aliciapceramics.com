@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { squareClient, fetchPieceById } from "@/lib/square";
+import { SHIPPING_COST_CENTS } from "@/lib/config";
 import type { Currency } from "square";
 import { z } from "zod";
 
@@ -43,7 +44,13 @@ export async function POST(req: Request) {
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const locationId = process.env.SQUARE_LOCATION_ID ?? "";
+  const locationId = process.env.SQUARE_LOCATION_ID;
+  if (!locationId) {
+    return NextResponse.json(
+      { error: "store not configured" },
+      { status: 500 },
+    );
+  }
 
   const lineItems = pieces.map((piece, idx) => ({
     name: piece!.title,
@@ -54,8 +61,7 @@ export async function POST(req: Request) {
     },
   }));
 
-  // Shipping computed server-side — never accept from client
-  const shippingCents = delivery === "ship" ? 1200 : 0;
+  const shippingCents = delivery === "ship" ? SHIPPING_COST_CENTS : 0;
   if (shippingCents > 0) {
     lineItems.push({
       name: "shipping",

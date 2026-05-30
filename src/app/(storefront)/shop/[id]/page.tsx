@@ -14,13 +14,16 @@ export default async function PieceDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [piece, allPieces] = await Promise.all([
+  const [pieceResult, allPiecesResult] = await Promise.allSettled([
     fetchPieceById(id),
     fetchAllPieces(),
   ]);
 
+  const piece = pieceResult.status === "fulfilled" ? pieceResult.value : null;
   if (!piece) notFound();
 
+  const allPieces =
+    allPiecesResult.status === "fulfilled" ? allPiecesResult.value : [];
   const morePieces = allPieces.filter((p) => p.id !== id).slice(0, 4);
   const pieceIndex = allPieces.findIndex((p) => p.id === id);
 

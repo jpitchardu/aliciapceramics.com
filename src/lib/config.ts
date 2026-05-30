@@ -21,6 +21,8 @@ export const DROP = {
   opensAt: "2026-05-30T09:00:00-05:00", // 9am CDT (Dallas)
 };
 
+export const SHIPPING_COST_CENTS = 1200;
+
 export const PICKUP_SLOTS = [
   { day: "wed", date: "jun 18", window: "2 – 5 pm" },
   { day: "sat", date: "jun 21", window: "11 am – 3 pm" },

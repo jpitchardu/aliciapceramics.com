@@ -36,7 +36,7 @@ export default function OrderConfirmedPage() {
           maxWidth: 560,
         }}
       >
-        it&apos;s on its way.
+        thank you.
       </div>
 
       <p
@@ -52,8 +52,7 @@ export default function OrderConfirmedPage() {
           margin: "24px auto 0",
         }}
       >
-        thank you. I&apos;ll have your piece packed and posted the morning
-        after. you&apos;ll hear from me when it&apos;s on its way.
+        your order is in. I&apos;ll be in touch soon with next steps.
       </p>
 
       <Sig

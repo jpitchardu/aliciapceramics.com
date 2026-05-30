@@ -23,6 +23,46 @@ export default async function ShopPage({
   const hereCount = filtered.filter((p) => p.state === "here").length;
   const goneCount = filtered.filter((p) => p.state === "gone").length;
 
+  if (pieces.length === 0) {
+    return (
+      <div
+        style={{
+          minHeight: "60vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          padding: "80px 24px",
+          color: "var(--ink)",
+          fontFamily: "var(--serif)",
+        }}
+      >
+        <p
+          style={{
+            fontSize: 22,
+            fontStyle: "italic",
+            fontWeight: 300,
+            color: "var(--ink-soft)",
+          }}
+        >
+          the collection isn&apos;t loading right now.
+        </p>
+        <p
+          style={{
+            marginTop: 12,
+            fontSize: 15,
+            fontStyle: "italic",
+            fontWeight: 300,
+            color: "var(--ink-faint)",
+          }}
+        >
+          try refreshing in a moment.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
@@ -148,8 +188,7 @@ export default async function ShopPage({
               letterSpacing: "-0.005em",
             }}
           >
-            made of earth, full of His spirit — {pieces.length} new pieces,
-            revelations of creation.
+            {DROP.description} — {pieces.length} new pieces, {DROP.subtitle}
           </p>
         </div>
 
