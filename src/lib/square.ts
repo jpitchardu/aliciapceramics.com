@@ -1,5 +1,8 @@
 import { SquareClient, SquareEnvironment, CatalogObject } from "square";
 import { Piece, PieceState } from "@/types/piece";
+import { MOCK_PIECES, MOCK_CATEGORIES } from "@/lib/mockCatalog";
+
+const USE_MOCK = process.env.SQUARE_ACCESS_TOKEN === "fake";
 
 function createSquareClient(): SquareClient {
   const token = process.env.SQUARE_ACCESS_TOKEN;
@@ -54,6 +57,7 @@ function inferState(inventoryNote: string): PieceState {
 }
 
 export async function fetchAllPieces(): Promise<Piece[]> {
+  if (USE_MOCK) return MOCK_PIECES;
   const { pieces } = await fetchCatalog();
   return pieces;
 }
@@ -75,6 +79,7 @@ export async function fetchCatalog(): Promise<{
   pieces: Piece[];
   categories: Category[];
 }> {
+  if (USE_MOCK) return { pieces: MOCK_PIECES, categories: MOCK_CATEGORIES };
   console.log(
     "[square:catalog] fetching catalog, env:",
     process.env.SQUARE_ENVIRONMENT,
@@ -118,6 +123,7 @@ export async function fetchCatalog(): Promise<{
 }
 
 export async function fetchPieceById(id: string): Promise<Piece | null> {
+  if (USE_MOCK) return MOCK_PIECES.find((p) => p.n === id || p.id === id) ?? null;
   try {
     const response = await squareClient.catalog.object.get({
       objectId: id,

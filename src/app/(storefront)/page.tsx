@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
@@ -11,9 +12,11 @@ const EDITORIAL = Array.from(
   (_, i) => `${MEDIA_BASE_URL}/editorial-${i + 1}.jpg`,
 );
 
-const isOpen = Date.now() >= new Date(DROP.opensAt).getTime();
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const hasBypass = cookieStore.get("gate_bypass")?.value === "1";
+  const isOpen = hasBypass || Date.now() >= new Date(DROP.opensAt).getTime();
 
-export default function HomePage() {
   if (!isOpen) {
     return (
       <Countdown

@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' https://*.public.blob.vercel-storage.com https://*.squarecdn.com https://items-images-production.s3.us-west-2.amazonaws.com data:",
               "font-src 'self' https://fonts.gstatic.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "script-src 'self'",
+              "script-src 'self' 'unsafe-inline'",
               "connect-src 'self' https://connect.squareup.com https://connect.squareupsandbox.com",
               "frame-ancestors 'none'",
             ].join("; "),
