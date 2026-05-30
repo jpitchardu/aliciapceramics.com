@@ -7,6 +7,7 @@ interface PhotoProps {
   style?: CSSProperties;
   rotate?: 90 | -90 | 180;
   sizes?: string;
+  objectFit?: "cover" | "contain";
 }
 
 export function Photo({
@@ -15,6 +16,7 @@ export function Photo({
   style,
   rotate,
   sizes = "(max-width: 1024px) 50vw, 33vw",
+  objectFit = "cover",
 }: PhotoProps) {
   return (
     <div
@@ -33,7 +35,7 @@ export function Photo({
         fill
         sizes={sizes}
         style={{
-          objectFit: "cover",
+          objectFit,
           transform: rotate ? `rotate(${rotate}deg)` : undefined,
         }}
       />

@@ -32,8 +32,8 @@ export default async function HomePage() {
       >
         <Photo
           src={HERO}
-          rotate={90}
-          sizes="(max-width: 1023px) 125vw, 1px"
+          objectFit="contain"
+          sizes="(max-width: 1023px) 100vw, 1px"
           style={{ height: "100dvh", aspectRatio: "unset" }}
         />
         <div
