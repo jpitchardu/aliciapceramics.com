@@ -90,6 +90,8 @@ export default async function HomePage() {
       >
         <Photo
           src={HERO}
+          objectFit="contain"
+          objectPosition="bottom center"
           sizes="(min-width: 1024px) 100vw, 1px"
           style={{ height: "calc(100dvh - 185px)", aspectRatio: "unset" }}
         />

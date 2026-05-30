@@ -16,7 +16,7 @@ export default function StorefrontLayout({
         <DesktopNav />
       </header>
       <main>{children}</main>
-      <StorefrontFooter pad={28} topGap={80} />
+      <StorefrontFooter pad={28} topGap={32} />
     </>
   );
 }
