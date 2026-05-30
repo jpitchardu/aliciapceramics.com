@@ -6,7 +6,7 @@ import { useCart } from "@/ui/cart/CartContext";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
-import { SITE, PICKUP_SLOTS, SHIPPING_COST_CENTS } from "@/lib/config";
+import { SITE, PICKUP_SLOTS } from "@/lib/config";
 
 const TIME_SLOTS = PICKUP_SLOTS;
 
@@ -47,8 +47,7 @@ export function CartClient() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
 
-  const shipping = delivery === "ship" ? SHIPPING_COST_CENTS / 100 : 0;
-  const orderTotal = total + shipping;
+  const orderTotal = total;
 
   async function handleCheckout() {
     setProcessing(true);
@@ -318,20 +317,9 @@ export function CartClient() {
                   fontWeight: 300,
                 }}
               >
-                packed by hand with care
+                packed by hand with care · US only
               </div>
             </div>
-            <span
-              style={{
-                fontFamily: "var(--serif)",
-                fontSize: 15,
-                fontWeight: 300,
-                color: "var(--ink-soft)",
-                flexShrink: 0,
-              }}
-            >
-              ${SHIPPING_COST_CENTS / 100}
-            </span>
           </div>
 
           <div

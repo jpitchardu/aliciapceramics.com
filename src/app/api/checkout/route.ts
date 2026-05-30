@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { squareClient, fetchPieceById } from "@/lib/square";
-import { SHIPPING_COST_CENTS } from "@/lib/config";
 import type { Currency } from "square";
 import { z } from "zod";
 
@@ -60,18 +59,6 @@ export async function POST(req: Request) {
       currency: USD,
     },
   }));
-
-  const shippingCents = delivery === "ship" ? SHIPPING_COST_CENTS : 0;
-  if (shippingCents > 0) {
-    lineItems.push({
-      name: "shipping",
-      quantity: "1",
-      basePriceMoney: {
-        amount: BigInt(shippingCents),
-        currency: USD,
-      },
-    });
-  }
 
   const orderNote = [
     delivery === "pickup" && pickupSlot ? `pickup: ${pickupSlot}` : "shipping",

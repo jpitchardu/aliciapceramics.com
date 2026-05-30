@@ -7,10 +7,6 @@ import { isGateOpen } from "@/lib/countdown";
 import { Countdown } from "@/ui/Countdown";
 
 const HERO = `${MEDIA_BASE_URL}/hero-2.jpg`;
-const EDITORIAL = Array.from(
-  { length: 7 },
-  (_, i) => `${MEDIA_BASE_URL}/editorial-${i + 1}.jpg`,
-);
 
 export default async function HomePage() {
   const bypassed = (await cookies()).get(BYPASS_COOKIE)?.value === "1";
@@ -30,14 +26,22 @@ export default async function HomePage() {
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
       <h1 className="sr-only">alicia p. ceramics — {DROP.name}</h1>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
-      <div className="lg:hidden">
+      <div className="lg:hidden" style={{ position: "relative", height: "100dvh" }}>
         <Photo
-          ratio="5 / 4"
           src={HERO}
           rotate={90}
           sizes="(max-width: 1023px) 125vw, 1px"
+          style={{ height: "100dvh", aspectRatio: "unset" }}
         />
-        <div style={{ paddingTop: 18, textAlign: "center" }}>
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: "8%",
+            textAlign: "center",
+          }}
+        >
           <span
             style={{
               fontFamily: "var(--serif)",
@@ -57,7 +61,7 @@ export default async function HomePage() {
               fontSize: 19,
               fontStyle: "italic",
               fontWeight: 300,
-              color: "var(--ink-soft)",
+              color: "var(--ink)",
               lineHeight: 1.3,
             }}
           >
@@ -68,37 +72,6 @@ export default async function HomePage() {
               enter the shop
             </Link>
           </div>
-        </div>
-
-        {/* scatter — 3 editorial images */}
-        <div style={{ padding: "40px 20px 0" }}>
-          {[
-            { src: EDITORIAL[0], w: 64, ratio: "3 / 4", align: "left", mt: 0 },
-            {
-              src: EDITORIAL[1],
-              w: 50,
-              ratio: "1 / 1",
-              align: "right",
-              mt: -48,
-            },
-            { src: EDITORIAL[2], w: 72, ratio: "4 / 5", align: "left", mt: 32 },
-          ].map((s, i) => (
-            <div
-              key={i}
-              style={{
-                marginTop: s.mt,
-                width: `${s.w}%`,
-                marginLeft: s.align === "right" ? "auto" : 0,
-                marginRight: s.align === "left" ? "auto" : 0,
-              }}
-            >
-              <Photo
-                ratio={s.ratio}
-                src={s.src}
-                sizes={`(max-width: 1023px) ${Math.round(s.w * 0.95)}vw, 1px`}
-              />
-            </div>
-          ))}
         </div>
       </div>
 
@@ -119,7 +92,6 @@ export default async function HomePage() {
                 right: 0,
                 bottom: "8%",
                 textAlign: "center",
-                textShadow: "0 2px 24px rgba(0,0,0,0.35)",
               }}
             >
               <span
@@ -129,7 +101,7 @@ export default async function HomePage() {
                   fontWeight: 300,
                   letterSpacing: "0.6em",
                   textTransform: "uppercase",
-                  color: "var(--paper)",
+                  color: "var(--ink)",
                 }}
               >
                 {DROP.name}
@@ -141,7 +113,7 @@ export default async function HomePage() {
                   fontSize: 20,
                   fontStyle: "italic",
                   fontWeight: 300,
-                  color: "var(--paper)",
+                  color: "var(--ink)",
                   letterSpacing: "-0.005em",
                   opacity: 0.92,
                 }}
@@ -185,107 +157,6 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* desktop scatter — 7 images, alternating z-index, funky layout */}
-        <div
-          style={{
-            position: "relative",
-            height: 860,
-            margin: "64px 56px 0",
-            overflow: "hidden",
-          }}
-        >
-          {[
-            {
-              src: EDITORIAL[0],
-              left: "2%",
-              top: 0,
-              w: "28%",
-              ratio: "3 / 4",
-              z: 2,
-            },
-            {
-              src: EDITORIAL[1],
-              left: "22%",
-              top: 120,
-              w: "18%",
-              ratio: "4 / 5",
-              z: 1,
-            },
-            {
-              src: EDITORIAL[2],
-              left: "44%",
-              top: 20,
-              w: "25%",
-              ratio: "3 / 4",
-              z: 2,
-            },
-            {
-              src: EDITORIAL[3],
-              left: "65%",
-              top: 180,
-              w: "20%",
-              ratio: "1 / 1",
-              z: 1,
-            },
-            {
-              src: EDITORIAL[4],
-              left: "10%",
-              top: 430,
-              w: "22%",
-              ratio: "4 / 5",
-              z: 2,
-            },
-            {
-              src: EDITORIAL[5],
-              left: "36%",
-              top: 300,
-              w: "28%",
-              ratio: "3 / 4",
-              z: 1,
-            },
-            {
-              src: EDITORIAL[6],
-              left: "68%",
-              top: 480,
-              w: "21%",
-              ratio: "4 / 5",
-              z: 2,
-            },
-          ].map((p, i) => (
-            <Link
-              key={i}
-              href="/shop"
-              aria-label="Enter the shop"
-              style={{ textDecoration: "none" }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  left: p.left,
-                  zIndex: p.z,
-                  top: p.top,
-                  width: p.w,
-                }}
-              >
-                <Photo
-                  ratio={p.ratio}
-                  src={p.src}
-                  sizes={`(min-width: 1024px) ${parseInt(p.w)}vw, 1px`}
-                />
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        <div style={{ padding: "80px 56px 0", textAlign: "center" }}>
-          <Link
-            href="/shop"
-            className="ds-action"
-            style={{ fontSize: 13, paddingBottom: 8 }}
-          >
-            enter the shop
-          </Link>
-        </div>
       </div>
     </div>
   );
