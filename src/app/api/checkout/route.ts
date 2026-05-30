@@ -105,6 +105,9 @@ export async function POST(req: Request) {
         locationId,
         lineItems,
         referenceId: orderNote || undefined,
+        metadata: variationIds.length
+          ? { variationIds: variationIds.join(",") }
+          : undefined,
       },
       checkoutOptions: {
         redirectUrl: `${siteUrl}/order-confirmed`,
