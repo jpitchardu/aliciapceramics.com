@@ -59,7 +59,9 @@ export default async function ShopPage({
               href={`/shop/${p.id}`}
               style={{ textDecoration: "none" }}
             >
-              <figure style={{ margin: 0, position: "relative", cursor: "pointer" }}>
+              <figure
+                style={{ margin: 0, position: "relative", cursor: "pointer" }}
+              >
                 <Badge state={p.state} compact />
                 <Photo
                   ratio="4 / 5"
@@ -82,7 +84,8 @@ export default async function ShopPage({
                       fontSize: 12,
                       fontStyle: "italic",
                       fontWeight: 300,
-                      color: p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
+                      color:
+                        p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -95,8 +98,10 @@ export default async function ShopPage({
                       fontFamily: "var(--serif)",
                       fontSize: 12,
                       fontWeight: 300,
-                      color: p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
-                      textDecoration: p.state === "gone" ? "line-through" : "none",
+                      color:
+                        p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
+                      textDecoration:
+                        p.state === "gone" ? "line-through" : "none",
                       flexShrink: 0,
                     }}
                   >
