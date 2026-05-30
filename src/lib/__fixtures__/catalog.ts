@@ -25,7 +25,7 @@ export const FIXTURE_PIECES: Piece[] = [
     id: "FIXTURE_CUP_001",
     n: "1/1",
     title: "Morning Cup",
-    note: "Wheel-thrown, dipped twice in cobalt. The handle sits just right.",
+    note: "Hand built, dipped twice in cobalt. The handle sits just right.",
     glaze: "cobalt slip · clear",
     dim: '3" h x 2.75" w',
     price: 48,

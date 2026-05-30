@@ -135,6 +135,31 @@ export default async function PieceDetailPage({
           <AddToCartButton piece={piece} />
         </div>
 
+        <div style={{ padding: "28px 28px 0" }}>
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+              fontFamily: "var(--serif)",
+              fontSize: 13,
+              fontStyle: "italic",
+              fontWeight: 300,
+              color: "var(--ink-faint)",
+              lineHeight: 2,
+            }}
+          >
+            <li>
+              each piece is hand built — dimensions and capacity are
+              approximate and may vary slightly.
+            </li>
+            <li>
+              all sales are final. if your piece arrives damaged, reach out
+              within 3 days of delivery with a photo.
+            </li>
+          </ul>
+        </div>
+
         {morePieces.length > 0 && (
           <div style={{ padding: "40px 16px 0" }}>
             <div
@@ -353,6 +378,29 @@ export default async function PieceDetailPage({
               </div>
               <AddToCartButton piece={piece} />
             </div>
+
+            <ul
+              style={{
+                listStyle: "none",
+                padding: 0,
+                margin: "24px 0 0",
+                fontFamily: "var(--serif)",
+                fontSize: 13,
+                fontStyle: "italic",
+                fontWeight: 300,
+                color: "var(--ink-faint)",
+                lineHeight: 2,
+              }}
+            >
+              <li>
+                each piece is hand built — dimensions and capacity are
+                approximate and may vary slightly.
+              </li>
+              <li>
+                all sales are final. if your piece arrives damaged, reach out
+                within 3 days of delivery with a photo.
+              </li>
+            </ul>
           </div>
         </div>
 

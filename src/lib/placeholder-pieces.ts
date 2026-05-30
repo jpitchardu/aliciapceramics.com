@@ -18,7 +18,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     n: "015",
     srcs: ["/assets/piece-blush.png"],
     title: "blush mug",
-    note: "wheel-thrown stoneware, dipped once. the colour came out softer than expected.",
+    note: "hand built, dipped once. the colour came out softer than expected.",
     glaze: "blush matte",
     dim: "10×8 cm",
     price: 62,
