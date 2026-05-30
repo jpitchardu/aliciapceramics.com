@@ -76,7 +76,17 @@ export function CartClient() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error ?? "something went wrong.");
+        if (res.status === 409 && Array.isArray(data.soldOut)) {
+          const soldTitles = data.soldOut
+            .map((id: string) => items.find((i) => i.piece.id === id)?.piece.title)
+            .filter(Boolean);
+          data.soldOut.forEach((id: string) => removeItem(id));
+          setError(
+            `${soldTitles.join(", ")} ${soldTitles.length === 1 ? "was" : "were"} just taken — removed from your cart.`,
+          );
+        } else {
+          setError(data.error ?? "something went wrong.");
+        }
         setProcessing(false);
         return;
       }

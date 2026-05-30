@@ -34,9 +34,12 @@ export async function POST(req: Request) {
   if (pieces.some((p) => !p)) {
     return NextResponse.json({ error: "item not found" }, { status: 400 });
   }
-  if (pieces.some((p) => p!.state === "gone")) {
+  const soldOut = pieces
+    .filter((p) => p!.state === "gone")
+    .map((p) => p!.id);
+  if (soldOut.length > 0) {
     return NextResponse.json(
-      { error: "one or more pieces are no longer available" },
+      { error: "one or more pieces are no longer available", soldOut },
       { status: 409 },
     );
   }
