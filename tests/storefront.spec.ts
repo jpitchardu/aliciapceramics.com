@@ -3,8 +3,6 @@ import { test, expect } from "@playwright/test";
 // All tests set the bypass cookie so the gate doesn't block navigation.
 // The gate itself is tested in tests/gate.spec.ts.
 
-const BYPASS_KEY = process.env.GATE_BYPASS_KEY ?? "test-bypass";
-
 test.beforeEach(async ({ context }) => {
   await context.addCookies([
     {
