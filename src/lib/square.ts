@@ -1,27 +1,41 @@
 import { SquareClient, SquareEnvironment, CatalogObject } from "square";
 import { Piece, PieceState } from "@/types/piece";
 
-const token = process.env.SQUARE_ACCESS_TOKEN;
-const environment = process.env.SQUARE_ENVIRONMENT;
+function createSquareClient(): SquareClient {
+  const token = process.env.SQUARE_ACCESS_TOKEN;
+  const environment = process.env.SQUARE_ENVIRONMENT;
 
-if (!token) {
-  throw new Error(
-    "[square] SQUARE_ACCESS_TOKEN is not set. " +
-      "Add it to your environment variables.",
-  );
-}
-if (!environment || !["sandbox", "production"].includes(environment)) {
-  throw new Error(
-    `[square] SQUARE_ENVIRONMENT must be "sandbox" or "production", got: ${environment ?? "(unset)"}`,
-  );
+  if (!token) {
+    throw new Error(
+      "[square] SQUARE_ACCESS_TOKEN is not set. " +
+        "Add it to your environment variables.",
+    );
+  }
+  if (!environment || !["sandbox", "production"].includes(environment)) {
+    throw new Error(
+      `[square] SQUARE_ENVIRONMENT must be "sandbox" or "production", got: ${environment ?? "(unset)"}`,
+    );
+  }
+
+  return new SquareClient({
+    token,
+    environment:
+      environment === "production"
+        ? SquareEnvironment.Production
+        : SquareEnvironment.Sandbox,
+  });
 }
 
-export const squareClient = new SquareClient({
-  token,
-  environment:
-    environment === "production"
-      ? SquareEnvironment.Production
-      : SquareEnvironment.Sandbox,
+let _client: SquareClient | null = null;
+function getClient(): SquareClient {
+  if (!_client) _client = createSquareClient();
+  return _client;
+}
+
+export const squareClient = new Proxy({} as SquareClient, {
+  get(_target, prop) {
+    return (getClient() as unknown as Record<string | symbol, unknown>)[prop];
+  },
 });
 
 function bigIntReplacer(_key: string, value: unknown): unknown {

@@ -65,11 +65,9 @@ export function CartClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: items.map((i) => ({
-            name: i.piece.title,
-            price: i.piece.price,
+            id: i.piece.id,
             quantity: i.quantity,
           })),
-          shipping,
           note,
           delivery,
           pickupSlot,

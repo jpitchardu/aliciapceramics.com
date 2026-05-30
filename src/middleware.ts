@@ -16,9 +16,10 @@ export function middleware(request: NextRequest) {
     const dest = request.nextUrl.clone();
     dest.searchParams.delete("bypass");
     const res = NextResponse.redirect(dest);
-    res.cookies.set(BYPASS_COOKIE, BYPASS_KEY, {
+    res.cookies.set(BYPASS_COOKIE, "1", {
       httpOnly: true,
       sameSite: "lax",
+      secure: true,
       path: "/",
     });
     return res;
@@ -26,7 +27,7 @@ export function middleware(request: NextRequest) {
 
   // bypass cookie lets you through regardless of open time
   const bypassCookie = request.cookies.get(BYPASS_COOKIE);
-  if (BYPASS_KEY && bypassCookie?.value === BYPASS_KEY) {
+  if (BYPASS_KEY && bypassCookie?.value === "1") {
     return NextResponse.next();
   }
 
