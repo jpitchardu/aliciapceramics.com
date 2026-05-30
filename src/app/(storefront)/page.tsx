@@ -69,6 +69,37 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
+
+        {/* scatter — 3 editorial images */}
+        <div style={{ padding: "40px 20px 0" }}>
+          {[
+            { src: EDITORIAL[0], w: 64, ratio: "3 / 4", align: "left", mt: 0 },
+            {
+              src: EDITORIAL[1],
+              w: 50,
+              ratio: "1 / 1",
+              align: "right",
+              mt: -48,
+            },
+            { src: EDITORIAL[2], w: 72, ratio: "4 / 5", align: "left", mt: 32 },
+          ].map((s, i) => (
+            <div
+              key={i}
+              style={{
+                marginTop: s.mt,
+                width: `${s.w}%`,
+                marginLeft: s.align === "right" ? "auto" : 0,
+                marginRight: s.align === "left" ? "auto" : 0,
+              }}
+            >
+              <Photo
+                ratio={s.ratio}
+                src={s.src}
+                sizes={`(max-width: 1023px) ${Math.round(s.w * 0.95)}vw, 1px`}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
