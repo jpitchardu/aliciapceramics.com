@@ -119,19 +119,18 @@ export async function fetchCatalog(): Promise<{
 
 export async function fetchPieceById(id: string): Promise<Piece | null> {
   try {
-    const page = await squareClient.catalog.list({ types: "ITEM,IMAGE" });
-    const objects: CatalogObject[] = [];
-    for await (const obj of page) {
-      objects.push(obj);
-    }
+    const response = await squareClient.catalog.object.get({
+      objectId: id,
+      includeRelatedObjects: true,
+    });
+    const item = response.object;
+    if (!item || item.type !== "ITEM") return null;
     const images = new Map<string, string>();
-    for (const obj of objects) {
+    for (const obj of response.relatedObjects ?? []) {
       if (obj.type === "IMAGE" && obj.id && obj.imageData?.url) {
         images.set(obj.id, obj.imageData.url);
       }
     }
-    const item = objects.find((o) => o.type === "ITEM" && o.id === id);
-    if (!item) return null;
     const piece = mapCatalogItemToPiece(item, images);
     return piece ? safeSerialize(piece) : null;
   } catch (err) {

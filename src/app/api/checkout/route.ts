@@ -36,7 +36,13 @@ export async function POST(req: Request) {
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const locationId = process.env.SQUARE_LOCATION_ID ?? "";
+  const locationId = process.env.SQUARE_LOCATION_ID;
+  if (!locationId) {
+    return NextResponse.json(
+      { error: "store not configured" },
+      { status: 500 },
+    );
+  }
 
   const lineItems = pieces.map((piece, idx) => ({
     name: piece!.title,
@@ -60,21 +66,30 @@ export async function POST(req: Request) {
     });
   }
 
-  const orderNote = [
-    delivery === "pickup" && pickupSlot ? `pickup: ${pickupSlot}` : "shipping",
-    note ? `note: ${note.slice(0, 480)}` : "",
-  ]
-    .filter(Boolean)
-    .join(" · ")
-    .slice(0, 40);
+  // referenceId: compact delivery/slot identifier (max 40 chars)
+  const referenceId =
+    delivery === "pickup" && pickupSlot
+      ? `pickup:${pickupSlot}`.slice(0, 40)
+      : "ship";
+
+  // paymentNote appears on the resulting Payment record in Square Dashboard
+  const paymentNote = note?.trim()
+    ? `${delivery === "pickup" ? "pickup" : "ship"} — ${note.trim()}`.slice(
+        0,
+        500,
+      )
+    : delivery === "pickup" && pickupSlot
+      ? `pickup: ${pickupSlot}`
+      : undefined;
 
   try {
     const response = await squareClient.checkout.paymentLinks.create({
       idempotencyKey: crypto.randomUUID(),
+      paymentNote,
       order: {
         locationId,
         lineItems,
-        referenceId: orderNote || undefined,
+        referenceId,
       },
       checkoutOptions: {
         redirectUrl: `${siteUrl}/order-confirmed`,

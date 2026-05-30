@@ -30,5 +30,10 @@ export default defineConfig({
     command: "pnpm dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
+    env: {
+      GATE_BYPASS_KEY: process.env.GATE_BYPASS_KEY ?? "test-bypass",
+      SQUARE_ACCESS_TOKEN: process.env.SQUARE_ACCESS_TOKEN ?? "fake",
+      SQUARE_ENVIRONMENT: process.env.SQUARE_ENVIRONMENT ?? "sandbox",
+    },
   },
 });
