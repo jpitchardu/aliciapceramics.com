@@ -40,17 +40,33 @@ function inferState(inventoryNote: string): PieceState {
 }
 
 export async function fetchAllPieces(): Promise<Piece[]> {
+  const { pieces } = await fetchCatalog();
+  return pieces;
+}
+
+export type Category = { id: string; name: string };
+
+async function fetchObjects(): Promise<CatalogObject[]> {
+  const page = await squareClient.catalog.list({
+    types: "ITEM,IMAGE,CATEGORY",
+  });
+  const objects: CatalogObject[] = [];
+  for await (const obj of page) {
+    objects.push(obj);
+  }
+  return objects;
+}
+
+export async function fetchCatalog(): Promise<{
+  pieces: Piece[];
+  categories: Category[];
+}> {
   console.log(
     "[square:catalog] fetching catalog, env:",
     process.env.SQUARE_ENVIRONMENT,
   );
-  console.log("[square:catalog] token set:", !!process.env.SQUARE_ACCESS_TOKEN);
   try {
-    const page = await squareClient.catalog.list({ types: "ITEM,IMAGE" });
-    const objects: CatalogObject[] = [];
-    for await (const obj of page) {
-      objects.push(obj);
-    }
+    const objects = await fetchObjects();
     console.log("[square:catalog] raw objects fetched:", objects.length);
 
     const images = new Map<string, string>();
@@ -59,18 +75,31 @@ export async function fetchAllPieces(): Promise<Piece[]> {
         images.set(obj.id, obj.imageData.url);
       }
     }
-    console.log("[square:catalog] images found:", images.size);
 
     const pieces = objects
       .filter((o) => o.type === "ITEM")
       .map((o) => mapCatalogItemToPiece(o, images))
       .filter((p): p is Piece => p !== null);
 
-    console.log("[square:catalog] pieces mapped:", pieces.length);
-    return safeSerialize(pieces);
+    const categories: Category[] = objects
+      .filter((o) => o.type === "CATEGORY")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((o: any) => ({
+        id: o.id as string,
+        name: o.categoryData?.name as string,
+      }))
+      .filter((c) => c.id && c.name);
+
+    console.log(
+      "[square:catalog] pieces:",
+      pieces.length,
+      "categories:",
+      categories.length,
+    );
+    return safeSerialize({ pieces, categories });
   } catch (err) {
     console.error("[square:catalog] error:", err);
-    return [];
+    return { pieces: [], categories: [] };
   }
 }
 

@@ -4,10 +4,10 @@ import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
 import { Sig } from "@/ui/Sig";
 import { DROP } from "@/lib/config";
-import { fetchAllPieces } from "@/lib/square";
+import { fetchCatalog } from "@/lib/square";
 
 export default async function ShopPage() {
-  const pieces = await fetchAllPieces();
+  const { pieces, categories } = await fetchCatalog();
   const hereCount = pieces.filter((p) => p.state === "here").length;
   const goneCount = pieces.filter((p) => p.state === "gone").length;
 
@@ -110,24 +110,19 @@ export default async function ShopPage() {
           }}
         >
           <div style={{ display: "flex", gap: 26 }}>
-            {["all", "mugs", "bowls", "pitchers", "small things"].map(
-              (f, i) => (
-                <CeramicLabel
-                  key={f}
-                  color={i === 0 ? "var(--ink)" : "var(--ink-faint)"}
-                  style={
-                    i === 0
-                      ? {
-                          borderBottom: "1px solid var(--ink)",
-                          paddingBottom: 4,
-                        }
-                      : {}
-                  }
-                >
-                  {f}
-                </CeramicLabel>
-              ),
-            )}
+            {[{ id: "all", name: "all" }, ...categories].map((cat, i) => (
+              <CeramicLabel
+                key={cat.id}
+                color={i === 0 ? "var(--ink)" : "var(--ink-faint)"}
+                style={
+                  i === 0
+                    ? { borderBottom: "1px solid var(--ink)", paddingBottom: 4 }
+                    : {}
+                }
+              >
+                {cat.name}
+              </CeramicLabel>
+            ))}
           </div>
           <CeramicLabel color="var(--ink-faint)">
             {hereCount} still here · {goneCount} taken
