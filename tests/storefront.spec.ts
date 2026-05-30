@@ -9,7 +9,7 @@ test.beforeEach(async ({ context }) => {
   await context.addCookies([
     {
       name: "gate_bypass",
-      value: BYPASS_KEY,
+      value: "1",
       domain: "localhost",
       path: "/",
     },

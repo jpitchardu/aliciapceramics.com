@@ -42,7 +42,7 @@ test.describe("gate — bypass cookie", () => {
     await context.addCookies([
       {
         name: "gate_bypass",
-        value: BYPASS_KEY,
+        value: "1",
         domain: "localhost",
         path: "/",
       },
