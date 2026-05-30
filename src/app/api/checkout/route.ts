@@ -34,6 +34,12 @@ export async function POST(req: Request) {
   if (pieces.some((p) => !p)) {
     return NextResponse.json({ error: "item not found" }, { status: 400 });
   }
+  if (pieces.some((p) => p!.state === "gone")) {
+    return NextResponse.json(
+      { error: "one or more pieces are no longer available" },
+      { status: 409 },
+    );
+  }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const locationId = process.env.SQUARE_LOCATION_ID ?? "";
