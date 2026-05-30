@@ -89,10 +89,7 @@ async function fetchObjects(): Promise<CatalogObject[]> {
     objectIds: itemIds,
   });
 
-  return [
-    ...objects.filter((o) => o.type !== "ITEM"),
-    ...fullItems,
-  ];
+  return [...objects.filter((o) => o.type !== "ITEM"), ...fullItems];
 }
 
 export async function fetchCatalog(): Promise<{
