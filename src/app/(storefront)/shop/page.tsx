@@ -21,8 +21,8 @@ export default async function ShopPage({
       : pieces;
 
   const filtered = [
-    ...base.filter((p) => p.state === "here").sort((a, b) => a.price - b.price),
-    ...base.filter((p) => p.state === "gone").sort((a, b) => a.price - b.price),
+    ...base.filter((p) => p.state === "here").sort((a, b) => b.price - a.price),
+    ...base.filter((p) => p.state === "gone").sort((a, b) => b.price - a.price),
   ];
 
   if (pieces.length === 0) {
