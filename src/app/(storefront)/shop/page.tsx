@@ -59,9 +59,7 @@ export default async function ShopPage({
               href={`/shop/${p.id}`}
               style={{ textDecoration: "none" }}
             >
-              <figure
-                style={{ margin: 0, position: "relative", cursor: "pointer" }}
-              >
+              <figure style={{ margin: 0, position: "relative", cursor: "pointer" }}>
                 <Badge state={p.state} compact />
                 <Photo
                   ratio="4 / 5"
@@ -69,6 +67,42 @@ export default async function ShopPage({
                   sizes="(max-width: 1023px) 50vw, 1px"
                   style={{ opacity: p.state === "gone" ? 0.5 : 1 }}
                 />
+                <div
+                  style={{
+                    marginTop: 8,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                    gap: 4,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--serif)",
+                      fontSize: 12,
+                      fontStyle: "italic",
+                      fontWeight: 300,
+                      color: p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {p.title}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "var(--serif)",
+                      fontSize: 12,
+                      fontWeight: 300,
+                      color: p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
+                      textDecoration: p.state === "gone" ? "line-through" : "none",
+                      flexShrink: 0,
+                    }}
+                  >
+                    ${p.price}
+                  </span>
+                </div>
               </figure>
             </Link>
           ))}

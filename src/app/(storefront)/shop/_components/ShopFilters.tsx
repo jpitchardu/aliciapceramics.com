@@ -92,7 +92,7 @@ export function ShopFilters({ categories }: ShopFiltersProps) {
       </div>
 
       {/* ── Desktop tab row ───────────────────────────── */}
-      <div className="hidden lg:flex" style={{ display: "flex", gap: 26 }}>
+      <div className="hidden lg:flex" style={{ gap: 26 }}>
         {all.map((cat) => (
           <button
             key={cat.id}
