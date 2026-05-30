@@ -39,6 +39,4 @@ export const MOCK_PIECES: Piece[] = [
   },
 ];
 
-export const MOCK_CATEGORIES: Category[] = [
-  { id: "mock-cat-1", name: "mugs" },
-];
+export const MOCK_CATEGORIES: Category[] = [{ id: "mock-cat-1", name: "mugs" }];

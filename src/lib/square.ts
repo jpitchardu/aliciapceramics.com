@@ -123,7 +123,8 @@ export async function fetchCatalog(): Promise<{
 }
 
 export async function fetchPieceById(id: string): Promise<Piece | null> {
-  if (USE_MOCK) return MOCK_PIECES.find((p) => p.n === id || p.id === id) ?? null;
+  if (USE_MOCK)
+    return MOCK_PIECES.find((p) => p.n === id || p.id === id) ?? null;
   try {
     const response = await squareClient.catalog.object.get({
       objectId: id,
