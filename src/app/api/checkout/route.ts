@@ -48,7 +48,7 @@ export async function POST(req: Request) {
   }));
 
   // Shipping computed server-side — never accept from client
-  const shippingCents = delivery === "ship" ? 1800 : 0;
+  const shippingCents = delivery === "ship" ? 1200 : 0;
   if (shippingCents > 0) {
     lineItems.push({
       name: "shipping",

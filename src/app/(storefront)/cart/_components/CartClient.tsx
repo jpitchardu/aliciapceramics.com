@@ -47,7 +47,7 @@ export function CartClient() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
 
-  const shipping = delivery === "ship" ? 18 : 0;
+  const shipping = delivery === "ship" ? 12 : 0;
   const orderTotal = total + shipping;
 
   async function handleCheckout() {
@@ -318,7 +318,7 @@ export function CartClient() {
                 flexShrink: 0,
               }}
             >
-              $18
+              $12
             </span>
           </div>
 
