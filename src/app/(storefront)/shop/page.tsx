@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
-import { Sig } from "@/ui/Sig";
 import { DROP } from "@/lib/config";
 import { fetchCatalog } from "@/lib/square";
 import { ShopFilters } from "./_components/ShopFilters";
@@ -218,13 +217,6 @@ export default async function ShopPage({
           <CeramicLabel color="var(--ink-faint)">
             end of drop · {DROP.name} · {DROP.date}
           </CeramicLabel>
-          <Sig
-            size={32}
-            color="var(--ink)"
-            style={{ marginTop: 18, display: "inline-block" }}
-          >
-            — AP
-          </Sig>
         </div>
       </div>
     </div>
