@@ -355,7 +355,7 @@ export function CartClient() {
                   fontWeight: 300,
                 }}
               >
-                we&apos;ll reach out to you
+                i&apos;ll send you the address after your purchase
               </div>
 
               {delivery === "pickup" && (
