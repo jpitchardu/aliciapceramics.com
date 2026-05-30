@@ -60,13 +60,13 @@ async function fetchInventoryCounts(
   const locationId = process.env.SQUARE_LOCATION_ID;
   if (!locationId || variationIds.length === 0) return new Map();
 
-  const res = await squareClient.inventory.batchGetCounts({
+  const page = await squareClient.inventory.batchGetCounts({
     catalogObjectIds: variationIds,
     locationIds: [locationId],
   });
 
   const stateMap = new Map<string, PieceState>();
-  for (const count of res.counts ?? []) {
+  for await (const count of page) {
     if (count.catalogObjectId) {
       stateMap.set(
         count.catalogObjectId,
