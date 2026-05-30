@@ -59,13 +59,14 @@ export async function POST(req: Request) {
 
   if (variationIds.length > 0) {
     try {
-      await squareClient.inventory.batchChangeInventory({
+      await squareClient.inventory.batchCreateChanges({
         idempotencyKey: crypto.randomUUID(),
         changes: variationIds.map((variationId) => ({
           type: "PHYSICAL_COUNT",
           physicalCount: {
             catalogObjectId: variationId,
             locationId,
+            state: "IN_STOCK",
             quantity: "0",
             occurredAt: new Date().toISOString(),
           },
