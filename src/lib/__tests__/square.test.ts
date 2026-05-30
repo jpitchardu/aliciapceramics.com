@@ -18,7 +18,10 @@ function makeItem(overrides: Record<string, unknown> = {}) {
         },
       ],
       customAttributeValues: {
-        "Square:glaze-key": { name: "glaze", stringValue: "cobalt slip · clear" },
+        "Square:glaze-key": {
+          name: "glaze",
+          stringValue: "cobalt slip · clear",
+        },
         "Square:dim-key": { name: "dim", stringValue: "11×9 cm" },
         "Square:num-key": { name: "piece_number", stringValue: "014" },
         "Square:state-key": { name: "state", stringValue: "" },

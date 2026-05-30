@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  FIXTURE_PIECES,
-  FIXTURE_CATEGORIES,
-} from "@/lib/__fixtures__/catalog";
+import { FIXTURE_PIECES, FIXTURE_CATEGORIES } from "@/lib/__fixtures__/catalog";
 
 describe("FIXTURE_PIECES", () => {
   it("has at least one piece", () => {
@@ -61,9 +58,7 @@ describe("FIXTURE_PIECES", () => {
 
   it("filtering by bowls category returns only bowls", () => {
     const bowlsId = "DLWWZFQLXFYHZZKMICVWAYF6";
-    const bowls = FIXTURE_PIECES.filter((p) =>
-      p.collections.includes(bowlsId),
-    );
+    const bowls = FIXTURE_PIECES.filter((p) => p.collections.includes(bowlsId));
     expect(bowls.length).toBeGreaterThan(0);
     expect(bowls.length).toBeLessThan(FIXTURE_PIECES.length);
   });

@@ -77,7 +77,9 @@ export default async function PieceDetailPage({
 
         {(piece.glaze || piece.dim) && (
           <div style={{ padding: "36px 28px 0" }}>
-            <CeramicLabel color="var(--ink-faint)">about this piece</CeramicLabel>
+            <CeramicLabel color="var(--ink-faint)">
+              about this piece
+            </CeramicLabel>
             <ul
               style={{
                 listStyle: "none",

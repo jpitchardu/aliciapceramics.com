@@ -12,7 +12,13 @@ export function ImageGallery({ srcs, ratio = "4 / 5" }: ImageGalleryProps) {
   const [active, setActive] = useState(0);
 
   if (srcs.length <= 1) {
-    return <Photo ratio={ratio} src={srcs[0]} sizes="(max-width: 1023px) 100vw, 55vw" />;
+    return (
+      <Photo
+        ratio={ratio}
+        src={srcs[0]}
+        sizes="(max-width: 1023px) 100vw, 55vw"
+      />
+    );
   }
 
   return (

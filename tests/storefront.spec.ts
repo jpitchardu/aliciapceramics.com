@@ -176,8 +176,12 @@ test.describe("piece detail page", () => {
     await page.goto("/shop");
     const href = await firstPieceHref(page);
     await page.goto(href);
-    await expect(page.getByText(/food safe, dishwasher fine/i)).not.toBeVisible();
-    await expect(page.getByText(/ships — or pick up in studio/i)).not.toBeVisible();
+    await expect(
+      page.getByText(/food safe, dishwasher fine/i),
+    ).not.toBeVisible();
+    await expect(
+      page.getByText(/ships — or pick up in studio/i),
+    ).not.toBeVisible();
   });
 
   test("back link returns to shop", async ({ page }) => {
@@ -310,7 +314,10 @@ test.describe("navigation — mobile hamburger", () => {
   test("clicking shop in menu navigates to /shop", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: /menu/i }).click();
-    await page.getByRole("link", { name: /^shop$/i }).first().click();
+    await page
+      .getByRole("link", { name: /^shop$/i })
+      .first()
+      .click();
     await expect(page).toHaveURL("/shop");
   });
 });
