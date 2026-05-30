@@ -24,7 +24,13 @@ export default async function HomePage() {
   }
 
   return (
-    <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
+    <div
+      style={{
+        color: "var(--ink)",
+        fontFamily: "var(--serif)",
+        height: "100%",
+      }}
+    >
       {/*
        * Make the full page (nav + main + footer) a flex column capped at
        * 100dvh with no scroll. Scoped to this page — removed on navigation.
