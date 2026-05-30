@@ -143,10 +143,9 @@ export default async function HomePage() {
         <div style={{ padding: "20px 56px 0", position: "relative" }}>
           <div style={{ position: "relative" }}>
             <Photo
-              ratio="2 / 3"
+              ratio="3 / 2"
               src={HERO}
-              rotate={90}
-              sizes="(min-width: 1024px) 138vw, 1px"
+              sizes="(min-width: 1024px) 100vw, 1px"
             />
             <div
               style={{
@@ -266,7 +265,7 @@ export default async function HomePage() {
             {
               src: EDITORIAL[4],
               left: "10%",
-              top: 420,
+              top: 430,
               w: "22%",
               ratio: "4 / 5",
               z: 2,
@@ -274,7 +273,7 @@ export default async function HomePage() {
             {
               src: EDITORIAL[5],
               left: "36%",
-              top: 380,
+              top: 300,
               w: "28%",
               ratio: "3 / 4",
               z: 1,
@@ -282,7 +281,7 @@ export default async function HomePage() {
             {
               src: EDITORIAL[6],
               left: "68%",
-              top: 350,
+              top: 480,
               w: "21%",
               ratio: "4 / 5",
               z: 2,
