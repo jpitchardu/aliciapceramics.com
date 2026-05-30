@@ -2,6 +2,7 @@ export type PieceState = "here" | "gone";
 
 export interface Piece {
   id: string;
+  variationId: string;
   n: string;
   title: string;
   note: string;

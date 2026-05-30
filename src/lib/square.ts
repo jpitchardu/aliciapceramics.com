@@ -239,6 +239,7 @@ export function mapCatalogItemToPiece(
 
   return {
     id: item.id,
+    variationId: variation?.id ?? "",
     n: pieceNum,
     title: data.name ?? "untitled",
     note: data.description ?? "",

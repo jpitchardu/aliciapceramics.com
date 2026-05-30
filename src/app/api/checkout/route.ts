@@ -51,6 +51,35 @@ export async function POST(req: Request) {
     );
   }
 
+  // Zero out inventory immediately so concurrent buyers are blocked before
+  // Square decrements on payment completion.
+  const variationIds = pieces
+    .map((p) => p!.variationId)
+    .filter((id) => id && id.length > 0);
+
+  if (variationIds.length > 0) {
+    try {
+      await squareClient.inventory.batchChangeInventory({
+        idempotencyKey: crypto.randomUUID(),
+        changes: variationIds.map((variationId) => ({
+          type: "PHYSICAL_COUNT",
+          physicalCount: {
+            catalogObjectId: variationId,
+            locationId,
+            quantity: "0",
+            occurredAt: new Date().toISOString(),
+          },
+        })),
+      });
+    } catch (err) {
+      console.error("Square inventory reserve error:", err);
+      return NextResponse.json(
+        { error: "could not reserve items, please try again" },
+        { status: 500 },
+      );
+    }
+  }
+
   const lineItems = pieces.map((piece, idx) => ({
     name: piece!.title,
     quantity: String(items[idx].quantity),
