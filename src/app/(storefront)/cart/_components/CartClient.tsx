@@ -78,7 +78,9 @@ export function CartClient() {
         const data = await res.json();
         if (res.status === 409 && Array.isArray(data.soldOut)) {
           const soldTitles = data.soldOut
-            .map((id: string) => items.find((i) => i.piece.id === id)?.piece.title)
+            .map(
+              (id: string) => items.find((i) => i.piece.id === id)?.piece.title,
+            )
             .filter(Boolean);
           data.soldOut.forEach((id: string) => removeItem(id));
           setError(
