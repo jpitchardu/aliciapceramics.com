@@ -26,7 +26,10 @@ export default async function HomePage() {
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
       <h1 className="sr-only">alicia p. ceramics — {DROP.name}</h1>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
-      <div className="lg:hidden" style={{ position: "relative", height: "100dvh" }}>
+      <div
+        className="lg:hidden"
+        style={{ position: "relative", height: "100dvh" }}
+      >
         <Photo
           src={HERO}
           rotate={90}
@@ -156,7 +159,6 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
-
       </div>
     </div>
   );
