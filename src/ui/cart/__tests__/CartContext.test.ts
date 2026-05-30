@@ -46,7 +46,8 @@ const mug: Piece = {
   dim: "11×9 cm",
   price: 148,
   state: "here",
-  src: "/assets/piece-cobalt.png",
+  srcs: ["/assets/piece-cobalt.png"],
+  collections: [],
 };
 
 const bowl: Piece = {
@@ -58,7 +59,8 @@ const bowl: Piece = {
   dim: "22×8 cm",
   price: 94,
   state: "here",
-  src: "/assets/piece-olive.png",
+  srcs: ["/assets/piece-olive.png"],
+  collections: [],
 };
 
 const empty: CartState = { items: [] };

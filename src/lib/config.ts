@@ -2,6 +2,8 @@ export const MEDIA_BASE_URL =
   process.env.NEXT_PUBLIC_BLOB_BASE_URL ??
   "https://qbqkeoda0hejfzhl.public.blob.vercel-storage.com";
 
+export const BYPASS_COOKIE = "gate_bypass";
+
 export const SITE = {
   name: "aliciapceramics",
   estYear: "2024",

@@ -18,12 +18,13 @@ function makeItem(overrides: Record<string, unknown> = {}) {
         },
       ],
       customAttributeValues: {
-        glaze: { stringValue: "cobalt slip · clear" },
-        dim: { stringValue: "11×9 cm" },
-        piece_number: { stringValue: "014" },
-        state: { stringValue: "" },
+        "Square:glaze-key": { name: "glaze", stringValue: "cobalt slip · clear" },
+        "Square:dim-key": { name: "dim", stringValue: "11×9 cm" },
+        "Square:num-key": { name: "piece_number", stringValue: "014" },
+        "Square:state-key": { name: "state", stringValue: "" },
       },
       imageIds: [],
+      categories: [],
       ...overrides,
     },
   };
@@ -44,14 +45,33 @@ describe("mapCatalogItemToPiece", () => {
 
   it("falls back to placeholder image when no imageIds", () => {
     const piece = mapCatalogItemToPiece(makeItem(), noImages);
-    expect(piece!.src).toBe("/assets/photo-placeholder.png");
+    expect(piece!.srcs).toEqual(["/assets/photo-placeholder.png"]);
   });
 
   it("uses catalog image URL when available", () => {
     const images = new Map([["img001", "https://cdn.example.com/mug.jpg"]]);
     const item = makeItem({ imageIds: ["img001"] });
     const piece = mapCatalogItemToPiece(item, images);
-    expect(piece!.src).toBe("https://cdn.example.com/mug.jpg");
+    expect(piece!.srcs).toEqual(["https://cdn.example.com/mug.jpg"]);
+  });
+
+  it("collects multiple image URLs in order", () => {
+    const images = new Map([
+      ["img001", "https://cdn.example.com/mug-1.jpg"],
+      ["img002", "https://cdn.example.com/mug-2.jpg"],
+    ]);
+    const item = makeItem({ imageIds: ["img001", "img002"] });
+    const piece = mapCatalogItemToPiece(item, images);
+    expect(piece!.srcs).toHaveLength(2);
+    expect(piece!.srcs[0]).toBe("https://cdn.example.com/mug-1.jpg");
+  });
+
+  it("maps categories to collections array", () => {
+    const item = makeItem({
+      categories: [{ id: "CAT1" }, { id: "CAT2" }],
+    });
+    const piece = mapCatalogItemToPiece(item, noImages);
+    expect(piece!.collections).toEqual(["CAT1", "CAT2"]);
   });
 
   it("returns null for non-ITEM types", () => {
@@ -72,10 +92,7 @@ describe("mapCatalogItemToPiece", () => {
   it("treats 'held' attribute as 'here' (first come first serve)", () => {
     const item = makeItem({
       customAttributeValues: {
-        glaze: { stringValue: "" },
-        dim: { stringValue: "" },
-        piece_number: { stringValue: "018" },
-        state: { stringValue: "held" },
+        "Square:state-key": { name: "state", stringValue: "held" },
       },
     });
     const piece = mapCatalogItemToPiece(item, noImages);
@@ -85,10 +102,7 @@ describe("mapCatalogItemToPiece", () => {
   it("infers state 'gone' from custom attribute", () => {
     const item = makeItem({
       customAttributeValues: {
-        glaze: { stringValue: "" },
-        dim: { stringValue: "" },
-        piece_number: { stringValue: "022" },
-        state: { stringValue: "taken" },
+        "Square:state-key": { name: "state", stringValue: "taken" },
       },
     });
     const piece = mapCatalogItemToPiece(item, noImages);
@@ -108,12 +122,7 @@ describe("mapCatalogItemToPiece", () => {
 
   it("uses last 3 chars of id as piece number when attribute missing", () => {
     const item = makeItem({
-      customAttributeValues: {
-        glaze: { stringValue: "" },
-        dim: { stringValue: "" },
-        state: { stringValue: "" },
-        // no piece_number key
-      },
+      customAttributeValues: {},
     });
     const piece = mapCatalogItemToPiece(item, noImages);
     expect(piece!.n).toBe("123"); // last 3 of "XYZABC123"

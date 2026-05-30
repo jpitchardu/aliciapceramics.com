@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { DROP } from "@/lib/config";
+import { DROP, BYPASS_COOKIE } from "@/lib/config";
 
 const OPEN_AT = new Date(DROP.opensAt).getTime();
 const BYPASS_KEY = process.env.GATE_BYPASS_KEY;
-const BYPASS_COOKIE = "gate_bypass";
 
 const GATED = ["/shop", "/cart", "/order-confirmed"];
 

@@ -9,6 +9,6 @@ export interface Piece {
   dim: string;
   price: number;
   state: PieceState;
-  src: string;
-  collection?: string;
+  srcs: string[];
+  collections: string[];
 }

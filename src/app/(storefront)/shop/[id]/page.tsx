@@ -2,6 +2,7 @@ import { DROP } from "@/lib/config";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Photo } from "@/ui/Photo";
+import { ImageGallery } from "@/ui/ImageGallery";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
 import { AddToCartButton } from "./_components/AddToCartButton";
@@ -27,20 +28,17 @@ export default async function PieceDetailPage({
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
-        {/* back breadcrumb */}
         <div style={{ padding: "0 24px 16px" }}>
           <Link href="/shop" style={{ textDecoration: "none" }}>
             <CeramicLabel color="var(--ink-soft)">← all pieces</CeramicLabel>
           </Link>
         </div>
 
-        {/* hero */}
         <div style={{ position: "relative" }}>
           <Badge state={piece.state} />
-          <Photo ratio="4 / 5" src={piece.src} />
+          <ImageGallery srcs={piece.srcs} ratio="4 / 5" />
         </div>
 
-        {/* title */}
         <div style={{ padding: "32px 28px 0" }}>
           <CeramicLabel color="var(--ink-faint)">
             no. {piece.n} · {DROP.name}
@@ -59,46 +57,46 @@ export default async function PieceDetailPage({
           >
             {piece.title}.
           </div>
-          <p
-            style={{
-              marginTop: 18,
-              fontFamily: "var(--serif)",
-              fontSize: 17,
-              lineHeight: 1.6,
-              color: "var(--ink)",
-              margin: "18px 0 0",
-              fontStyle: "italic",
-              fontWeight: 300,
-            }}
-          >
-            {piece.note}
-          </p>
+          {piece.note && (
+            <p
+              style={{
+                marginTop: 18,
+                fontFamily: "var(--serif)",
+                fontSize: 17,
+                lineHeight: 1.6,
+                color: "var(--ink)",
+                margin: "18px 0 0",
+                fontStyle: "italic",
+                fontWeight: 300,
+              }}
+            >
+              {piece.note}
+            </p>
+          )}
         </div>
 
-        {/* specs */}
-        <div style={{ padding: "36px 28px 0" }}>
-          <CeramicLabel color="var(--ink-faint)">about this piece</CeramicLabel>
-          <ul
-            style={{
-              listStyle: "none",
-              padding: 0,
-              margin: "16px 0 0",
-              fontFamily: "var(--serif)",
-              fontSize: 16,
-              fontWeight: 300,
-              fontStyle: "italic",
-              color: "var(--ink)",
-              lineHeight: 1.9,
-            }}
-          >
-            {piece.glaze && <li>glazed in {piece.glaze}</li>}
-            {piece.dim && <li>{piece.dim}, wheel-thrown stoneware</li>}
-            <li>food safe, dishwasher fine</li>
-            <li>ships — or pick up in studio</li>
-          </ul>
-        </div>
+        {(piece.glaze || piece.dim) && (
+          <div style={{ padding: "36px 28px 0" }}>
+            <CeramicLabel color="var(--ink-faint)">about this piece</CeramicLabel>
+            <ul
+              style={{
+                listStyle: "none",
+                padding: 0,
+                margin: "16px 0 0",
+                fontFamily: "var(--serif)",
+                fontSize: 16,
+                fontWeight: 300,
+                fontStyle: "italic",
+                color: "var(--ink)",
+                lineHeight: 1.9,
+              }}
+            >
+              {piece.glaze && <li>glazed in {piece.glaze}</li>}
+              {piece.dim && <li>{piece.dim}</li>}
+            </ul>
+          </div>
+        )}
 
-        {/* action */}
         <div
           style={{
             margin: "36px 28px 0",
@@ -132,7 +130,6 @@ export default async function PieceDetailPage({
           <AddToCartButton piece={piece} />
         </div>
 
-        {/* more from the drop — 2-col on mobile */}
         {morePieces.length > 0 && (
           <div style={{ padding: "40px 16px 0" }}>
             <div
@@ -169,7 +166,8 @@ export default async function PieceDetailPage({
                     <Badge state={m.state} compact />
                     <Photo
                       ratio="4 / 5"
-                      src={m.src}
+                      src={m.srcs[0]}
+                      sizes="(max-width: 1023px) 50vw, 1px"
                       style={{ opacity: m.state === "gone" ? 0.5 : 1 }}
                     />
                     <div
@@ -225,7 +223,6 @@ export default async function PieceDetailPage({
 
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
       <div className="hidden lg:block">
-        {/* breadcrumb */}
         <div
           style={{
             padding: "20px 56px 32px",
@@ -242,7 +239,6 @@ export default async function PieceDetailPage({
           </CeramicLabel>
         </div>
 
-        {/* hero */}
         <div
           style={{
             padding: "0 56px",
@@ -254,7 +250,7 @@ export default async function PieceDetailPage({
         >
           <div style={{ position: "relative" }}>
             <Badge state={piece.state} />
-            <Photo ratio="4 / 5" src={piece.src} />
+            <ImageGallery srcs={piece.srcs} ratio="4 / 5" />
           </div>
 
           <div style={{ paddingTop: 24 }}>
@@ -275,45 +271,47 @@ export default async function PieceDetailPage({
             >
               {piece.title}.
             </div>
-            <p
-              style={{
-                marginTop: 24,
-                fontFamily: "var(--serif)",
-                fontSize: 19,
-                lineHeight: 1.55,
-                color: "var(--ink)",
-                margin: "24px 0 0",
-                fontStyle: "italic",
-                fontWeight: 300,
-                maxWidth: 460,
-              }}
-            >
-              {piece.note}
-            </p>
-
-            <div style={{ marginTop: 44 }}>
-              <CeramicLabel color="var(--ink-faint)">
-                about this piece
-              </CeramicLabel>
-              <ul
+            {piece.note && (
+              <p
                 style={{
-                  listStyle: "none",
-                  padding: 0,
-                  margin: "18px 0 0",
+                  marginTop: 24,
                   fontFamily: "var(--serif)",
-                  fontSize: 17,
-                  fontWeight: 300,
-                  fontStyle: "italic",
+                  fontSize: 19,
+                  lineHeight: 1.55,
                   color: "var(--ink)",
-                  lineHeight: 1.9,
+                  margin: "24px 0 0",
+                  fontStyle: "italic",
+                  fontWeight: 300,
+                  maxWidth: 460,
                 }}
               >
-                {piece.glaze && <li>glazed in {piece.glaze}</li>}
-                {piece.dim && <li>{piece.dim}, wheel-thrown stoneware</li>}
-                <li>food safe, dishwasher fine</li>
-                <li>ships — or pick up in studio</li>
-              </ul>
-            </div>
+                {piece.note}
+              </p>
+            )}
+
+            {(piece.glaze || piece.dim) && (
+              <div style={{ marginTop: 44 }}>
+                <CeramicLabel color="var(--ink-faint)">
+                  about this piece
+                </CeramicLabel>
+                <ul
+                  style={{
+                    listStyle: "none",
+                    padding: 0,
+                    margin: "18px 0 0",
+                    fontFamily: "var(--serif)",
+                    fontSize: 17,
+                    fontWeight: 300,
+                    fontStyle: "italic",
+                    color: "var(--ink)",
+                    lineHeight: 1.9,
+                  }}
+                >
+                  {piece.glaze && <li>glazed in {piece.glaze}</li>}
+                  {piece.dim && <li>{piece.dim}</li>}
+                </ul>
+              </div>
+            )}
 
             <div
               style={{
@@ -353,7 +351,6 @@ export default async function PieceDetailPage({
           </div>
         </div>
 
-        {/* more from the drop */}
         {morePieces.length > 0 && (
           <div style={{ padding: "140px 56px 0" }}>
             <div
@@ -408,7 +405,8 @@ export default async function PieceDetailPage({
                       <Badge state={m.state} compact />
                       <Photo
                         ratio="4 / 5"
-                        src={m.src}
+                        src={m.srcs[0]}
+                        sizes="(min-width: 1024px) 22vw, 1px"
                         style={{ opacity: m.state === "gone" ? 0.5 : 1 }}
                       />
                     </div>

@@ -18,7 +18,7 @@ test.describe("gate — closed (no bypass)", () => {
   });
 
   test("visiting /shop/some-id redirects to /", async ({ page }) => {
-    await page.goto("/shop/014");
+    await page.goto("/shop/MDCV2BMWYMDYJO6DMQKNS2HA");
     await expect(page).toHaveURL("/");
   });
 
@@ -57,6 +57,14 @@ test.describe("gate — bypass cookie", () => {
   test("bypass cookie allows /cart", async ({ page }) => {
     await page.goto("/cart");
     await expect(page).toHaveURL("/cart");
+  });
+
+  test("bypass cookie shows home page not countdown at /", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByText(/hours/i)).not.toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /enter the shop/i }).first(),
+    ).toBeVisible();
   });
 });
 

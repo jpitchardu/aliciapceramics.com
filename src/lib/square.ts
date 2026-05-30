@@ -53,6 +53,14 @@ function inferState(inventoryNote: string): PieceState {
   return "here";
 }
 
+function findAttr(
+  attrs: Record<string, { name?: string; stringValue?: string }>,
+  name: string,
+): string {
+  const entry = Object.values(attrs).find((a) => a.name === name);
+  return entry?.stringValue ?? "";
+}
+
 export async function fetchAllPieces(): Promise<Piece[]> {
   const { pieces } = await fetchCatalog();
   return pieces;
@@ -75,6 +83,14 @@ export async function fetchCatalog(): Promise<{
   pieces: Piece[];
   categories: Category[];
 }> {
+  if (!process.env.SQUARE_ACCESS_TOKEN) {
+    const { FIXTURE_PIECES, FIXTURE_CATEGORIES } = await import(
+      "@/lib/__fixtures__/catalog"
+    );
+    console.log("[square:catalog] no credentials — using fixture data");
+    return { pieces: FIXTURE_PIECES, categories: FIXTURE_CATEGORIES };
+  }
+
   console.log(
     "[square:catalog] fetching catalog, env:",
     process.env.SQUARE_ENVIRONMENT,
@@ -118,6 +134,11 @@ export async function fetchCatalog(): Promise<{
 }
 
 export async function fetchPieceById(id: string): Promise<Piece | null> {
+  if (!process.env.SQUARE_ACCESS_TOKEN) {
+    const { FIXTURE_PIECES } = await import("@/lib/__fixtures__/catalog");
+    return FIXTURE_PIECES.find((p) => p.id === id) ?? null;
+  }
+
   try {
     const page = await squareClient.catalog.list({ types: "ITEM,IMAGE" });
     const objects: CatalogObject[] = [];
@@ -154,16 +175,19 @@ export function mapCatalogItemToPiece(
   const price = priceAmount ? Number(priceAmount) / 100 : 0;
 
   const customAttrs = data.customAttributeValues ?? {};
-  const glaze = customAttrs["glaze"]?.stringValue ?? "";
-  const dim = customAttrs["dim"]?.stringValue ?? "";
-  const pieceNum =
-    customAttrs["piece_number"]?.stringValue ?? item.id.slice(-3);
-  const inventoryNote = customAttrs["state"]?.stringValue ?? "";
+  const glaze = findAttr(customAttrs, "glaze");
+  const dim = findAttr(customAttrs, "dim");
+  const pieceNum = findAttr(customAttrs, "piece_number") || item.id.slice(-3);
+  const inventoryNote = findAttr(customAttrs, "state");
 
-  const imageId = data.imageIds?.[0];
-  const src = imageId
-    ? (images.get(imageId) ?? "/assets/photo-placeholder.png")
-    : "/assets/photo-placeholder.png";
+  const srcs = ((data.imageIds ?? []) as string[])
+    .map((id) => images.get(id))
+    .filter((url): url is string => !!url);
+  if (srcs.length === 0) srcs.push("/assets/photo-placeholder.png");
+
+  const collections = ((data.categories ?? []) as { id: string }[]).map(
+    (c) => c.id,
+  );
 
   return {
     id: item.id,
@@ -174,7 +198,7 @@ export function mapCatalogItemToPiece(
     dim,
     price,
     state: inferState(inventoryNote),
-    src,
-    collection: data.categoryId ?? undefined,
+    srcs,
+    collections,
   };
 }

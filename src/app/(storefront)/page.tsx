@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
-import { DROP, MEDIA_BASE_URL } from "@/lib/config";
+import { DROP, MEDIA_BASE_URL, BYPASS_COOKIE } from "@/lib/config";
+import { isGateOpen } from "@/lib/countdown";
 import { Countdown } from "@/ui/Countdown";
 
 const HERO = `${MEDIA_BASE_URL}/hero.jpg`;
@@ -11,10 +13,11 @@ const EDITORIAL = Array.from(
   (_, i) => `${MEDIA_BASE_URL}/editorial-${i + 1}.jpg`,
 );
 
-const isOpen = Date.now() >= new Date(DROP.opensAt).getTime();
+export default async function HomePage() {
+  const bypassed = (await cookies()).get(BYPASS_COOKIE)?.value === "1";
+  const isOpen = isGateOpen(DROP.opensAt);
 
-export default function HomePage() {
-  if (!isOpen) {
+  if (!isOpen && !bypassed) {
     return (
       <Countdown
         opensAt={DROP.opensAt}
@@ -30,7 +33,12 @@ export default function HomePage() {
       <div className="lg:hidden">
         {/* hero */}
         <div style={{ padding: "8px 16px 0" }}>
-          <Photo ratio="5 / 4" src={HERO} rotate={90} />
+          <Photo
+            ratio="5 / 4"
+            src={HERO}
+            rotate={90}
+            sizes="(max-width: 1023px) 125vw, 1px"
+          />
           <div style={{ paddingTop: 18, textAlign: "center" }}>
             <span
               style={{
@@ -82,7 +90,11 @@ export default function HomePage() {
                 marginRight: s.align === "left" ? "auto" : 0,
               }}
             >
-              <Photo ratio={s.ratio} src={s.src} />
+              <Photo
+                ratio={s.ratio}
+                src={s.src}
+                sizes={`(max-width: 1023px) ${Math.round(s.w * 0.95)}vw, 1px`}
+              />
             </div>
           ))}
         </div>
@@ -130,7 +142,12 @@ export default function HomePage() {
         {/* hero */}
         <div style={{ padding: "20px 56px 0", position: "relative" }}>
           <div style={{ position: "relative" }}>
-            <Photo ratio="2 / 3" src={HERO} rotate={90} />
+            <Photo
+              ratio="2 / 3"
+              src={HERO}
+              rotate={90}
+              sizes="(min-width: 1024px) 138vw, 1px"
+            />
             <div
               style={{
                 position: "absolute",
@@ -281,7 +298,11 @@ export default function HomePage() {
                   width: p.w,
                 }}
               >
-                <Photo ratio={p.ratio} src={p.src} />
+                <Photo
+                  ratio={p.ratio}
+                  src={p.src}
+                  sizes={`(min-width: 1024px) ${parseInt(p.w)}vw, 1px`}
+                />
               </div>
             </Link>
           ))}

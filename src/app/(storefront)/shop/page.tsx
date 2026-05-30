@@ -1,15 +1,28 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
 import { Sig } from "@/ui/Sig";
 import { DROP } from "@/lib/config";
 import { fetchCatalog } from "@/lib/square";
+import { ShopFilters } from "./_components/ShopFilters";
 
-export default async function ShopPage() {
+export default async function ShopPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cat?: string }>;
+}) {
+  const { cat } = await searchParams;
   const { pieces, categories } = await fetchCatalog();
-  const hereCount = pieces.filter((p) => p.state === "here").length;
-  const goneCount = pieces.filter((p) => p.state === "gone").length;
+
+  const filtered =
+    cat && cat !== "all"
+      ? pieces.filter((p) => p.collections.includes(cat))
+      : pieces;
+
+  const hereCount = filtered.filter((p) => p.state === "here").length;
+  const goneCount = filtered.filter((p) => p.state === "gone").length;
 
   return (
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
@@ -17,17 +30,21 @@ export default async function ShopPage() {
       <div className="lg:hidden">
         <div
           style={{
-            padding: "8px 24px 22px",
+            padding: "8px 24px 16px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "baseline",
           }}
         >
           <CeramicLabel color="var(--ink-faint)">
-            {DROP.name} · {pieces.length} pieces
+            {DROP.name} · {filtered.length} pieces
           </CeramicLabel>
           <CeramicLabel color="var(--ink-faint)">tap a piece</CeramicLabel>
         </div>
+
+        <Suspense>
+          <ShopFilters categories={categories} />
+        </Suspense>
 
         <div
           style={{
@@ -37,7 +54,7 @@ export default async function ShopPage() {
             padding: "0 16px",
           }}
         >
-          {pieces.map((p) => (
+          {filtered.map((p) => (
             <Link
               key={p.id}
               href={`/shop/${p.id}`}
@@ -49,7 +66,8 @@ export default async function ShopPage() {
                 <Badge state={p.state} compact />
                 <Photo
                   ratio="4 / 5"
-                  src={p.src}
+                  src={p.srcs[0]}
+                  sizes="(max-width: 1023px) 50vw, 1px"
                   style={{ opacity: p.state === "gone" ? 0.5 : 1 }}
                 />
               </figure>
@@ -60,7 +78,6 @@ export default async function ShopPage() {
 
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
       <div className="hidden lg:block">
-        {/* collection header */}
         <div style={{ padding: "64px 56px 0", textAlign: "center" }}>
           <CeramicLabel color="var(--ink-faint)">
             a new drop · {DROP.date}
@@ -98,7 +115,6 @@ export default async function ShopPage() {
           </p>
         </div>
 
-        {/* meta row / filters */}
         <div
           style={{
             margin: "64px 56px 0",
@@ -109,27 +125,14 @@ export default async function ShopPage() {
             alignItems: "baseline",
           }}
         >
-          <div style={{ display: "flex", gap: 26 }}>
-            {[{ id: "all", name: "all" }, ...categories].map((cat, i) => (
-              <CeramicLabel
-                key={cat.id}
-                color={i === 0 ? "var(--ink)" : "var(--ink-faint)"}
-                style={
-                  i === 0
-                    ? { borderBottom: "1px solid var(--ink)", paddingBottom: 4 }
-                    : {}
-                }
-              >
-                {cat.name}
-              </CeramicLabel>
-            ))}
-          </div>
+          <Suspense>
+            <ShopFilters categories={categories} />
+          </Suspense>
           <CeramicLabel color="var(--ink-faint)">
             {hereCount} still here · {goneCount} taken
           </CeramicLabel>
         </div>
 
-        {/* grid */}
         <div
           style={{
             padding: "40px 56px 0",
@@ -138,7 +141,7 @@ export default async function ShopPage() {
             gap: 48,
           }}
         >
-          {pieces.map((p) => (
+          {filtered.map((p) => (
             <Link
               key={p.id}
               href={`/shop/${p.id}`}
@@ -149,7 +152,8 @@ export default async function ShopPage() {
                   <Badge state={p.state} />
                   <Photo
                     ratio="4 / 5"
-                    src={p.src}
+                    src={p.srcs[0]}
+                    sizes="(min-width: 1024px) 30vw, 1px"
                     style={{ opacity: p.state === "gone" ? 0.5 : 1 }}
                   />
                 </div>
@@ -210,7 +214,6 @@ export default async function ShopPage() {
           ))}
         </div>
 
-        {/* end of drop */}
         <div style={{ padding: "80px 56px 0", textAlign: "center" }}>
           <CeramicLabel color="var(--ink-faint)">
             end of drop · {DROP.name} · {DROP.date}
