@@ -28,7 +28,10 @@ export function ShopFilters({ categories }: ShopFiltersProps) {
   return (
     <>
       {/* ── Mobile filter button ───────────────────────── */}
-      <div className="lg:hidden" style={{ padding: "0 16px 16px", position: "relative" }}>
+      <div
+        className="lg:hidden"
+        style={{ padding: "0 16px 16px", position: "relative" }}
+      >
         <button
           onClick={() => setOpen((v) => !v)}
           style={{
@@ -43,9 +46,7 @@ export function ShopFilters({ categories }: ShopFiltersProps) {
             justifyContent: "space-between",
           }}
         >
-          <CeramicLabel color="var(--ink)">
-            filter: {activeLabel}
-          </CeramicLabel>
+          <CeramicLabel color="var(--ink)">filter: {activeLabel}</CeramicLabel>
           <CeramicLabel color="var(--ink-faint)">
             {open ? "▲" : "▼"}
           </CeramicLabel>
