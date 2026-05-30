@@ -2,6 +2,7 @@ import { Piece } from "@/types/piece";
 
 export const PLACEHOLDER_PIECES: Piece[] = [
   {
+    variationId: "",
     id: "014",
     n: "014",
     srcs: ["/assets/piece-cobalt.png"],
@@ -14,6 +15,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "015",
     n: "015",
     srcs: ["/assets/piece-blush.png"],
@@ -26,6 +28,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "016",
     n: "016",
     srcs: ["/assets/piece-pour.png"],
@@ -38,6 +41,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "017",
     n: "017",
     srcs: ["/assets/piece-speckled.png"],
@@ -50,6 +54,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "018",
     n: "018",
     srcs: ["/assets/piece-tall.png"],
@@ -62,6 +67,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "019",
     n: "019",
     srcs: ["/assets/piece-olive.png"],
@@ -74,6 +80,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "020",
     n: "020",
     srcs: ["/assets/piece-cream.png"],
@@ -86,6 +93,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "021",
     n: "021",
     srcs: ["/assets/piece-saucer.png"],
@@ -98,6 +106,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "022",
     n: "022",
     srcs: ["/assets/piece-pair.png"],
@@ -110,6 +119,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "023",
     n: "023",
     srcs: ["/assets/piece-blush.png"],
@@ -122,6 +132,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "024",
     n: "024",
     srcs: ["/assets/piece-cobalt.png"],
@@ -134,6 +145,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     collections: [],
   },
   {
+    variationId: "",
     id: "025",
     n: "025",
     srcs: ["/assets/piece-pour.png"],

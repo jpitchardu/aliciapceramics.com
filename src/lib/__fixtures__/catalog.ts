@@ -11,6 +11,7 @@ export const FIXTURE_CATEGORIES: Category[] = [
 export const FIXTURE_PIECES: Piece[] = [
   {
     id: "MDCV2BMWYMDYJO6DMQKNS2HA",
+    variationId: "",
     n: "2/3",
     title: '"Look" 12oz Cup',
     note: 'Inspired by the sunsets that are painted for us to behold. Every day I point to the sky and say to my husband, "Look."',
@@ -23,6 +24,7 @@ export const FIXTURE_PIECES: Piece[] = [
   },
   {
     id: "FIXTURE_CUP_001",
+    variationId: "",
     n: "1/1",
     title: "Morning Cup",
     note: "Hand built, dipped twice in cobalt. The handle sits just right.",
@@ -35,6 +37,7 @@ export const FIXTURE_PIECES: Piece[] = [
   },
   {
     id: "FIXTURE_CUP_002",
+    variationId: "",
     n: "3/3",
     title: "Blush Tumbler",
     note: "No handle. Holds a glass of wine or a slow morning coffee.",
@@ -47,6 +50,7 @@ export const FIXTURE_PIECES: Piece[] = [
   },
   {
     id: "FIXTURE_BOWL_001",
+    variationId: "",
     n: "1/2",
     title: "Sunday Bowl",
     note: "Wide enough for one salad or two soups.",
@@ -59,6 +63,7 @@ export const FIXTURE_PIECES: Piece[] = [
   },
   {
     id: "FIXTURE_BOWL_002",
+    variationId: "",
     n: "2/2",
     title: "Low Pinch Bowl",
     note: "Pinched, not thrown. A small ridge on one side where my thumb sat.",
@@ -71,6 +76,7 @@ export const FIXTURE_PIECES: Piece[] = [
   },
   {
     id: "FIXTURE_BOWL_003",
+    variationId: "",
     n: "1/1",
     title: "Deep Blue Tea Bowl",
     note: "Wider than the mug, no handle — for the way you hold a bowl in cold weather.",
