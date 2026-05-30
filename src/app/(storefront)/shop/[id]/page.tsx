@@ -150,8 +150,8 @@ export default async function PieceDetailPage({
             }}
           >
             <li>
-              each piece is hand built — dimensions and capacity are
-              approximate and may vary slightly.
+              each piece is hand built — dimensions and capacity are approximate
+              and may vary slightly.
             </li>
             <li>
               all sales are final. if your piece arrives damaged, reach out
