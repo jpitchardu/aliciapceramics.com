@@ -65,6 +65,7 @@ export default async function ShopPage({
 
   return (
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
+      <h1 className="sr-only">{DROP.name} — the shop</h1>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
         <div

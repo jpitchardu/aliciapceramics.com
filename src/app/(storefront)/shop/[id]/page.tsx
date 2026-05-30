@@ -46,7 +46,7 @@ export default async function PieceDetailPage({
           <CeramicLabel color="var(--ink-faint)">
             no. {piece.n} · {DROP.name}
           </CeramicLabel>
-          <div
+          <h1
             style={{
               marginTop: 14,
               fontFamily: "var(--serif)",
@@ -56,10 +56,11 @@ export default async function PieceDetailPage({
               lineHeight: 1.0,
               color: "var(--ink)",
               letterSpacing: "-0.01em",
+              margin: "14px 0 0",
             }}
           >
             {piece.title}.
-          </div>
+          </h1>
           {piece.note && (
             <p
               style={{
@@ -287,7 +288,7 @@ export default async function PieceDetailPage({
             <CeramicLabel color="var(--ink-faint)">
               no. {piece.n} · {DROP.name}
             </CeramicLabel>
-            <div
+            <h1
               style={{
                 marginTop: 18,
                 fontFamily: "var(--serif)",
@@ -297,10 +298,11 @@ export default async function PieceDetailPage({
                 lineHeight: 1.0,
                 color: "var(--ink)",
                 letterSpacing: "-0.015em",
+                margin: "18px 0 0",
               }}
             >
               {piece.title}.
-            </div>
+            </h1>
             {piece.note && (
               <p
                 style={{

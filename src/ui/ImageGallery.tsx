@@ -40,6 +40,8 @@ export function ImageGallery({ srcs, ratio = "4 / 5" }: ImageGalleryProps) {
         {srcs.map((src, i) => (
           <button
             key={i}
+            aria-label={`View photo ${i + 1} of ${srcs.length}`}
+            aria-pressed={i === active}
             onClick={() => setActive(i)}
             style={{
               border: "none",

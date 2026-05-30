@@ -28,12 +28,14 @@
     "zod": "^4.0.17"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.52.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.2",
+    "axe-core": "^4.11.4",
     "lefthook": "^1.12.3",
     "oxlint": "^1.7.0",
     "playwright": "^1.52.0",

@@ -15,7 +15,7 @@ export default function StorefrontLayout({
       <div className="hidden lg:block">
         <DesktopNav />
       </div>
-      {children}
+      <main>{children}</main>
       <StorefrontFooter pad={28} topGap={80} />
     </>
   );

@@ -29,6 +29,7 @@ export default async function HomePage() {
 
   return (
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
+      <h1 className="sr-only">alicia p. ceramics — {DROP.name}</h1>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
         {/* hero */}
@@ -287,7 +288,12 @@ export default async function HomePage() {
               z: 2,
             },
           ].map((p, i) => (
-            <Link key={i} href="/shop" style={{ textDecoration: "none" }}>
+            <Link
+              key={i}
+              href="/shop"
+              aria-label="Enter the shop"
+              style={{ textDecoration: "none" }}
+            >
               <div
                 style={{
                   position: "absolute",
