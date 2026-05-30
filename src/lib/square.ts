@@ -1,10 +1,25 @@
 import { SquareClient, SquareEnvironment, CatalogObject } from "square";
 import { Piece, PieceState } from "@/types/piece";
 
+const token = process.env.SQUARE_ACCESS_TOKEN;
+const environment = process.env.SQUARE_ENVIRONMENT;
+
+if (!token) {
+  throw new Error(
+    "[square] SQUARE_ACCESS_TOKEN is not set. " +
+      "Add it to your environment variables.",
+  );
+}
+if (!environment || !["sandbox", "production"].includes(environment)) {
+  throw new Error(
+    `[square] SQUARE_ENVIRONMENT must be "sandbox" or "production", got: ${environment ?? "(unset)"}`,
+  );
+}
+
 export const squareClient = new SquareClient({
-  token: process.env.SQUARE_ACCESS_TOKEN ?? "",
+  token,
   environment:
-    process.env.SQUARE_ENVIRONMENT === "production"
+    environment === "production"
       ? SquareEnvironment.Production
       : SquareEnvironment.Sandbox,
 });
