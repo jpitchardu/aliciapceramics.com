@@ -5,41 +5,7 @@ import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
 import { AddToCartButton } from "./_components/AddToCartButton";
-import { Piece } from "@/types/piece";
-
-async function getPiece(id: string): Promise<Piece | null> {
-  const vercelUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : null;
-  const base =
-    process.env.NEXT_PUBLIC_SITE_URL ?? vercelUrl ?? "http://localhost:3000";
-  try {
-    const res = await fetch(`${base}/api/catalog/${id}`, {
-      next: { revalidate: 300 },
-    });
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
-  }
-}
-
-async function getAllPieces(): Promise<Piece[]> {
-  const vercelUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : null;
-  const base =
-    process.env.NEXT_PUBLIC_SITE_URL ?? vercelUrl ?? "http://localhost:3000";
-  try {
-    const res = await fetch(`${base}/api/catalog`, {
-      next: { revalidate: 300 },
-    });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
-}
+import { fetchAllPieces, fetchPieceById } from "@/lib/square";
 
 export default async function PieceDetailPage({
   params,
@@ -47,7 +13,10 @@ export default async function PieceDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [piece, allPieces] = await Promise.all([getPiece(id), getAllPieces()]);
+  const [piece, allPieces] = await Promise.all([
+    fetchPieceById(id),
+    fetchAllPieces(),
+  ]);
 
   if (!piece) notFound();
 

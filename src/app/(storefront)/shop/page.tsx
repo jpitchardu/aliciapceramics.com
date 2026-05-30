@@ -3,28 +3,11 @@ import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Badge } from "@/ui/Badge";
 import { Sig } from "@/ui/Sig";
-import { Piece } from "@/types/piece";
 import { DROP } from "@/lib/config";
-
-async function getPieces(): Promise<Piece[]> {
-  const vercelUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : null;
-  const base =
-    process.env.NEXT_PUBLIC_SITE_URL ?? vercelUrl ?? "http://localhost:3000";
-  try {
-    const res = await fetch(`${base}/api/catalog`, {
-      next: { revalidate: 300 },
-    });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
-}
+import { fetchAllPieces } from "@/lib/square";
 
 export default async function ShopPage() {
-  const pieces = await getPieces();
+  const pieces = await fetchAllPieces();
   const hereCount = pieces.filter((p) => p.state === "here").length;
   const goneCount = pieces.filter((p) => p.state === "gone").length;
 
