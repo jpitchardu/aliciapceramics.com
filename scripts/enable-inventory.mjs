@@ -52,7 +52,9 @@ for (const item of items) {
   }
 }
 
-console.log(`Enabling trackInventory on ${variationBatches.length} variations...`);
+console.log(
+  `Enabling trackInventory on ${variationBatches.length} variations...`,
+);
 const upsertRes = await client.catalog.batchUpsert({
   idempotencyKey: `enable-inventory-${Date.now()}`,
   batches: [{ objects: variationBatches }],

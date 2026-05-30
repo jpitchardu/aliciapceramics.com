@@ -23,13 +23,15 @@ const listed = [];
 const page = await client.catalog.list({ types: "ITEM,IMAGE,CATEGORY" });
 for await (const obj of page) listed.push(obj);
 
-const itemIds = listed.filter((o) => o.type === "ITEM").map((o) => o.id).filter(Boolean);
-const { objects: fullItems = [] } = await client.catalog.batchGet({ objectIds: itemIds });
+const itemIds = listed
+  .filter((o) => o.type === "ITEM")
+  .map((o) => o.id)
+  .filter(Boolean);
+const { objects: fullItems = [] } = await client.catalog.batchGet({
+  objectIds: itemIds,
+});
 
-const objects = [
-  ...listed.filter((o) => o.type !== "ITEM"),
-  ...fullItems,
-];
+const objects = [...listed.filter((o) => o.type !== "ITEM"), ...fullItems];
 
 const items = objects.filter((o) => o.type === "ITEM");
 const cats = objects.filter((o) => o.type === "CATEGORY");
@@ -37,7 +39,9 @@ const cats = objects.filter((o) => o.type === "CATEGORY");
 console.log(`\n=== ${items.length} items, ${cats.length} categories ===\n`);
 
 function findAttr(attrs, name) {
-  return Object.values(attrs ?? {}).find((a) => a.name === name)?.stringValue ?? "";
+  return (
+    Object.values(attrs ?? {}).find((a) => a.name === name)?.stringValue ?? ""
+  );
 }
 
 for (const item of items) {

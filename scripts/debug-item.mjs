@@ -25,4 +25,6 @@ const res = await client.catalog.object.get({
   includeRelatedObjects: true,
 });
 
-console.log(JSON.stringify(res, (_, v) => typeof v === "bigint" ? v.toString() : v, 2));
+console.log(
+  JSON.stringify(res, (_, v) => (typeof v === "bigint" ? v.toString() : v), 2),
+);
