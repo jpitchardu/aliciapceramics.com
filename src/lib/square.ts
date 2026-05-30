@@ -46,19 +46,35 @@ export function safeSerialize<T>(value: T): T {
   return JSON.parse(JSON.stringify(value, bigIntReplacer));
 }
 
-function inferState(inventoryNote: string): PieceState {
-  const n = inventoryNote.toLowerCase();
-  if (n.includes("gone") || n.includes("taken") || n.includes("sold"))
-    return "gone";
-  return "here";
-}
-
 function findAttr(
   attrs: Record<string, { name?: string; stringValue?: string }>,
   name: string,
 ): string {
   const entry = Object.values(attrs).find((a) => a.name === name);
   return entry?.stringValue ?? "";
+}
+
+async function fetchInventoryCounts(
+  variationIds: string[],
+): Promise<Map<string, PieceState>> {
+  const locationId = process.env.SQUARE_LOCATION_ID;
+  if (!locationId || variationIds.length === 0) return new Map();
+
+  const res = await squareClient.inventory.batchGetCounts({
+    catalogObjectIds: variationIds,
+    locationIds: [locationId],
+  });
+
+  const stateMap = new Map<string, PieceState>();
+  for (const count of res.counts ?? []) {
+    if (count.catalogObjectId) {
+      stateMap.set(
+        count.catalogObjectId,
+        Number(count.quantity ?? 0) > 0 ? "here" : "gone",
+      );
+    }
+  }
+  return stateMap;
 }
 
 export async function fetchAllPieces(): Promise<Piece[]> {
@@ -110,7 +126,6 @@ export async function fetchCatalog(): Promise<{
   );
   try {
     const objects = await fetchObjects();
-    console.log("[square:catalog] raw objects fetched:", objects.length);
 
     const images = new Map<string, string>();
     for (const obj of objects) {
@@ -119,9 +134,17 @@ export async function fetchCatalog(): Promise<{
       }
     }
 
-    const pieces = objects
-      .filter((o) => o.type === "ITEM")
-      .map((o) => mapCatalogItemToPiece(o, images))
+    const items = objects.filter((o) => o.type === "ITEM");
+
+    // Collect all variation IDs to fetch inventory counts in one request
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const variationIds = items.flatMap((o: any) =>
+      (o.itemData?.variations ?? []).map((v: any) => v.id).filter(Boolean),
+    );
+    const inventoryState = await fetchInventoryCounts(variationIds);
+
+    const pieces = items
+      .map((o) => mapCatalogItemToPiece(o, images, inventoryState))
       .filter((p): p is Piece => p !== null);
 
     const categories: Category[] = objects
@@ -153,20 +176,29 @@ export async function fetchPieceById(id: string): Promise<Piece | null> {
   }
 
   try {
-    const page = await squareClient.catalog.list({ types: "ITEM,IMAGE" });
-    const objects: CatalogObject[] = [];
-    for await (const obj of page) {
-      objects.push(obj);
-    }
+    const { object: item, relatedObjects = [] } =
+      await squareClient.catalog.object.get({
+        objectId: id,
+        includeRelatedObjects: true,
+      });
+
+    if (!item) return null;
+
     const images = new Map<string, string>();
-    for (const obj of objects) {
+    for (const obj of relatedObjects) {
       if (obj.type === "IMAGE" && obj.id && obj.imageData?.url) {
         images.set(obj.id, obj.imageData.url);
       }
     }
-    const item = objects.find((o) => o.type === "ITEM" && o.id === id);
-    if (!item) return null;
-    const piece = mapCatalogItemToPiece(item, images);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const variationIds = ((item as any).itemData?.variations ?? [])
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((v: any) => v.id)
+      .filter(Boolean);
+    const inventoryState = await fetchInventoryCounts(variationIds);
+
+    const piece = mapCatalogItemToPiece(item, images, inventoryState);
     return piece ? safeSerialize(piece) : null;
   } catch (err) {
     console.error("[square:catalog] error fetching piece:", id, err);
@@ -178,6 +210,7 @@ export async function fetchPieceById(id: string): Promise<Piece | null> {
 export function mapCatalogItemToPiece(
   item: any,
   images: Map<string, string>,
+  inventoryState: Map<string, PieceState>,
 ): Piece | null {
   if (!item || item.type !== "ITEM") return null;
   const data = item.itemData;
@@ -191,16 +224,18 @@ export function mapCatalogItemToPiece(
   const glaze = findAttr(customAttrs, "glaze");
   const dim = findAttr(customAttrs, "dim");
   const pieceNum = findAttr(customAttrs, "piece_number") || item.id.slice(-3);
-  const inventoryNote = findAttr(customAttrs, "state");
 
   const srcs = ((data.imageIds ?? []) as string[])
-    .map((id) => images.get(id))
+    .map((id: string) => images.get(id))
     .filter((url): url is string => !!url);
   if (srcs.length === 0) srcs.push("/assets/photo-placeholder.png");
 
   const collections = ((data.categories ?? []) as { id: string }[]).map(
     (c) => c.id,
   );
+
+  // Use Square inventory count; default to "here" if not tracked yet
+  const state: PieceState = inventoryState.get(variation?.id ?? "") ?? "here";
 
   return {
     id: item.id,
@@ -210,7 +245,7 @@ export function mapCatalogItemToPiece(
     glaze,
     dim,
     price,
-    state: inferState(inventoryNote),
+    state,
     srcs,
     collections,
   };
