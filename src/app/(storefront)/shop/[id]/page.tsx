@@ -8,8 +8,11 @@ import { AddToCartButton } from "./_components/AddToCartButton";
 import { Piece } from "@/types/piece";
 
 async function getPiece(id: string): Promise<Piece | null> {
-  const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? vercelUrl ?? "http://localhost:3000";
+  const vercelUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : null;
+  const base =
+    process.env.NEXT_PUBLIC_SITE_URL ?? vercelUrl ?? "http://localhost:3000";
   try {
     const res = await fetch(`${base}/api/catalog/${id}`, {
       next: { revalidate: 300 },
@@ -22,8 +25,11 @@ async function getPiece(id: string): Promise<Piece | null> {
 }
 
 async function getAllPieces(): Promise<Piece[]> {
-  const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? vercelUrl ?? "http://localhost:3000";
+  const vercelUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : null;
+  const base =
+    process.env.NEXT_PUBLIC_SITE_URL ?? vercelUrl ?? "http://localhost:3000";
   try {
     const res = await fetch(`${base}/api/catalog`, {
       next: { revalidate: 300 },

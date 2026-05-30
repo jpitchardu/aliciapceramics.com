@@ -7,8 +7,11 @@ import { Piece } from "@/types/piece";
 import { DROP } from "@/lib/config";
 
 async function getPieces(): Promise<Piece[]> {
-  const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? vercelUrl ?? "http://localhost:3000";
+  const vercelUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : null;
+  const base =
+    process.env.NEXT_PUBLIC_SITE_URL ?? vercelUrl ?? "http://localhost:3000";
   try {
     const res = await fetch(`${base}/api/catalog`, {
       next: { revalidate: 300 },
