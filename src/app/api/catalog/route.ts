@@ -8,10 +8,8 @@ import { CatalogObject } from "square";
 
 export const revalidate = 300;
 
-const DEBUG = process.env.SQUARE_DEBUG === "true";
-
 function log(...args: unknown[]) {
-  if (DEBUG) console.log("[square:catalog]", ...args);
+  console.log("[square:catalog]", ...args);
 }
 
 export async function GET() {
