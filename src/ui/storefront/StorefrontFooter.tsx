@@ -12,7 +12,7 @@ export function StorefrontFooter({
   topGap = 120,
 }: StorefrontFooterProps) {
   return (
-    <div
+    <footer
       style={{
         margin: `${topGap}px ${pad}px 0`,
         paddingTop: 26,
@@ -56,6 +56,6 @@ export function StorefrontFooter({
       <Sig size={26} color="var(--ink-soft)">
         AP
       </Sig>
-    </div>
+    </footer>
   );
 }

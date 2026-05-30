@@ -9,12 +9,12 @@ export default function StorefrontLayout({
 }) {
   return (
     <>
-      <div className="lg:hidden">
+      <header className="lg:hidden">
         <TopNav />
-      </div>
-      <div className="hidden lg:block">
+      </header>
+      <header className="hidden lg:block">
         <DesktopNav />
-      </div>
+      </header>
       <main>{children}</main>
       <StorefrontFooter pad={28} topGap={80} />
     </>

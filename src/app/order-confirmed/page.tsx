@@ -5,7 +5,7 @@ import { CeramicLabel } from "@/ui/CeramicLabel";
 
 export default function OrderConfirmedPage() {
   return (
-    <div
+    <main
       style={{
         background: "var(--paper)",
         color: "var(--ink)",
@@ -19,6 +19,7 @@ export default function OrderConfirmedPage() {
         textAlign: "center",
       }}
     >
+      <h1 className="sr-only">order confirmed</h1>
       <Link href="/">
         <Logo width={140} />
       </Link>
@@ -80,6 +81,6 @@ export default function OrderConfirmedPage() {
       >
         <CeramicLabel color="var(--ink-faint)">aliciapceramics</CeramicLabel>
       </div>
-    </div>
+    </main>
   );
 }
