@@ -4,6 +4,8 @@ export const MEDIA_BASE_URL =
 
 export const BYPASS_COOKIE = "gate_bypass";
 
+export const SHOP_CLOSED = false;
+
 export const SITE = {
   name: "aliciapceramics",
   estYear: "2024",

@@ -12,33 +12,6 @@ export default async function ShopPage({
 }: {
   searchParams: Promise<{ cat?: string }>;
 }) {
-  return (
-    <div
-      style={{
-        minHeight: "60vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-        padding: "80px 24px",
-        fontFamily: "var(--serif)",
-        color: "var(--ink)",
-      }}
-    >
-      <p
-        style={{
-          fontSize: 22,
-          fontStyle: "italic",
-          fontWeight: 300,
-          color: "var(--ink-soft)",
-        }}
-      >
-        we&apos;re making some updates — back shortly.
-      </p>
-    </div>
-  );
-
   const { cat } = await searchParams;
   const { pieces, categories } = await fetchCatalog();
 
