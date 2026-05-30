@@ -52,10 +52,10 @@ export default async function HomePage() {
       >
         <Photo
           src={HERO}
-          objectFit="contain"
+          objectFit="cover"
           objectPosition="bottom center"
-          sizes="(max-width: 1023px) 100vw, 1px"
-          style={{ height: "100%", aspectRatio: "unset" }}
+          sizes="100vw, 1px"
+          style={{ height: "100dvh", aspectRatio: "unset" }}
         />
         <div
           style={{
