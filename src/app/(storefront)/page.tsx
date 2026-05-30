@@ -1,8 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import { cookies } from "next/headers";
 import { Photo } from "@/ui/Photo";
 import { CeramicLabel } from "@/ui/CeramicLabel";
-import { NoScroll } from "@/ui/NoScroll";
 import { DROP, MEDIA_BASE_URL, BYPASS_COOKIE } from "@/lib/config";
 import { isGateOpen } from "@/lib/countdown";
 import { Countdown } from "@/ui/Countdown";
@@ -25,20 +25,31 @@ export default async function HomePage() {
 
   return (
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
-      <NoScroll />
+      {/*
+       * Make the full page (nav + main + footer) a flex column capped at
+       * 100dvh with no scroll. Scoped to this page — removed on navigation.
+       */}
+      <style>{`
+        html { height: 100dvh; overflow: hidden; }
+        body { height: 100%; display: flex; flex-direction: column; }
+        body > header { flex-shrink: 0; }
+        body > main  { flex: 1; min-height: 0; overflow: hidden; }
+        body > footer { flex-shrink: 0; }
+      `}</style>
+
       <h1 className="sr-only">alicia p. ceramics — {DROP.name}</h1>
+
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
-      {/* 104px = TopNav: 20pt + 18pb + logo(108w × 364/600) */}
       <div
         className="lg:hidden"
-        style={{ position: "relative", height: "calc(100dvh - 104px)" }}
+        style={{ position: "relative", height: "100%" }}
       >
         <Photo
           src={HERO}
           objectFit="contain"
           objectPosition="bottom center"
           sizes="(max-width: 1023px) 100vw, 1px"
-          style={{ height: "calc(100dvh - 104px)", aspectRatio: "unset" }}
+          style={{ height: "100%", aspectRatio: "unset" }}
         />
         <div
           style={{
@@ -83,17 +94,32 @@ export default async function HomePage() {
       </div>
 
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
-      {/* 185px = DesktopNav: 40pt + 24pb + logo(200w × 364/600) */}
       <div
         className="hidden lg:block"
-        style={{ position: "relative", height: "calc(100dvh - 185px)" }}
+        style={{ position: "relative", height: "100%", overflow: "hidden" }}
       >
-        <Photo
+        {/*
+         * Portrait image displayed as landscape via the dimension-swap trick:
+         * give the img element swapped w/h (containerH × containerW), then
+         * rotate 90°. After rotation the visual size matches the container.
+         * 100dvh over-estimates container height; overflow:hidden clips the rest.
+         */}
+        <Image
           src={HERO}
-          objectFit="contain"
-          objectPosition="bottom center"
+          alt=""
+          fill
           sizes="(min-width: 1024px) 100vw, 1px"
-          style={{ height: "calc(100dvh - 185px)", aspectRatio: "unset" }}
+          style={{
+            objectFit: "cover",
+            position: "absolute",
+            width: "100dvh",
+            height: "100vw",
+            top: "50%",
+            left: "50%",
+            right: "auto",
+            bottom: "auto",
+            transform: "translate(-50%, -50%) rotate(90deg)",
+          }}
         />
 
         {/* drop name + description */}

@@ -25,9 +25,6 @@ export default async function ShopPage({
     ...base.filter((p) => p.state === "gone").sort((a, b) => a.price - b.price),
   ];
 
-  const hereCount = filtered.filter((p) => p.state === "here").length;
-  const goneCount = filtered.filter((p) => p.state === "gone").length;
-
   if (pieces.length === 0) {
     return (
       <div
@@ -211,9 +208,6 @@ export default async function ShopPage({
           <Suspense>
             <ShopFilters categories={categories} />
           </Suspense>
-          <CeramicLabel color="var(--ink-faint)">
-            {hereCount} still here · {goneCount} taken
-          </CeramicLabel>
         </div>
 
         <div
