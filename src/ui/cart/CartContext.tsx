@@ -58,7 +58,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("cart");
-      if (saved) dispatch({ type: "LOAD", items: JSON.parse(saved) });
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          dispatch({
+            type: "LOAD",
+            items: parsed.filter(
+              (i) => i?.piece?.id && Array.isArray(i.piece.srcs),
+            ),
+          });
+        }
+      }
     } catch {
       // ignore
     }

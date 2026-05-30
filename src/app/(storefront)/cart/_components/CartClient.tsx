@@ -139,7 +139,7 @@ export function CartClient() {
             borderTop: i === 0 ? "none" : "1px solid var(--rule-soft)",
           }}
         >
-          <Photo ratio="4 / 5" src={item.piece.srcs[0]} />
+          <Photo ratio="4 / 5" src={item.piece.srcs?.[0]} />
           <div style={{ paddingTop: 2 }}>
             <CeramicLabel color="var(--ink-faint)">
               no. {item.piece.n}
