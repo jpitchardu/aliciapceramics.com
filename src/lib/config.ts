@@ -16,7 +16,7 @@ export const SITE = {
 };
 
 export const DROP = {
-  name: "creating spring",
+  name: "Made of Earth, Full of His spirit",
   date: "jun 2026",
   subtitle: "revelations of creation.",
   description: "made of earth, full of His spirit.",

@@ -17,7 +17,7 @@ export default async function HomePage() {
     return (
       <Countdown
         opensAt={DROP.opensAt}
-        dropName={DROP.name}
+        dropName="alicia p ceramics"
         dropSubtitle={DROP.subtitle}
       />
     );
@@ -43,7 +43,7 @@ export default async function HomePage() {
         body > footer { flex-shrink: 0; }
       `}</style>
 
-      <h1 className="sr-only">alicia p. ceramics — {DROP.name}</h1>
+      <h1 className="sr-only">alicia p. ceramics</h1>
 
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div
@@ -76,7 +76,7 @@ export default async function HomePage() {
               color: "var(--ink)",
             }}
           >
-            {DROP.name}
+            alicia p ceramics
           </span>
           <div
             style={{
@@ -148,7 +148,7 @@ export default async function HomePage() {
               color: "var(--ink)",
             }}
           >
-            {DROP.name}
+            alicia p ceramics
           </span>
           <div
             style={{
