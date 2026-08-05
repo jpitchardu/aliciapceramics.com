@@ -67,7 +67,7 @@ export default async function ShopPage({
 
   return (
     <div style={{ color: "var(--ink)", fontFamily: "var(--serif)" }}>
-      <h1 className="sr-only">{DROP.name} — the shop</h1>
+      <h1 className="sr-only">alicia p ceramics — the shop</h1>
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div className="lg:hidden">
         <div
@@ -79,7 +79,7 @@ export default async function ShopPage({
           }}
         >
           <CeramicLabel color="var(--ink-faint)">
-            {DROP.name} · {filtered.length} pieces
+            alicia p ceramics · {filtered.length} pieces
           </CeramicLabel>
           <CeramicLabel color="var(--ink-faint)">tap a piece</CeramicLabel>
         </div>
@@ -174,7 +174,7 @@ export default async function ShopPage({
                 color: "var(--ink)",
               }}
             >
-              {DROP.name}
+              alicia p ceramics
             </span>
           </div>
           <p
@@ -293,7 +293,7 @@ export default async function ShopPage({
 
         <div style={{ padding: "80px 56px 0", textAlign: "center" }}>
           <CeramicLabel color="var(--ink-faint)">
-            end of drop · {DROP.name} · {DROP.date}
+            end of drop · alicia p ceramics · {DROP.date}
           </CeramicLabel>
         </div>
       </div>
