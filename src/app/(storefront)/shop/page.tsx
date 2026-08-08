@@ -201,7 +201,7 @@ export default async function ShopPage({
               letterSpacing: "-0.005em",
             }}
           >
-            {DROP.description} — {pieces.length} new pieces, {DROP.subtitle}
+            {DROP.description} — {filtered.length} new pieces, {DROP.subtitle}
           </p>
         </div>
 
@@ -272,15 +272,16 @@ export default async function ShopPage({
                     >
                       {p.title}
                     </div>
-                    <div style={{ marginTop: 4 }}>
-                      <CeramicLabel
-                        color="var(--ink-faint)"
-                        style={{ fontSize: 9 }}
-                      >
-                        no. {p.n}
-                        {p.quantity > 1 ? ` · ${p.quantity} left` : ""}
-                      </CeramicLabel>
-                    </div>
+                    {p.quantity > 1 && (
+                      <div style={{ marginTop: 4 }}>
+                        <CeramicLabel
+                          color="var(--ink-faint)"
+                          style={{ fontSize: 9 }}
+                        >
+                          {p.quantity} left
+                        </CeramicLabel>
+                      </div>
+                    )}
                   </div>
                   <span
                     style={{

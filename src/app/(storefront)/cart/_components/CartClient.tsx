@@ -135,12 +135,8 @@ export function CartClient() {
         >
           <Photo ratio="4 / 5" src={item.piece.srcs?.[0]} />
           <div style={{ paddingTop: 2 }}>
-            <CeramicLabel color="var(--ink-faint)">
-              no. {item.piece.n}
-            </CeramicLabel>
             <div
               style={{
-                marginTop: 8,
                 fontFamily: "var(--serif)",
                 fontSize: 20,
                 fontStyle: "italic",

@@ -43,9 +43,7 @@ export default async function PieceDetailPage({
         </div>
 
         <div style={{ padding: "32px 28px 0" }}>
-          <CeramicLabel color="var(--ink-faint)">
-            no. {piece.n} · {DROP.name}
-          </CeramicLabel>
+          <CeramicLabel color="var(--ink-faint)">{DROP.name}</CeramicLabel>
           <h1
             style={{
               marginTop: 14,
@@ -273,7 +271,7 @@ export default async function PieceDetailPage({
             <CeramicLabel color="var(--ink-soft)">← {DROP.name}</CeramicLabel>
           </Link>
           <CeramicLabel color="var(--ink-faint)">
-            no. {piece.n} · piece {pieceIndex + 1} of {allPieces.length}
+            piece {pieceIndex + 1} of {allPieces.length}
           </CeramicLabel>
         </div>
 
@@ -292,9 +290,7 @@ export default async function PieceDetailPage({
           </div>
 
           <div style={{ paddingTop: 24 }}>
-            <CeramicLabel color="var(--ink-faint)">
-              no. {piece.n} · {DROP.name}
-            </CeramicLabel>
+            <CeramicLabel color="var(--ink-faint)">{DROP.name}</CeramicLabel>
             <h1
               style={{
                 marginTop: 18,
