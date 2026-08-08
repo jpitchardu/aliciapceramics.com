@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { cookies } from "next/headers";
 import { Photo } from "@/ui/Photo";
-import { CeramicLabel } from "@/ui/CeramicLabel";
 import { DROP, MEDIA_BASE_URL, BYPASS_COOKIE } from "@/lib/config";
 import { isGateOpen } from "@/lib/countdown";
 import { Countdown } from "@/ui/Countdown";
@@ -175,15 +174,12 @@ export default async function HomePage() {
             bottom: 0,
             padding: "0 56px 36px",
             display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
+            gridTemplateColumns: "1fr 1fr",
             alignItems: "baseline",
             gap: 32,
           }}
         >
-          <CeramicLabel color="var(--ink-faint)">
-            a new drop · {DROP.date}
-          </CeramicLabel>
-          <div style={{ textAlign: "center" }}>
+          <div style={{ textAlign: "left" }}>
             <span
               style={{
                 fontFamily: "var(--serif)",

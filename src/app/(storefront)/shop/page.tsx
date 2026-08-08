@@ -170,23 +170,18 @@ export default async function ShopPage({
       {/* ── DESKTOP ────────────────────────────────────────────────── */}
       <div className="hidden lg:block">
         <div style={{ padding: "64px 56px 0", textAlign: "center" }}>
-          <CeramicLabel color="var(--ink-faint)">
-            a new drop · {DROP.date}
-          </CeramicLabel>
-          <div style={{ marginTop: 22 }}>
-            <span
-              style={{
-                fontFamily: "var(--serif)",
-                fontSize: 32,
-                fontWeight: 300,
-                letterSpacing: "0.6em",
-                textTransform: "uppercase",
-                color: "var(--ink)",
-              }}
-            >
-              alicia p ceramics
-            </span>
-          </div>
+          <span
+            style={{
+              fontFamily: "var(--serif)",
+              fontSize: 32,
+              fontWeight: 300,
+              letterSpacing: "0.6em",
+              textTransform: "uppercase",
+              color: "var(--ink)",
+            }}
+          >
+            alicia p ceramics
+          </span>
           <p
             style={{
               marginTop: 22,
@@ -305,7 +300,7 @@ export default async function ShopPage({
 
         <div style={{ padding: "80px 56px 0", textAlign: "center" }}>
           <CeramicLabel color="var(--ink-faint)">
-            end of drop · alicia p ceramics · {DROP.date}
+            end of drop · alicia p ceramics
           </CeramicLabel>
         </div>
       </div>
