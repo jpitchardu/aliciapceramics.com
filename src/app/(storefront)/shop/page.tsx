@@ -151,7 +151,7 @@ export default async function ShopPage({
                     ${p.price}
                   </span>
                 </div>
-                {p.quantity > 1 && (
+                {p.quantity > 0 && (
                   <div style={{ marginTop: 4 }}>
                     <CeramicLabel
                       color="var(--ink-faint)"
@@ -267,7 +267,7 @@ export default async function ShopPage({
                     >
                       {p.title}
                     </div>
-                    {p.quantity > 1 && (
+                    {p.quantity > 0 && (
                       <div style={{ marginTop: 4 }}>
                         <CeramicLabel
                           color="var(--ink-faint)"

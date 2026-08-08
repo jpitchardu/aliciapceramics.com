@@ -130,7 +130,7 @@ export default async function PieceDetailPage({
             >
               ${piece.price}
             </div>
-            {piece.quantity > 1 && (
+            {piece.quantity > 0 && (
               <div style={{ marginTop: 6 }}>
                 <CeramicLabel color="var(--ink-faint)">
                   {piece.quantity} left
@@ -380,7 +380,7 @@ export default async function PieceDetailPage({
                 >
                   ${piece.price}
                 </div>
-                {piece.quantity > 1 && (
+                {piece.quantity > 0 && (
                   <div style={{ marginTop: 8 }}>
                     <CeramicLabel color="var(--ink-faint)">
                       {piece.quantity} left
