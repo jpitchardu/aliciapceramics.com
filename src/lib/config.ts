@@ -23,9 +23,4 @@ export const DROP = {
   opensAt: "2026-05-30T09:00:00-05:00", // 9am CDT (Dallas)
 };
 
-export const PICKUP_SLOTS = [
-  { day: "wed", date: "jun 3", window: "3 – 5 pm" },
-  { day: "thu", date: "jun 4", window: "10 am – 2 pm" },
-  { day: "fri", date: "jun 5", window: "10 am – 2 pm" },
-  { day: "other", date: "", window: "i'll text you to coordinate" },
-];
+export const PICKUP_NOTE = "i'll coordinate with you";
