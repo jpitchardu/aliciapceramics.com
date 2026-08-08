@@ -12,6 +12,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "11×9 cm",
     price: 148,
     state: "here",
+    quantity: 1,
     collections: [],
   },
   {
@@ -25,6 +26,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "10×8 cm",
     price: 62,
     state: "here",
+    quantity: 1,
     collections: [],
   },
   {
@@ -38,6 +40,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "14×11 cm",
     price: 128,
     state: "here",
+    quantity: 1,
     collections: [],
   },
   {
@@ -51,6 +54,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "9×8 cm",
     price: 58,
     state: "here",
+    quantity: 1,
     collections: [],
   },
   {
@@ -64,6 +68,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "20×9 cm",
     price: 94,
     state: "here",
+    quantity: 1,
     collections: [],
   },
   {
@@ -77,6 +82,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "22×8 cm",
     price: 94,
     state: "here",
+    quantity: 1,
     collections: [],
   },
   {
@@ -90,6 +96,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "12×5 cm",
     price: 72,
     state: "here",
+    quantity: 1,
     collections: [],
   },
   {
@@ -103,6 +110,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "14×2 cm",
     price: 36,
     state: "here",
+    quantity: 1,
     collections: [],
   },
   {
@@ -116,6 +124,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "10×8 cm",
     price: 110,
     state: "gone",
+    quantity: 0,
     collections: [],
   },
   {
@@ -129,6 +138,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "11×7 cm",
     price: 48,
     state: "here",
+    quantity: 1,
     collections: [],
   },
   {
@@ -142,6 +152,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "8×11 cm",
     price: 78,
     state: "here",
+    quantity: 1,
     collections: [],
   },
   {
@@ -155,6 +166,7 @@ export const PLACEHOLDER_PIECES: Piece[] = [
     dim: "11×10 cm",
     price: 92,
     state: "gone",
+    quantity: 0,
     collections: [],
   },
 ];

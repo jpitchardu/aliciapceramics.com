@@ -61,8 +61,9 @@ export async function POST(req: Request) {
 
   try {
     const { order } = await squareClient.orders.get({ orderId });
-    const rawIds = (order?.metadata as Record<string, string> | undefined)
-      ?.variationIds;
+    const metadata = order?.metadata as Record<string, string> | undefined;
+    const rawIds = metadata?.variationIds;
+    const rawQuantities = metadata?.variationQuantities;
 
     if (!rawIds) {
       return NextResponse.json({ ok: true });
@@ -72,16 +73,21 @@ export async function POST(req: Request) {
     if (variationIds.length === 0) {
       return NextResponse.json({ ok: true });
     }
+    // Older orders (placed before quantities were tracked) fall back to 1.
+    const quantities = (rawQuantities ?? "").split(",").filter(Boolean);
 
+    // Reverse the exact IN_STOCK → SOLD adjustment made at checkout so
+    // pieces bought in bulk get all of their stock back, not just one unit.
     await squareClient.inventory.batchCreateChanges({
       idempotencyKey: crypto.randomUUID(),
-      changes: variationIds.map((variationId) => ({
-        type: "PHYSICAL_COUNT",
-        physicalCount: {
+      changes: variationIds.map((variationId, idx) => ({
+        type: "ADJUSTMENT",
+        adjustment: {
           catalogObjectId: variationId,
           locationId,
-          state: "IN_STOCK",
-          quantity: "1",
+          fromState: "SOLD",
+          toState: "IN_STOCK",
+          quantity: quantities[idx] ?? "1",
           occurredAt: new Date().toISOString(),
         },
       })),

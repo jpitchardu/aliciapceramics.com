@@ -34,7 +34,11 @@ export async function POST(req: Request) {
   if (pieces.some((p) => !p)) {
     return NextResponse.json({ error: "item not found" }, { status: 400 });
   }
-  const soldOut = pieces.filter((p) => p!.state === "gone").map((p) => p!.id);
+  const soldOut = pieces
+    .filter(
+      (p, idx) => p!.state === "gone" || items[idx].quantity > p!.quantity,
+    )
+    .map((p) => p!.id);
   if (soldOut.length > 0) {
     return NextResponse.json(
       { error: "one or more pieces are no longer available", soldOut },
@@ -51,23 +55,26 @@ export async function POST(req: Request) {
     );
   }
 
-  // Zero out inventory immediately so concurrent buyers are blocked before
-  // Square decrements on payment completion.
-  const variationIds = pieces
-    .map((p) => p!.variationId)
-    .filter((id) => id && id.length > 0);
+  // Move the purchased quantity from IN_STOCK to SOLD immediately so
+  // concurrent buyers are blocked before Square settles the order — Square
+  // rejects the adjustment if the requested quantity isn't actually in stock.
+  const stockChanges = pieces
+    .map((piece, idx) => ({ piece: piece!, quantity: items[idx].quantity }))
+    .filter(({ piece }) => piece.variationId && piece.variationId.length > 0);
+  const variationIds = stockChanges.map(({ piece }) => piece.variationId);
 
-  if (variationIds.length > 0) {
+  if (stockChanges.length > 0) {
     try {
       await squareClient.inventory.batchCreateChanges({
         idempotencyKey: crypto.randomUUID(),
-        changes: variationIds.map((variationId) => ({
-          type: "PHYSICAL_COUNT",
-          physicalCount: {
-            catalogObjectId: variationId,
+        changes: stockChanges.map(({ piece, quantity }) => ({
+          type: "ADJUSTMENT",
+          adjustment: {
+            catalogObjectId: piece.variationId,
             locationId,
-            state: "IN_STOCK",
-            quantity: "0",
+            fromState: "IN_STOCK",
+            toState: "SOLD",
+            quantity: String(quantity),
             occurredAt: new Date().toISOString(),
           },
         })),
@@ -106,7 +113,12 @@ export async function POST(req: Request) {
         lineItems,
         referenceId: orderNote || undefined,
         metadata: variationIds.length
-          ? { variationIds: variationIds.join(",") }
+          ? {
+              variationIds: variationIds.join(","),
+              variationQuantities: stockChanges
+                .map(({ quantity }) => quantity)
+                .join(","),
+            }
           : undefined,
       },
       checkoutOptions: {
