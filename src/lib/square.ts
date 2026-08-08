@@ -56,7 +56,7 @@ function findAttr(
 
 async function fetchInventoryCounts(
   variationIds: string[],
-): Promise<Map<string, PieceState>> {
+): Promise<Map<string, number>> {
   const locationId = process.env.SQUARE_LOCATION_ID;
   if (!locationId || variationIds.length === 0) return new Map();
 
@@ -65,16 +65,13 @@ async function fetchInventoryCounts(
     locationIds: [locationId],
   });
 
-  const stateMap = new Map<string, PieceState>();
+  const quantities = new Map<string, number>();
   for await (const count of page) {
     if (count.catalogObjectId) {
-      stateMap.set(
-        count.catalogObjectId,
-        Number(count.quantity ?? 0) > 0 ? "here" : "gone",
-      );
+      quantities.set(count.catalogObjectId, Number(count.quantity ?? 0));
     }
   }
-  return stateMap;
+  return quantities;
 }
 
 export async function fetchAllPieces(): Promise<Piece[]> {
@@ -141,10 +138,10 @@ export async function fetchCatalog(): Promise<{
     const variationIds = items.flatMap((o: any) =>
       (o.itemData?.variations ?? []).map((v: any) => v.id).filter(Boolean),
     );
-    const inventoryState = await fetchInventoryCounts(variationIds);
+    const inventoryQuantities = await fetchInventoryCounts(variationIds);
 
     const pieces = items
-      .map((o) => mapCatalogItemToPiece(o, images, inventoryState))
+      .map((o) => mapCatalogItemToPiece(o, images, inventoryQuantities))
       .filter((p): p is Piece => p !== null);
 
     const categories: Category[] = objects
@@ -196,9 +193,9 @@ export async function fetchPieceById(id: string): Promise<Piece | null> {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((v: any) => v.id)
       .filter(Boolean);
-    const inventoryState = await fetchInventoryCounts(variationIds);
+    const inventoryQuantities = await fetchInventoryCounts(variationIds);
 
-    const piece = mapCatalogItemToPiece(item, images, inventoryState);
+    const piece = mapCatalogItemToPiece(item, images, inventoryQuantities);
     return piece ? safeSerialize(piece) : null;
   } catch (err) {
     console.error("[square:catalog] error fetching piece:", id, err);
@@ -210,7 +207,7 @@ export async function fetchPieceById(id: string): Promise<Piece | null> {
 export function mapCatalogItemToPiece(
   item: any,
   images: Map<string, string>,
-  inventoryState: Map<string, PieceState>,
+  inventoryQuantities: Map<string, number>,
 ): Piece | null {
   if (!item || item.type !== "ITEM") return null;
   const data = item.itemData;
@@ -234,8 +231,9 @@ export function mapCatalogItemToPiece(
     (c) => c.id,
   );
 
-  // Use Square inventory count; default to "here" if not tracked yet
-  const state: PieceState = inventoryState.get(variation?.id ?? "") ?? "here";
+  // Use Square inventory count; default to 1 (a single available piece) if not tracked yet
+  const quantity = inventoryQuantities.get(variation?.id ?? "") ?? 1;
+  const state: PieceState = quantity > 0 ? "here" : "gone";
 
   return {
     id: item.id,
@@ -247,6 +245,7 @@ export function mapCatalogItemToPiece(
     dim,
     price,
     state,
+    quantity,
     srcs,
     collections,
   };

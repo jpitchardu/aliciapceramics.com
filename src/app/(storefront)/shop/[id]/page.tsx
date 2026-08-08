@@ -132,6 +132,13 @@ export default async function PieceDetailPage({
             >
               ${piece.price}
             </div>
+            {piece.quantity > 1 && (
+              <div style={{ marginTop: 6 }}>
+                <CeramicLabel color="var(--ink-faint)">
+                  {piece.quantity} left
+                </CeramicLabel>
+              </div>
+            )}
           </div>
           <AddToCartButton piece={piece} />
         </div>
@@ -377,6 +384,13 @@ export default async function PieceDetailPage({
                 >
                   ${piece.price}
                 </div>
+                {piece.quantity > 1 && (
+                  <div style={{ marginTop: 8 }}>
+                    <CeramicLabel color="var(--ink-faint)">
+                      {piece.quantity} left
+                    </CeramicLabel>
+                  </div>
+                )}
               </div>
               <AddToCartButton piece={piece} />
             </div>

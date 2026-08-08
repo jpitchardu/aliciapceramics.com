@@ -151,6 +151,16 @@ export default async function ShopPage({
                     ${p.price}
                   </span>
                 </div>
+                {p.quantity > 1 && (
+                  <div style={{ marginTop: 4 }}>
+                    <CeramicLabel
+                      color="var(--ink-faint)"
+                      style={{ fontSize: 9 }}
+                    >
+                      {p.quantity} left
+                    </CeramicLabel>
+                  </div>
+                )}
               </figure>
             </Link>
           ))}
@@ -268,6 +278,7 @@ export default async function ShopPage({
                         style={{ fontSize: 9 }}
                       >
                         no. {p.n}
+                        {p.quantity > 1 ? ` · ${p.quantity} left` : ""}
                       </CeramicLabel>
                     </div>
                   </div>

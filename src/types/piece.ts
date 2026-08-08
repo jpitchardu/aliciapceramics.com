@@ -10,6 +10,7 @@ export interface Piece {
   dim: string;
   price: number;
   state: PieceState;
+  quantity: number;
   srcs: string[];
   collections: string[];
 }

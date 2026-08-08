@@ -1,9 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { mapCatalogItemToPiece } from "@/lib/square";
-import type { PieceState } from "@/types/piece";
 
 const noImages = new Map<string, string>();
-const noInventory = new Map<string, PieceState>();
+const noInventory = new Map<string, number>();
 
 function makeItem(overrides: Record<string, unknown> = {}) {
   return {
@@ -44,21 +43,31 @@ describe("mapCatalogItemToPiece", () => {
     expect(piece!.n).toBe("014");
   });
 
-  it("defaults to 'here' when not in inventory map", () => {
+  it("defaults to 'here' with quantity 1 when not in inventory map", () => {
     const piece = mapCatalogItemToPiece(makeItem(), noImages, noInventory);
     expect(piece!.state).toBe("here");
+    expect(piece!.quantity).toBe(1);
   });
 
   it("uses 'here' when inventory count is 1", () => {
-    const inv = new Map<string, PieceState>([["VAR001", "here"]]);
+    const inv = new Map<string, number>([["VAR001", 1]]);
     const piece = mapCatalogItemToPiece(makeItem(), noImages, inv);
     expect(piece!.state).toBe("here");
+    expect(piece!.quantity).toBe(1);
   });
 
   it("uses 'gone' when inventory count is 0", () => {
-    const inv = new Map<string, PieceState>([["VAR001", "gone"]]);
+    const inv = new Map<string, number>([["VAR001", 0]]);
     const piece = mapCatalogItemToPiece(makeItem(), noImages, inv);
     expect(piece!.state).toBe("gone");
+    expect(piece!.quantity).toBe(0);
+  });
+
+  it("carries the actual quantity through when more than 1 is in stock", () => {
+    const inv = new Map<string, number>([["VAR001", 4]]);
+    const piece = mapCatalogItemToPiece(makeItem(), noImages, inv);
+    expect(piece!.state).toBe("here");
+    expect(piece!.quantity).toBe(4);
   });
 
   it("falls back to placeholder image when no imageIds", () => {
