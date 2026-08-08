@@ -3,6 +3,8 @@ import { fetchAllPieces } from "@/lib/square";
 
 const BASE_URL = "https://aliciapceramics.com";
 
+export const revalidate = 300;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pieces = await fetchAllPieces();
 
