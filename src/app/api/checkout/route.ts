@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { squareClient, fetchPieceById } from "@/lib/square";
 import type { Currency } from "square";
 import { z } from "zod";
+import { track as vercelTrack } from "@vercel/analytics/server";
+
+// Never let an analytics hiccup break checkout.
+function track(name: string, properties?: Record<string, string | number>) {
+  return vercelTrack(name, properties).catch(() => {});
+}
+
+function trackFailure(reason: string, extra?: Record<string, string | number>) {
+  return track("checkout_failed", { reason, ...extra });
+}
 
 const USD = "USD" as Currency;
 
@@ -24,14 +34,21 @@ export async function POST(req: Request) {
   const raw = await req.json();
   const parsed = CheckoutSchema.safeParse(raw);
   if (!parsed.success) {
+    await trackFailure("invalid_request");
     return NextResponse.json({ error: "invalid request" }, { status: 400 });
   }
 
   const { items, delivery, note, pickupSlot } = parsed.data;
 
+  await track("checkout_started", {
+    itemCount: items.reduce((s, i) => s + i.quantity, 0),
+    delivery,
+  });
+
   // Look up authoritative prices server-side — never trust the client
   const pieces = await Promise.all(items.map((i) => fetchPieceById(i.id)));
   if (pieces.some((p) => !p)) {
+    await trackFailure("item_not_found");
     return NextResponse.json({ error: "item not found" }, { status: 400 });
   }
   const soldOut = pieces
@@ -40,6 +57,7 @@ export async function POST(req: Request) {
     )
     .map((p) => p!.id);
   if (soldOut.length > 0) {
+    await trackFailure("sold_out", { pieceCount: soldOut.length });
     return NextResponse.json(
       { error: "one or more pieces are no longer available", soldOut },
       { status: 409 },
@@ -49,6 +67,7 @@ export async function POST(req: Request) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const locationId = process.env.SQUARE_LOCATION_ID;
   if (!locationId) {
+    await trackFailure("store_not_configured");
     return NextResponse.json(
       { error: "store not configured" },
       { status: 500 },
@@ -81,6 +100,7 @@ export async function POST(req: Request) {
       });
     } catch (err) {
       console.error("Square inventory reserve error:", err);
+      await trackFailure("reserve_error");
       return NextResponse.json(
         { error: "could not reserve items, please try again" },
         { status: 500 },
@@ -130,9 +150,19 @@ export async function POST(req: Request) {
     const url = response.paymentLink?.url;
     if (!url) throw new Error("no checkout url returned");
 
+    await track("checkout_link_created", {
+      itemCount: items.reduce((s, i) => s + i.quantity, 0),
+      total: pieces.reduce(
+        (s, p, idx) => s + p!.price * items[idx].quantity,
+        0,
+      ),
+      delivery,
+    });
+
     return NextResponse.json({ url });
   } catch (err) {
     console.error("Square checkout error:", err);
+    await trackFailure("checkout_creation_error");
     return NextResponse.json({ error: "checkout failed" }, { status: 500 });
   }
 }

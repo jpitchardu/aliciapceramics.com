@@ -7,6 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { track } from "@vercel/analytics";
 import { Piece } from "@/types/piece";
 
 export interface CartItem {
@@ -85,7 +86,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     <CartContext.Provider
       value={{
         items: state.items,
-        addItem: (piece) => dispatch({ type: "ADD", piece }),
+        addItem: (piece) => {
+          if (piece.state === "gone") return;
+          track("added_to_cart", {
+            pieceId: piece.id,
+            title: piece.title,
+            price: piece.price,
+          });
+          dispatch({ type: "ADD", piece });
+        },
         removeItem: (id) => dispatch({ type: "REMOVE", id }),
         clearCart: () => dispatch({ type: "CLEAR" }),
         total,

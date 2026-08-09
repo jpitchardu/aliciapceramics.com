@@ -1,6 +1,7 @@
 import { DROP } from "@/lib/config";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { track } from "@vercel/analytics/server";
 import { Photo } from "@/ui/Photo";
 import { ImageGallery } from "@/ui/ImageGallery";
 import { CeramicLabel } from "@/ui/CeramicLabel";
@@ -21,6 +22,13 @@ export default async function PieceDetailPage({
 
   const piece = pieceResult.status === "fulfilled" ? pieceResult.value : null;
   if (!piece) notFound();
+
+  await track("piece_viewed", {
+    pieceId: piece.id,
+    title: piece.title,
+    price: piece.price,
+    state: piece.state,
+  });
 
   const allPieces =
     allPiecesResult.status === "fulfilled" ? allPiecesResult.value : [];

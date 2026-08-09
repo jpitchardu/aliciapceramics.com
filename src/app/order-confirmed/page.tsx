@@ -1,9 +1,16 @@
 import Link from "next/link";
+import { track } from "@vercel/analytics/server";
 import { Logo } from "@/ui/Logo";
 import { Sig } from "@/ui/Sig";
 import { CeramicLabel } from "@/ui/CeramicLabel";
 
-export default function OrderConfirmedPage() {
+// Without this, Next prerenders the page once at build time and the
+// track() call below would only ever fire that one time, not per visit.
+export const dynamic = "force-dynamic";
+
+export default async function OrderConfirmedPage() {
+  await track("order_completed");
+
   return (
     <main
       style={{
