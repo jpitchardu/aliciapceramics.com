@@ -17,6 +17,9 @@ export function DesktopNav() {
         <Link href="/shop" style={{ textDecoration: "none" }}>
           <CeramicLabel color="var(--ink-soft)">shop</CeramicLabel>
         </Link>
+        <Link href="/care" style={{ textDecoration: "none" }}>
+          <CeramicLabel color="var(--ink-soft)">care</CeramicLabel>
+        </Link>
         <a
           href={`https://instagram.com/${SITE.instagram}`}
           target="_blank"

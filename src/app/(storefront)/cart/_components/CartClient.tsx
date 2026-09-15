@@ -101,8 +101,7 @@ export function CartClient() {
           style={{
             fontFamily: "var(--serif)",
             fontSize: 22,
-            fontStyle: "italic",
-            fontWeight: 300,
+            fontWeight: 400,
             color: "var(--ink-soft)",
           }}
         >
@@ -139,8 +138,7 @@ export function CartClient() {
               style={{
                 fontFamily: "var(--serif)",
                 fontSize: 20,
-                fontStyle: "italic",
-                fontWeight: 300,
+                fontWeight: 400,
                 lineHeight: 1.1,
                 color: "var(--ink)",
                 letterSpacing: "-0.005em",
@@ -154,8 +152,7 @@ export function CartClient() {
                   marginTop: 6,
                   fontFamily: "var(--serif)",
                   fontSize: 13,
-                  fontStyle: "italic",
-                  fontWeight: 300,
+                  fontWeight: 400,
                   color: "var(--ink-soft)",
                 }}
               >
@@ -168,8 +165,7 @@ export function CartClient() {
               paddingTop: 4,
               fontFamily: "var(--serif)",
               fontSize: 18,
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 400,
               color: "var(--ink)",
             }}
           >
@@ -213,8 +209,7 @@ export function CartClient() {
             style={{
               fontFamily: "var(--serif)",
               fontSize: 15,
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 400,
               color: "var(--ink-soft)",
             }}
           >
@@ -224,7 +219,7 @@ export function CartClient() {
             style={{
               fontFamily: "var(--serif)",
               fontSize: 15,
-              fontWeight: 300,
+              fontWeight: 400,
               color: "var(--ink)",
             }}
           >
@@ -236,8 +231,7 @@ export function CartClient() {
             style={{
               fontFamily: "var(--serif)",
               fontSize: 15,
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 400,
               color: "var(--ink-soft)",
             }}
           >
@@ -247,8 +241,7 @@ export function CartClient() {
             style={{
               fontFamily: "var(--serif)",
               fontSize: 14,
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 400,
               color: "var(--ink-faint)",
             }}
           >
@@ -290,8 +283,7 @@ export function CartClient() {
                 style={{
                   fontFamily: "var(--serif)",
                   fontSize: 16,
-                  fontStyle: "italic",
-                  fontWeight: 300,
+                  fontWeight: 400,
                   color: delivery === "ship" ? "var(--ink)" : "var(--ink-soft)",
                 }}
               >
@@ -303,8 +295,7 @@ export function CartClient() {
                   fontFamily: "var(--serif)",
                   fontSize: 13,
                   color: "var(--ink-faint)",
-                  fontStyle: "italic",
-                  fontWeight: 300,
+                  fontWeight: 400,
                 }}
               >
                 packed by hand with care · US only
@@ -327,8 +318,7 @@ export function CartClient() {
                 style={{
                   fontFamily: "var(--serif)",
                   fontSize: 16,
-                  fontStyle: "italic",
-                  fontWeight: 300,
+                  fontWeight: 400,
                   color:
                     delivery === "pickup" ? "var(--ink)" : "var(--ink-soft)",
                 }}
@@ -341,8 +331,7 @@ export function CartClient() {
                   fontFamily: "var(--serif)",
                   fontSize: 13,
                   color: "var(--ink-faint)",
-                  fontStyle: "italic",
-                  fontWeight: 300,
+                  fontWeight: 400,
                 }}
               >
                 {SITE.studio.address}
@@ -360,8 +349,7 @@ export function CartClient() {
                     style={{
                       fontFamily: "var(--serif)",
                       fontSize: 13,
-                      fontStyle: "italic",
-                      fontWeight: 300,
+                      fontWeight: 400,
                       color: "var(--ink-soft)",
                     }}
                   >
@@ -374,8 +362,7 @@ export function CartClient() {
               style={{
                 fontFamily: "var(--serif)",
                 fontSize: 14,
-                fontStyle: "italic",
-                fontWeight: 300,
+                fontWeight: 400,
                 color: "var(--ink-soft)",
                 flexShrink: 0,
               }}
@@ -402,8 +389,7 @@ export function CartClient() {
           style={{
             fontFamily: "var(--serif)",
             fontSize: 32,
-            fontStyle: "italic",
-            fontWeight: 300,
+            fontWeight: 700,
             color: "var(--ink)",
             letterSpacing: "-0.005em",
           }}
@@ -433,9 +419,8 @@ export function CartClient() {
             marginTop: 12,
             fontFamily: "var(--serif)",
             fontSize: 15,
-            fontStyle: "italic",
             color: "var(--ink)",
-            fontWeight: 300,
+            fontWeight: 400,
             lineHeight: 1.5,
             borderBottom: "1px solid rgba(36,35,34,0.25)",
             borderTop: "none",
@@ -457,7 +442,6 @@ export function CartClient() {
             fontFamily: "var(--serif)",
             fontSize: 13,
             color: "var(--topaze)",
-            fontStyle: "italic",
           }}
         >
           {error}
@@ -486,8 +470,7 @@ export function CartClient() {
             style={{
               fontFamily: "var(--serif)",
               fontSize: 26,
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 700,
               color: "var(--ink)",
             }}
           >
@@ -523,7 +506,7 @@ export function CartClient() {
             style={{
               fontFamily: "var(--serif)",
               fontSize: 28,
-              fontWeight: 300,
+              fontWeight: 700,
               letterSpacing: "0.6em",
               textTransform: "uppercase",
               color: "var(--ink)",
@@ -536,8 +519,7 @@ export function CartClient() {
               marginTop: 22,
               fontFamily: "var(--serif)",
               fontSize: 19,
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 400,
               color: "var(--ink-soft)",
               lineHeight: 1.4,
               margin: "22px auto 0",

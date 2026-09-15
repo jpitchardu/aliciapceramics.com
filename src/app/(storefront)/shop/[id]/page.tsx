@@ -57,8 +57,7 @@ export default async function PieceDetailPage({
               marginTop: 14,
               fontFamily: "var(--serif)",
               fontSize: 38,
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 700,
               lineHeight: 1.0,
               color: "var(--ink)",
               letterSpacing: "-0.01em",
@@ -76,8 +75,7 @@ export default async function PieceDetailPage({
                 lineHeight: 1.6,
                 color: "var(--ink)",
                 margin: "18px 0 0",
-                fontStyle: "italic",
-                fontWeight: 300,
+                fontWeight: 400,
               }}
             >
               {piece.note}
@@ -97,8 +95,7 @@ export default async function PieceDetailPage({
                 margin: "16px 0 0",
                 fontFamily: "var(--serif)",
                 fontSize: 16,
-                fontWeight: 300,
-                fontStyle: "italic",
+                fontWeight: 400,
                 color: "var(--ink)",
                 lineHeight: 1.9,
               }}
@@ -127,8 +124,7 @@ export default async function PieceDetailPage({
                 marginTop: 6,
                 fontFamily: "var(--serif)",
                 fontSize: 28,
-                fontStyle: "italic",
-                fontWeight: 300,
+                fontWeight: 700,
                 color:
                   piece.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
                 textDecoration:
@@ -157,8 +153,7 @@ export default async function PieceDetailPage({
               margin: 0,
               fontFamily: "var(--serif)",
               fontSize: 13,
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 400,
               color: "var(--ink-faint)",
               lineHeight: 2,
             }}
@@ -227,8 +222,7 @@ export default async function PieceDetailPage({
                         style={{
                           fontFamily: "var(--serif)",
                           fontSize: 13,
-                          fontStyle: "italic",
-                          fontWeight: 300,
+                          fontWeight: 400,
                           color:
                             m.state === "gone"
                               ? "var(--ink-faint)"
@@ -244,7 +238,7 @@ export default async function PieceDetailPage({
                         style={{
                           fontFamily: "var(--serif)",
                           fontSize: 12,
-                          fontWeight: 300,
+                          fontWeight: 400,
                           color:
                             m.state === "gone"
                               ? "var(--ink-faint)"
@@ -304,8 +298,7 @@ export default async function PieceDetailPage({
                 marginTop: 18,
                 fontFamily: "var(--serif)",
                 fontSize: 56,
-                fontStyle: "italic",
-                fontWeight: 300,
+                fontWeight: 700,
                 lineHeight: 1.0,
                 color: "var(--ink)",
                 letterSpacing: "-0.015em",
@@ -323,8 +316,7 @@ export default async function PieceDetailPage({
                   lineHeight: 1.55,
                   color: "var(--ink)",
                   margin: "24px 0 0",
-                  fontStyle: "italic",
-                  fontWeight: 300,
+                  fontWeight: 400,
                   maxWidth: 460,
                 }}
               >
@@ -344,8 +336,7 @@ export default async function PieceDetailPage({
                     margin: "18px 0 0",
                     fontFamily: "var(--serif)",
                     fontSize: 17,
-                    fontWeight: 300,
-                    fontStyle: "italic",
+                    fontWeight: 400,
                     color: "var(--ink)",
                     lineHeight: 1.9,
                   }}
@@ -375,8 +366,7 @@ export default async function PieceDetailPage({
                     marginTop: 8,
                     fontFamily: "var(--serif)",
                     fontSize: 36,
-                    fontStyle: "italic",
-                    fontWeight: 300,
+                    fontWeight: 700,
                     color:
                       piece.state === "gone"
                         ? "var(--ink-faint)"
@@ -406,8 +396,7 @@ export default async function PieceDetailPage({
                 margin: "24px 0 0",
                 fontFamily: "var(--serif)",
                 fontSize: 13,
-                fontStyle: "italic",
-                fontWeight: 300,
+                fontWeight: 400,
                 color: "var(--ink-faint)",
                 lineHeight: 2,
               }}
@@ -439,7 +428,7 @@ export default async function PieceDetailPage({
                 style={{
                   fontFamily: "var(--serif)",
                   fontSize: 14,
-                  fontWeight: 300,
+                  fontWeight: 400,
                   letterSpacing: "0.6em",
                   textTransform: "uppercase",
                   color: "var(--ink)",
@@ -496,8 +485,7 @@ export default async function PieceDetailPage({
                         style={{
                           fontFamily: "var(--serif)",
                           fontSize: 14,
-                          fontStyle: "italic",
-                          fontWeight: 300,
+                          fontWeight: 400,
                           color:
                             m.state === "gone"
                               ? "var(--ink-faint)"
@@ -513,7 +501,7 @@ export default async function PieceDetailPage({
                         style={{
                           fontFamily: "var(--serif)",
                           fontSize: 13,
-                          fontWeight: 300,
+                          fontWeight: 400,
                           color:
                             m.state === "gone"
                               ? "var(--ink-faint)"

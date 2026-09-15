@@ -1,12 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import { cookies } from "next/headers";
-import { Photo } from "@/ui/Photo";
-import { DROP, MEDIA_BASE_URL, BYPASS_COOKIE } from "@/lib/config";
+import { DROP, BYPASS_COOKIE } from "@/lib/config";
 import { isGateOpen } from "@/lib/countdown";
 import { Countdown } from "@/ui/Countdown";
 
-const HERO = `${MEDIA_BASE_URL}/hero-2.jpg`;
+/*
+ * Two crops of the same studio photograph, cut so the pots fill the frame and
+ * a band of plain wall is left for the headline to sit on — top-right on the
+ * landscape crop, across the top on the portrait one. That wall band is what
+ * makes the type legible, so the headline must not be moved off it: no scrim,
+ * no gradient, no tinted type.
+ */
+const HERO_DESKTOP = "/assets/hero-desktop.jpg"; // 2880 × 1390
+const HERO_MOBILE = "/assets/hero-mobile.jpg"; // 1800 × 2100
 
 export default async function HomePage() {
   const bypassed = (await cookies()).get(BYPASS_COOKIE)?.value === "1";
@@ -17,7 +24,7 @@ export default async function HomePage() {
       <Countdown
         opensAt={DROP.opensAt}
         dropName="alicia p ceramics"
-        dropSubtitle={DROP.subtitle}
+        dropSubtitle={DROP.description}
       />
     );
   }
@@ -47,50 +54,42 @@ export default async function HomePage() {
       {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div
         className="lg:hidden"
-        style={{ position: "relative", height: "100%" }}
+        style={{ position: "relative", height: "100%", overflow: "hidden" }}
       >
-        <Photo
-          src={HERO}
-          objectFit="cover"
-          objectPosition="bottom center"
-          sizes="100vw, 1px"
-          style={{ height: "100dvh", aspectRatio: "unset" }}
+        <Image
+          src={HERO_MOBILE}
+          alt=""
+          fill
+          priority
+          sizes="(max-width: 1023px) 100vw, 1px"
+          style={{ objectFit: "cover", objectPosition: "center center" }}
         />
+
+        {/* headline sits on the band of wall across the top of the crop */}
         <div
           style={{
             position: "absolute",
             left: 0,
             right: 0,
-            bottom: "8%",
+            top: 22,
+            padding: "0 22px",
             textAlign: "center",
           }}
         >
-          <span
-            style={{
-              fontFamily: "var(--serif)",
-              fontSize: 16,
-              fontWeight: 300,
-              letterSpacing: "0.6em",
-              textTransform: "uppercase",
-              color: "var(--ink)",
-            }}
-          >
-            alicia p ceramics
-          </span>
           <div
             style={{
-              marginTop: 14,
               fontFamily: "var(--serif)",
               fontSize: 19,
-              fontStyle: "italic",
-              fontWeight: 300,
-              color: "var(--ink)",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
               lineHeight: 1.3,
+              color: "var(--ink)",
             }}
           >
-            {DROP.subtitle}
+            {DROP.description}
           </div>
-          <div style={{ marginTop: 28 }}>
+          <div style={{ marginTop: 18 }}>
             <Link href="/shop" className="ds-action">
               enter the shop
             </Link>
@@ -103,97 +102,44 @@ export default async function HomePage() {
         className="hidden lg:block"
         style={{ position: "relative", height: "100%", overflow: "hidden" }}
       >
-        {/*
-         * Portrait image displayed as landscape via the dimension-swap trick:
-         * give the img element swapped w/h (containerH × containerW), then
-         * rotate 90°. After rotation the visual size matches the container.
-         * 100dvh over-estimates container height; overflow:hidden clips the rest.
-         */}
         <Image
-          src={HERO}
+          src={HERO_DESKTOP}
           alt=""
           fill
+          priority
           sizes="(min-width: 1024px) 100vw, 1px"
-          style={{
-            objectFit: "cover",
-            position: "absolute",
-            width: "100dvh",
-            height: "100vw",
-            top: "50%",
-            left: "50%",
-            right: "auto",
-            bottom: "auto",
-            transform: "translate(-50%, -50%) rotate(90deg)",
-          }}
+          style={{ objectFit: "cover", objectPosition: "center top" }}
         />
 
-        {/* drop name + description */}
+        {/* headline sits in the quiet wall corner of the photo — no overlay */}
         <div
           style={{
             position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: "18%",
-            textAlign: "center",
+            top: 22,
+            right: 56,
+            width: 420,
+            textAlign: "right",
           }}
         >
-          <span
+          <div
             style={{
               fontFamily: "var(--serif)",
               fontSize: 28,
-              fontWeight: 300,
-              letterSpacing: "0.6em",
+              fontWeight: 700,
+              letterSpacing: "0.09em",
               textTransform: "uppercase",
+              lineHeight: 1.25,
               color: "var(--ink)",
-            }}
-          >
-            alicia p ceramics
-          </span>
-          <div
-            style={{
-              marginTop: 18,
-              fontFamily: "var(--serif)",
-              fontSize: 20,
-              fontStyle: "italic",
-              fontWeight: 300,
-              color: "var(--ink)",
-              letterSpacing: "-0.005em",
-              opacity: 0.92,
             }}
           >
             {DROP.description}
           </div>
-        </div>
-
-        {/* meta row — pinned to bottom */}
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            padding: "0 56px 36px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            alignItems: "baseline",
-            gap: 32,
-          }}
-        >
-          <div style={{ textAlign: "left" }}>
-            <span
-              style={{
-                fontFamily: "var(--serif)",
-                fontSize: 17,
-                fontStyle: "italic",
-                fontWeight: 300,
-                color: "var(--ink-soft)",
-              }}
+          <div style={{ marginTop: 14 }}>
+            <Link
+              href="/shop"
+              className="ds-action"
+              style={{ fontSize: 13, fontWeight: 700 }}
             >
-              {DROP.subtitle}
-            </span>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <Link href="/shop" className="ds-action">
               see the collection →
             </Link>
           </div>

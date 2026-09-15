@@ -27,7 +27,7 @@ export function Badge({ state, compact = false }: BadgeProps) {
         gap: compact ? 5 : 7,
         fontFamily: "var(--serif)",
         fontSize: compact ? 8 : 10,
-        fontWeight: 400,
+        fontWeight: 700,
         letterSpacing: "0.18em",
         textTransform: "uppercase",
         color: meta.ink,

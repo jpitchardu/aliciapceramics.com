@@ -42,8 +42,7 @@ export function Countdown({ opensAt, dropName, dropSubtitle }: CountdownProps) {
         style={{
           marginTop: 20,
           fontSize: "clamp(17px, 2.5vw, 22px)",
-          fontStyle: "italic",
-          fontWeight: 300,
+          fontWeight: 400,
           color: "var(--ink-soft)",
           lineHeight: 1.4,
           maxWidth: 480,
@@ -58,8 +57,7 @@ export function Countdown({ opensAt, dropName, dropSubtitle }: CountdownProps) {
           <p
             style={{
               fontSize: "clamp(18px, 2vw, 22px)",
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 400,
               color: "var(--ink-soft)",
               marginBottom: 32,
             }}
@@ -97,8 +95,7 @@ export function Countdown({ opensAt, dropName, dropSubtitle }: CountdownProps) {
                 <span
                   style={{
                     fontSize: "clamp(52px, 10vw, 120px)",
-                    fontWeight: 300,
-                    fontStyle: "italic",
+                    fontWeight: 700,
                     lineHeight: 1,
                     letterSpacing: "-0.03em",
                     color: "var(--ink)",
@@ -116,8 +113,7 @@ export function Countdown({ opensAt, dropName, dropSubtitle }: CountdownProps) {
             style={{
               marginTop: 48,
               fontSize: 14,
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 400,
               color: "var(--ink-faint)",
               letterSpacing: "0.01em",
             }}
@@ -127,7 +123,7 @@ export function Countdown({ opensAt, dropName, dropSubtitle }: CountdownProps) {
         </>
       )}
 
-      <Sig size={26} color="var(--ink-soft)" style={{ marginTop: 64 }}>
+      <Sig size={36} color="var(--ink-soft)" style={{ marginTop: 64 }}>
         AP
       </Sig>
     </div>
