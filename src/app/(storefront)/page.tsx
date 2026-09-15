@@ -47,6 +47,21 @@ export default async function HomePage() {
         body > header { flex-shrink: 0; }
         body > main  { flex: 1; min-height: 0; overflow: hidden; }
         body > footer { flex-shrink: 0; }
+
+        /*
+         * On phones this page is one locked screen, so the footer's usual
+         * breathing room reads as dead space under the photo rather than as
+         * rhythm. Tighten it here only — scrolling pages keep the roomy
+         * footer. Whatever we take off the footer, the hero gains.
+         * The bottom pad never drops below the home-indicator inset.
+         */
+        @media (max-width: 1023px) {
+          body {
+            --sf-footer-gap: 14px;
+            --sf-footer-pad-top: 12px;
+            --sf-footer-pad-bottom: max(18px, env(safe-area-inset-bottom, 0px));
+          }
+        }
       `}</style>
 
       <h1 className="sr-only">alicia p. ceramics</h1>

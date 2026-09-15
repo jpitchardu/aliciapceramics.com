@@ -14,9 +14,18 @@ export function StorefrontFooter({
   return (
     <footer
       style={{
-        margin: `${topGap}px ${pad}px 0`,
-        paddingTop: 26,
-        paddingBottom: 48,
+        /*
+         * Spacing goes through CSS variables so a page can retune it from its
+         * own scoped stylesheet — these are inline styles, which a plain
+         * stylesheet rule can't override. The props remain the default.
+         * The home page uses this to give the hero more of the phone screen.
+         */
+        marginTop: `var(--sf-footer-gap, ${topGap}px)`,
+        marginLeft: pad,
+        marginRight: pad,
+        marginBottom: 0,
+        paddingTop: "var(--sf-footer-pad-top, 26px)",
+        paddingBottom: "var(--sf-footer-pad-bottom, 48px)",
         borderTop: "1px solid var(--rule-soft)",
         display: "flex",
         justifyContent: "space-between",
