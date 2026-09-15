@@ -16,7 +16,7 @@ export function CeramicLabel({
       style={{
         fontFamily: "var(--serif)",
         fontSize: 11,
-        fontWeight: 400,
+        fontWeight: 700,
         letterSpacing: "0.22em",
         textTransform: "uppercase",
         color,

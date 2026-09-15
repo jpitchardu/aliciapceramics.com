@@ -5,7 +5,8 @@ import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "alicia p. ceramics",
-  description: "handmade ceramics by alicia p. — revelations of creation.",
+  description:
+    "handmade ceramics by alicia p. — made of earth, full of His spirit.",
 };
 
 export default function RootLayout({
@@ -23,7 +24,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Caveat:wght@400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Coming+Soon&family=Just+Me+Again+Down+Here&display=swap"
           rel="stylesheet"
         />
       </head>

@@ -43,8 +43,7 @@ export default async function ShopPage({
         <p
           style={{
             fontSize: 22,
-            fontStyle: "italic",
-            fontWeight: 300,
+            fontWeight: 400,
             color: "var(--ink-soft)",
           }}
         >
@@ -54,8 +53,7 @@ export default async function ShopPage({
           style={{
             marginTop: 12,
             fontSize: 15,
-            fontStyle: "italic",
-            fontWeight: 300,
+            fontWeight: 400,
             color: "var(--ink-faint)",
           }}
         >
@@ -125,8 +123,7 @@ export default async function ShopPage({
                     style={{
                       fontFamily: "var(--serif)",
                       fontSize: 12,
-                      fontStyle: "italic",
-                      fontWeight: 300,
+                      fontWeight: 400,
                       color:
                         p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
                       overflow: "hidden",
@@ -140,7 +137,7 @@ export default async function ShopPage({
                     style={{
                       fontFamily: "var(--serif)",
                       fontSize: 12,
-                      fontWeight: 300,
+                      fontWeight: 400,
                       color:
                         p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
                       textDecoration:
@@ -174,7 +171,7 @@ export default async function ShopPage({
             style={{
               fontFamily: "var(--serif)",
               fontSize: 32,
-              fontWeight: 300,
+              fontWeight: 700,
               letterSpacing: "0.6em",
               textTransform: "uppercase",
               color: "var(--ink)",
@@ -187,8 +184,7 @@ export default async function ShopPage({
               marginTop: 22,
               fontFamily: "var(--serif)",
               fontSize: 22,
-              fontStyle: "italic",
-              fontWeight: 300,
+              fontWeight: 400,
               color: "var(--ink-soft)",
               lineHeight: 1.4,
               margin: "22px auto 0",
@@ -196,7 +192,7 @@ export default async function ShopPage({
               letterSpacing: "-0.005em",
             }}
           >
-            {DROP.description} — {filtered.length} new pieces, {DROP.subtitle}
+            {DROP.description} — {filtered.length} new pieces.
           </p>
         </div>
 
@@ -253,8 +249,7 @@ export default async function ShopPage({
                       style={{
                         fontFamily: "var(--serif)",
                         fontSize: 16,
-                        fontStyle: "italic",
-                        fontWeight: 300,
+                        fontWeight: 400,
                         color:
                           p.state === "gone"
                             ? "var(--ink-faint)"
@@ -282,7 +277,7 @@ export default async function ShopPage({
                     style={{
                       fontFamily: "var(--serif)",
                       fontSize: 15,
-                      fontWeight: 300,
+                      fontWeight: 400,
                       color:
                         p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
                       textDecoration:

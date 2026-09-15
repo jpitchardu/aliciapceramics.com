@@ -23,8 +23,7 @@ export default function NotFound() {
         style={{
           marginTop: 48,
           fontSize: 22,
-          fontStyle: "italic",
-          fontWeight: 300,
+          fontWeight: 400,
           color: "var(--ink-soft)",
         }}
       >

@@ -33,9 +33,8 @@ export function StorefrontFooter({
             marginTop: 10,
             fontFamily: "var(--serif)",
             fontSize: 14,
-            fontStyle: "italic",
             color: "var(--ink-soft)",
-            fontWeight: 300,
+            fontWeight: 400,
           }}
         >
           new pieces show up first on instagram —{" "}
@@ -53,7 +52,9 @@ export function StorefrontFooter({
           </a>
         </div>
       </div>
-      <Sig size={26} color="var(--ink-soft)">
+      {/* 36, not 26: Just Me Again Down Here draws much smaller than Caveat
+          did at the same point size. Matches the care page's sign-off. */}
+      <Sig size={36} color="var(--ink-soft)">
         AP
       </Sig>
     </footer>
