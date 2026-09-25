@@ -1,13 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { isShopItem, type ShopFilter } from "@/lib/square";
 
-const ONLINE = "CH_ONLINE";
-const POS = "CH_POS";
+const MARKET_ONLY = "CAT_MARKET_ONLY";
 const EVENTS = "CAT_EVENTS";
 
 const filter: ShopFilter = {
-  onlineChannelId: ONLINE,
-  eventCategoryIds: new Set([EVENTS]),
+  excludedCategoryIds: new Set([MARKET_ONLY, EVENTS]),
 };
 
 function makeItem(itemData: Record<string, unknown> = {}, extra = {}) {
@@ -18,7 +16,6 @@ function makeItem(itemData: Record<string, unknown> = {}, extra = {}) {
     itemData: {
       name: "cup",
       productType: "REGULAR",
-      channels: [POS, ONLINE],
       categories: [{ id: "CAT_MUGS" }],
       ...itemData,
     },
@@ -26,16 +23,19 @@ function makeItem(itemData: Record<string, unknown> = {}, extra = {}) {
 }
 
 describe("isShopItem", () => {
-  it("keeps a regular item on the online channel", () => {
+  it("keeps a regular item", () => {
     expect(isShopItem(makeItem(), filter)).toBe(true);
   });
 
-  it("drops a market-only item (online channel unticked)", () => {
-    expect(isShopItem(makeItem({ channels: [POS] }), filter)).toBe(false);
+  it("drops an item in the market only category", () => {
+    const item = makeItem({
+      categories: [{ id: "CAT_MUGS" }, { id: MARKET_ONLY }],
+    });
+    expect(isShopItem(item, filter)).toBe(false);
   });
 
-  it("drops an item in the events category even when online", () => {
-    const item = makeItem({ categories: [{ id: "CAT_MUGS" }, { id: EVENTS }] });
+  it("drops an item in the events category", () => {
+    const item = makeItem({ categories: [{ id: EVENTS }] });
     expect(isShopItem(item, filter)).toBe(false);
   });
 
@@ -49,16 +49,13 @@ describe("isShopItem", () => {
     expect(isShopItem(makeItem({ productType: undefined }), filter)).toBe(true);
   });
 
+  it("keeps an item with no categories", () => {
+    expect(isShopItem(makeItem({ categories: undefined }), filter)).toBe(true);
+  });
+
   it("drops archived and deleted items", () => {
     expect(isShopItem(makeItem({ isArchived: true }), filter)).toBe(false);
     expect(isShopItem(makeItem({}, { isDeleted: true }), filter)).toBe(false);
-  });
-
-  it("skips the channel check when no online channel is configured", () => {
-    const noChannel: ShopFilter = { eventCategoryIds: new Set([EVENTS]) };
-    expect(isShopItem(makeItem({ channels: [POS] }), noChannel)).toBe(true);
-    const event = makeItem({ categories: [{ id: EVENTS }] });
-    expect(isShopItem(event, noChannel)).toBe(false);
   });
 
   it("drops non-item objects", () => {

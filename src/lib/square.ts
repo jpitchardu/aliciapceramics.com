@@ -1,6 +1,6 @@
 import { SquareClient, SquareEnvironment, CatalogObject } from "square";
 import { Piece, PieceState } from "@/types/piece";
-import { EVENTS_CATEGORY_NAME } from "@/lib/config";
+import { EVENTS_CATEGORY_NAME, MARKET_ONLY_CATEGORY_NAME } from "@/lib/config";
 
 function createSquareClient(): SquareClient {
   const token = process.env.SQUARE_ACCESS_TOKEN;
@@ -76,16 +76,15 @@ async function fetchInventoryCounts(
 }
 
 export type ShopFilter = {
-  // Square sales channel that means "sold online". Unset → no channel filter.
-  onlineChannelId?: string;
-  // IDs of categories whose items are events, never shop pieces.
-  eventCategoryIds: Set<string>;
+  // IDs of the categories that keep an item out of the shop (market only,
+  // events). See MARKET_ONLY_CATEGORY_NAME / EVENTS_CATEGORY_NAME.
+  excludedCategoryIds: Set<string>;
 };
 
 /*
- * Whether a catalog item belongs in the shop. Market-only pieces are the ones
- * Allie unticks the online sales channel for in the Square Dashboard; events
- * are excluded by type and category so a forgotten checkbox can't list them.
+ * Whether a catalog item belongs in the shop. Everything regular is for sale
+ * unless it's in an excluded category; events are also excluded by product
+ * type, so an EVENT item made in the Dashboard can't slip into the shop.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isShopItem(item: any, filter: ShopFilter): boolean {
@@ -99,33 +98,29 @@ export function isShopItem(item: any, filter: ShopFilter): boolean {
   const categoryIds = ((data.categories ?? []) as { id: string }[]).map(
     (c) => c.id,
   );
-  if (categoryIds.some((id) => filter.eventCategoryIds.has(id))) return false;
-
-  if (filter.onlineChannelId) {
-    const channels = (data.channels ?? []) as string[];
-    if (!channels.includes(filter.onlineChannelId)) return false;
-  }
-
-  return true;
+  return !categoryIds.some((id) => filter.excludedCategoryIds.has(id));
 }
 
-function buildShopFilter(categories: CatalogObject[]): ShopFilter {
-  const eventCategoryIds = new Set(
-    categories
+const EXCLUDED_CATEGORY_NAMES = new Set([
+  MARKET_ONLY_CATEGORY_NAME,
+  EVENTS_CATEGORY_NAME,
+]);
+
+function buildShopFilter(objects: CatalogObject[]): ShopFilter {
+  const excludedCategoryIds = new Set(
+    objects
       .filter(
         (o) =>
           o.type === "CATEGORY" &&
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (o as any).categoryData?.name?.trim().toLowerCase() ===
-            EVENTS_CATEGORY_NAME,
+          EXCLUDED_CATEGORY_NAMES.has(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ((o as any).categoryData?.name ?? "").trim().toLowerCase(),
+          ),
       )
       .map((o) => o.id!)
       .filter(Boolean),
   );
-  return {
-    onlineChannelId: process.env.SQUARE_ONLINE_CHANNEL_ID || undefined,
-    eventCategoryIds,
-  };
+  return { excludedCategoryIds };
 }
 
 export async function fetchAllPieces(): Promise<Piece[]> {
@@ -206,7 +201,9 @@ export async function fetchCatalog(): Promise<{
         id: o.id as string,
         name: o.categoryData?.name as string,
       }))
-      .filter((c) => c.id && c.name && !shopFilter.eventCategoryIds.has(c.id));
+      .filter(
+        (c) => c.id && c.name && !shopFilter.excludedCategoryIds.has(c.id),
+      );
 
     console.log(
       "[square:catalog] pieces:",
@@ -235,7 +232,7 @@ export async function fetchPieceById(id: string): Promise<Piece | null> {
       });
 
     if (!item) return null;
-    // related objects carry the item's categories, enough to spot an event
+    // related objects carry the item's categories, enough to spot an exclusion
     if (!isShopItem(item, buildShopFilter(relatedObjects))) return null;
 
     const images = new Map<string, string>();
