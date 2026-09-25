@@ -4,7 +4,10 @@ export const MEDIA_BASE_URL =
 
 export const BYPASS_COOKIE = "gate_bypass";
 
-export const SHOP_CLOSED = false;
+// Closes the shop while stock/inventory is reworked: "/" shows the
+// "exciting things coming" page and shop/cart routes redirect to it.
+// The ?bypass=<GATE_BYPASS_KEY> cookie still gets through for previewing.
+export const SHOP_CLOSED = true;
 
 export const SITE = {
   name: "aliciapceramics",

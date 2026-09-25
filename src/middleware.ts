@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { DROP, BYPASS_COOKIE } from "@/lib/config";
+import { DROP, BYPASS_COOKIE, SHOP_CLOSED } from "@/lib/config";
 
 const OPEN_AT = new Date(DROP.opensAt).getTime();
 const BYPASS_KEY = process.env.GATE_BYPASS_KEY;
@@ -31,9 +31,9 @@ export function middleware(request: NextRequest) {
   }
 
   // shop is open — no gate
-  if (Date.now() >= OPEN_AT) return NextResponse.next();
+  if (!SHOP_CLOSED && Date.now() >= OPEN_AT) return NextResponse.next();
 
-  // always allow the countdown page itself
+  // always allow the gate page itself (countdown or closed notice)
   if (pathname === "/") return NextResponse.next();
 
   // redirect all gated routes to countdown
