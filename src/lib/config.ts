@@ -4,10 +4,10 @@ export const MEDIA_BASE_URL =
 
 export const BYPASS_COOKIE = "gate_bypass";
 
-// Closes the shop while stock/inventory is reworked: "/" shows the
-// "exciting things coming" page and shop/cart routes redirect to it.
+// Closes the shop: "/" shows the "exciting things coming" page, shop/cart
+// routes redirect to it, and the catalog and checkout APIs return 503.
 // The ?bypass=<GATE_BYPASS_KEY> cookie still gets through for previewing.
-export const SHOP_CLOSED = true;
+export const SHOP_CLOSED = false;
 
 // Square categories that decide what the shop lists. Categories, not sales
 // channels, because channels are read-only through the API and items are added
