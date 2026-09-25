@@ -9,12 +9,15 @@ export const BYPASS_COOKIE = "gate_bypass";
 // The ?bypass=<GATE_BYPASS_KEY> cookie still gets through for previewing.
 export const SHOP_CLOSED = true;
 
-// Square categories that keep an item out of the shop. Categories, not sales
+// Square categories that decide what the shop lists. Categories, not sales
 // channels, because channels are read-only through the API and items are added
 // both in the Square Dashboard and through the API. Matched by name,
 // case-insensitively.
-// - market only: pieces in stock for markets but not sold online
-// - events: ticketed events (Scheduled / Collab), listed on their own page
+// - online shop: listed in the shop. An item must be in it to show at all, so
+//   anything untagged (bookkeeping entries, half-set-up items) stays hidden.
+// - market only: in stock for markets, not sold online. Wins over online shop.
+// - events: ticketed events (Scheduled / Collab), listed on their own page.
+export const ONLINE_SHOP_CATEGORY_NAME = "online shop";
 export const MARKET_ONLY_CATEGORY_NAME = "market only";
 export const EVENTS_CATEGORY_NAME = "events";
 

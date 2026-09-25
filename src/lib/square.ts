@@ -1,6 +1,10 @@
 import { SquareClient, SquareEnvironment, CatalogObject } from "square";
 import { Piece, PieceState } from "@/types/piece";
-import { EVENTS_CATEGORY_NAME, MARKET_ONLY_CATEGORY_NAME } from "@/lib/config";
+import {
+  EVENTS_CATEGORY_NAME,
+  MARKET_ONLY_CATEGORY_NAME,
+  ONLINE_SHOP_CATEGORY_NAME,
+} from "@/lib/config";
 
 function createSquareClient(): SquareClient {
   const token = process.env.SQUARE_ACCESS_TOKEN;
@@ -76,15 +80,18 @@ async function fetchInventoryCounts(
 }
 
 export type ShopFilter = {
-  // IDs of the categories that keep an item out of the shop (market only,
-  // events). See MARKET_ONLY_CATEGORY_NAME / EVENTS_CATEGORY_NAME.
+  // IDs of the category an item must be in to be listed (online shop).
+  listedCategoryIds: Set<string>;
+  // IDs of the categories that keep an item out regardless (market only,
+  // events).
   excludedCategoryIds: Set<string>;
 };
 
 /*
- * Whether a catalog item belongs in the shop. Everything regular is for sale
- * unless it's in an excluded category; events are also excluded by product
- * type, so an EVENT item made in the Dashboard can't slip into the shop.
+ * Whether a catalog item belongs in the shop: a regular item in the online
+ * shop category and in no excluded one. Untagged items stay hidden. Events are
+ * also excluded by product type, so an EVENT item made in the Dashboard can't
+ * slip into the shop.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isShopItem(item: any, filter: ShopFilter): boolean {
@@ -98,21 +105,19 @@ export function isShopItem(item: any, filter: ShopFilter): boolean {
   const categoryIds = ((data.categories ?? []) as { id: string }[]).map(
     (c) => c.id,
   );
-  return !categoryIds.some((id) => filter.excludedCategoryIds.has(id));
+  if (categoryIds.some((id) => filter.excludedCategoryIds.has(id))) {
+    return false;
+  }
+  return categoryIds.some((id) => filter.listedCategoryIds.has(id));
 }
 
-const EXCLUDED_CATEGORY_NAMES = new Set([
-  MARKET_ONLY_CATEGORY_NAME,
-  EVENTS_CATEGORY_NAME,
-]);
-
-function buildShopFilter(objects: CatalogObject[]): ShopFilter {
-  const excludedCategoryIds = new Set(
+function categoryIdsNamed(objects: CatalogObject[], names: string[]) {
+  return new Set(
     objects
       .filter(
         (o) =>
           o.type === "CATEGORY" &&
-          EXCLUDED_CATEGORY_NAMES.has(
+          names.includes(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ((o as any).categoryData?.name ?? "").trim().toLowerCase(),
           ),
@@ -120,7 +125,16 @@ function buildShopFilter(objects: CatalogObject[]): ShopFilter {
       .map((o) => o.id!)
       .filter(Boolean),
   );
-  return { excludedCategoryIds };
+}
+
+function buildShopFilter(objects: CatalogObject[]): ShopFilter {
+  return {
+    listedCategoryIds: categoryIdsNamed(objects, [ONLINE_SHOP_CATEGORY_NAME]),
+    excludedCategoryIds: categoryIdsNamed(objects, [
+      MARKET_ONLY_CATEGORY_NAME,
+      EVENTS_CATEGORY_NAME,
+    ]),
+  };
 }
 
 export async function fetchAllPieces(): Promise<Piece[]> {
@@ -202,7 +216,11 @@ export async function fetchCatalog(): Promise<{
         name: o.categoryData?.name as string,
       }))
       .filter(
-        (c) => c.id && c.name && !shopFilter.excludedCategoryIds.has(c.id),
+        (c) =>
+          c.id &&
+          c.name &&
+          !shopFilter.excludedCategoryIds.has(c.id) &&
+          !shopFilter.listedCategoryIds.has(c.id),
       );
 
     console.log(
