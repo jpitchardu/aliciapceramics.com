@@ -1,5 +1,6 @@
 import { SquareClient, SquareEnvironment, CatalogObject } from "square";
 import { Piece, PieceState } from "@/types/piece";
+import { EVENTS_CATEGORY_NAME } from "@/lib/config";
 
 function createSquareClient(): SquareClient {
   const token = process.env.SQUARE_ACCESS_TOKEN;
@@ -74,6 +75,59 @@ async function fetchInventoryCounts(
   return quantities;
 }
 
+export type ShopFilter = {
+  // Square sales channel that means "sold online". Unset → no channel filter.
+  onlineChannelId?: string;
+  // IDs of categories whose items are events, never shop pieces.
+  eventCategoryIds: Set<string>;
+};
+
+/*
+ * Whether a catalog item belongs in the shop. Market-only pieces are the ones
+ * Allie unticks the online sales channel for in the Square Dashboard; events
+ * are excluded by type and category so a forgotten checkbox can't list them.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isShopItem(item: any, filter: ShopFilter): boolean {
+  if (!item || item.type !== "ITEM" || item.isDeleted) return false;
+  const data = item.itemData;
+  if (!data || data.isArchived) return false;
+
+  // EVENT, APPOINTMENTS_SERVICE, gift cards etc. are never pottery
+  if (data.productType && data.productType !== "REGULAR") return false;
+
+  const categoryIds = ((data.categories ?? []) as { id: string }[]).map(
+    (c) => c.id,
+  );
+  if (categoryIds.some((id) => filter.eventCategoryIds.has(id))) return false;
+
+  if (filter.onlineChannelId) {
+    const channels = (data.channels ?? []) as string[];
+    if (!channels.includes(filter.onlineChannelId)) return false;
+  }
+
+  return true;
+}
+
+function buildShopFilter(categories: CatalogObject[]): ShopFilter {
+  const eventCategoryIds = new Set(
+    categories
+      .filter(
+        (o) =>
+          o.type === "CATEGORY" &&
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (o as any).categoryData?.name?.trim().toLowerCase() ===
+            EVENTS_CATEGORY_NAME,
+      )
+      .map((o) => o.id!)
+      .filter(Boolean),
+  );
+  return {
+    onlineChannelId: process.env.SQUARE_ONLINE_CHANNEL_ID || undefined,
+    eventCategoryIds,
+  };
+}
+
 export async function fetchAllPieces(): Promise<Piece[]> {
   const { pieces } = await fetchCatalog();
   return pieces;
@@ -131,7 +185,8 @@ export async function fetchCatalog(): Promise<{
       }
     }
 
-    const items = objects.filter((o) => o.type === "ITEM");
+    const shopFilter = buildShopFilter(objects);
+    const items = objects.filter((o) => isShopItem(o, shopFilter));
 
     // Collect all variation IDs to fetch inventory counts in one request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -151,7 +206,7 @@ export async function fetchCatalog(): Promise<{
         id: o.id as string,
         name: o.categoryData?.name as string,
       }))
-      .filter((c) => c.id && c.name);
+      .filter((c) => c.id && c.name && !shopFilter.eventCategoryIds.has(c.id));
 
     console.log(
       "[square:catalog] pieces:",
@@ -180,6 +235,8 @@ export async function fetchPieceById(id: string): Promise<Piece | null> {
       });
 
     if (!item) return null;
+    // related objects carry the item's categories, enough to spot an event
+    if (!isShopItem(item, buildShopFilter(relatedObjects))) return null;
 
     const images = new Map<string, string>();
     for (const obj of relatedObjects) {

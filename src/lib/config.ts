@@ -9,6 +9,11 @@ export const BYPASS_COOKIE = "gate_bypass";
 // The ?bypass=<GATE_BYPASS_KEY> cookie still gets through for previewing.
 export const SHOP_CLOSED = true;
 
+// Square category that marks ticketed events (Scheduled / Collab). Items in
+// it never appear in the shop, whatever their sales channels. Matched by
+// name, case-insensitively, so it can be created in the Square Dashboard.
+export const EVENTS_CATEGORY_NAME = "events";
+
 export const SITE = {
   name: "aliciapceramics",
   estYear: "2024",
