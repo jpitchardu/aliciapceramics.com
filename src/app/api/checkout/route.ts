@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { BYPASS_COOKIE, SHOP_CLOSED } from "@/lib/config";
+import { shopClosedResponse } from "@/lib/gate";
 import { squareClient, fetchPieceById } from "@/lib/square";
 import type { Currency } from "square";
 import { z } from "zod";
@@ -33,14 +32,11 @@ const CheckoutSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  // The middleware doesn't cover /api, so a stale cart could still check out
-  // while the shop is closed. Only the preview bypass cookie gets through.
-  const bypassKey = process.env.GATE_BYPASS_KEY;
-  const bypassed =
-    !!bypassKey && (await cookies()).get(BYPASS_COOKIE)?.value === "1";
-  if (SHOP_CLOSED && !bypassed) {
+  // a stale cart could otherwise still check out while the shop is closed
+  const closed = await shopClosedResponse();
+  if (closed) {
     await trackFailure("shop_closed");
-    return NextResponse.json({ error: "shop is closed" }, { status: 503 });
+    return closed;
   }
 
   const raw = await req.json();
