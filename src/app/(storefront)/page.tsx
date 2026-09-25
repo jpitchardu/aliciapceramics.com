@@ -1,9 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { cookies } from "next/headers";
-import { DROP, BYPASS_COOKIE } from "@/lib/config";
+import { DROP, BYPASS_COOKIE, SHOP_CLOSED } from "@/lib/config";
 import { isGateOpen } from "@/lib/countdown";
 import { Countdown } from "@/ui/Countdown";
+import { ShopClosed } from "@/ui/ShopClosed";
 
 /*
  * Two crops of the same studio photograph, cut so the pots fill the frame and
@@ -18,6 +19,10 @@ const HERO_MOBILE = "/assets/hero-mobile.jpg"; // 1800 × 2100
 export default async function HomePage() {
   const bypassed = (await cookies()).get(BYPASS_COOKIE)?.value === "1";
   const isOpen = isGateOpen(DROP.opensAt);
+
+  if (SHOP_CLOSED && !bypassed) {
+    return <ShopClosed />;
+  }
 
   if (!isOpen && !bypassed) {
     return (

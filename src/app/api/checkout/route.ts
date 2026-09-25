@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { shopClosedResponse } from "@/lib/gate";
 import { squareClient, fetchPieceById } from "@/lib/square";
 import type { Currency } from "square";
 import { z } from "zod";
@@ -31,6 +32,13 @@ const CheckoutSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  // a stale cart could otherwise still check out while the shop is closed
+  const closed = await shopClosedResponse();
+  if (closed) {
+    await trackFailure("shop_closed");
+    return closed;
+  }
+
   const raw = await req.json();
   const parsed = CheckoutSchema.safeParse(raw);
   if (!parsed.success) {
