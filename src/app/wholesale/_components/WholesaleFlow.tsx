@@ -56,6 +56,7 @@ type State = {
   inspiration: string;
   notes: string;
   consent: boolean;
+  submissionId?: string;
 };
 
 const EMPTY: State = {
@@ -97,6 +98,14 @@ export function WholesaleFlow() {
       // not worth surfacing
     }
   }, [s]);
+
+  // one id per order, made on reaching read back, so a retried send can't
+  // create a second order in square
+  useEffect(() => {
+    if (s.step === "review" && !s.submissionId) {
+      setS((prev) => ({ ...prev, submissionId: crypto.randomUUID() }));
+    }
+  }, [s.step, s.submissionId]);
 
   const update = (patch: Partial<State>) =>
     setS((prev) => ({ ...prev, ...patch }));
@@ -1013,6 +1022,7 @@ function ReviewStep({
           inspiration: state.inspiration,
           notes: state.notes,
           consent: state.consent,
+          submissionId: state.submissionId,
         }),
       });
       if (res.ok) return onSent();

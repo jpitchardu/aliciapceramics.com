@@ -153,6 +153,8 @@ export type Contact = z.infer<typeof contactSchema>;
 
 export const bulkOrderSchema = z
   .object({
+    /* generated once per order on the client — keeps retries idempotent */
+    submissionId: z.uuid(),
     code: z.string().trim().min(1).max(40),
     contact: contactSchema,
     lines: z.array(orderLineSchema).min(1).max(50),
