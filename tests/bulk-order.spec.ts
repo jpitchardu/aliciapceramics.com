@@ -1,47 +1,88 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
-test.describe("Bulk Order Form", () => {
-  test("should validate and accept a valid bulk code", async ({ page }) => {
+/*
+ * The /wholesale bulk-order flow. Runs against the demo code (BLOOM-24),
+ * which is available whenever WHOLESALE_CODES is unset outside production,
+ * and the order API's dry run.
+ */
+
+async function unlock(page: Page) {
+  await page.goto("/wholesale");
+  await page.getByLabel("your code").fill("bloom-24");
+  await page.getByRole("button", { name: /continue/i }).click();
+  await expect(
+    page.getByRole("heading", { name: /who am i talking to/i }),
+  ).toBeVisible();
+}
+
+async function addLine(page: Page, piece: string, qty: number, size?: string) {
+  await page.getByRole("button", { name: new RegExp(`^${piece}`) }).click();
+  if (size) await page.getByRole("radio", { name: size }).click();
+  await page.getByLabel("quantity").fill(String(qty));
+  await page.getByRole("button", { name: /add to line sheet/i }).click();
+}
+
+test.describe("bulk order", () => {
+  test("the old /bulk link lands on the new flow", async ({ page }) => {
     await page.goto("/bulk");
-
+    await expect(page).toHaveURL(/\/wholesale$/);
     await expect(
-      page.getByRole("heading", { name: /BULK ORDER/i }),
+      page.getByRole("heading", { name: /do you have a code/i }),
     ).toBeVisible();
-    await expect(
-      page.getByText(/Enter your bulk commission code/i),
-    ).toBeVisible();
-
-    await page.getByPlaceholder(/Enter your code/i).fill("TEST2024");
-    await page.getByRole("button", { name: /CONTINUE/i }).click();
-
-    await expect(page.getByText(/Test Bulk Order/i)).toBeVisible({
-      timeout: 10000,
-    });
-    await expect(page.getByText(/TEST2024/i)).toBeVisible();
-    await expect(page.getByText(/Minimum 10 pieces required/i)).toBeVisible();
   });
 
-  test("should show error for invalid bulk code", async ({ page }) => {
-    await page.goto("/bulk");
-
-    await page.getByPlaceholder(/Enter your code/i).fill("INVALID123");
-    await page.getByRole("button", { name: /CONTINUE/i }).click();
-
-    await expect(page.getByText(/Invalid code/i)).toBeVisible();
+  test("an unknown code is turned away gently", async ({ page }) => {
+    await page.goto("/wholesale");
+    await page.getByLabel("your code").fill("NOT-A-CODE");
+    await page.getByRole("button", { name: /continue/i }).click();
+    await expect(page.getByText(/don't recognise that code/i)).toBeVisible();
   });
 
-  test("should display bulk order header with code details", async ({
-    page,
-  }) => {
-    await page.goto("/bulk");
+  test("about you asks for a name and a real email", async ({ page }) => {
+    await unlock(page);
+    // the shop's name comes from the code
+    await expect(page.getByLabel("shop or business")).toHaveValue(
+      "still life coffee",
+    );
+    await page.getByRole("button", { name: /to the order/i }).click();
+    await expect(page.getByText(/your name, please/i)).toBeVisible();
+    await expect(
+      page.getByText(/that email doesn't look right/i),
+    ).toBeVisible();
+  });
 
-    await page.getByPlaceholder(/Enter your code/i).fill("TEST2024");
-    await page.getByRole("button", { name: /CONTINUE/i }).click();
+  test("walks from code to sent", async ({ page }) => {
+    await unlock(page);
+    await page.getByLabel("your name").fill("june park");
+    await page.getByLabel("email").fill("june@stilllife.coffee");
+    await page.getByRole("button", { name: /to the order/i }).click();
+
+    const next = page.getByRole("button", { name: /to the vision/i });
+    await addLine(page, "mug, with handle", 6, "10 oz");
+    await expect(page.getByText(/4 more to reach ten/i).first()).toBeAttached();
+    await expect(next).toBeDisabled();
+
+    await addLine(page, "tumbler", 4, "12 oz");
+    await addLine(page, "trinket dish", 3);
+    await expect(next).toBeEnabled();
+    await next.click();
+
+    await page
+      .getByLabel("anything else i should know")
+      .fill("for the counter");
+    await expect(page.getByText(/by dec 15/i)).toBeVisible();
+    await page.getByRole("button", { name: /read it back/i }).click();
+
+    const send = page.getByRole("button", { name: /send to alicia/i });
+    await expect(send).toBeDisabled();
+    await page.getByText(/everything looks right/i).click();
+    await send.click();
 
     await expect(
-      page.getByRole("heading", { name: /BULK ORDER: Test Bulk Order/i }),
+      page.getByRole("heading", { name: /thank you — i got your order/i }),
     ).toBeVisible();
-    await expect(page.getByText(/Code: TEST2024/i)).toBeVisible();
-    await expect(page.getByText(/Minimum 10 pieces required/i)).toBeVisible();
+    await expect(
+      page.getByText(/thirteen pieces, estimated for dec 15/i),
+    ).toBeVisible();
   });
 });
