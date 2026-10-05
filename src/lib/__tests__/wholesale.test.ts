@@ -43,7 +43,7 @@ describe("wholesale", () => {
     expect(ok({ type: "cup", size: "espresso" })).toBe(false);
     expect(ok({ type: "cup", size: "8" })).toBe(true);
     expect(ok({ type: "mug-with-handle", size: "8" })).toBe(true);
-    expect(ok({ type: "sippy-mug", size: "10" })).toBe(true);
+    expect(ok({ type: "tumbler", size: "10" })).toBe(true);
     expect(ok({ type: "matcha-bowl", size: "8" })).toBe(false);
     expect(ok({ type: "matcha-bowl" })).toBe(true);
   });

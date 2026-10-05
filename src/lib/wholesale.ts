@@ -28,7 +28,7 @@ export const sizeLabel = (s: Size) => `${s} oz`;
 export const PIECE_TYPES = [
   "cup",
   "mug-with-handle",
-  "sippy-mug",
+  "tumbler",
   "matcha-bowl",
   "trinket-dish",
   "other",
@@ -56,8 +56,8 @@ export const CATALOG: readonly CatalogEntry[] = [
     sizes: SIZES,
   },
   {
-    type: "sippy-mug",
-    label: "sippy mug",
+    type: "tumbler",
+    label: "tumbler",
     note: "a cup with a half lid and a drinking hole, so it's easy to take with you.",
     sizes: SIZES,
   },
