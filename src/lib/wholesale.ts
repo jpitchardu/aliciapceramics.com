@@ -46,7 +46,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   {
     type: "cup",
     label: "cup",
-    note: "a handleless mug, easy to hold and stack.",
+    note: "a handleless cup, easy to hold.",
     sizes: SIZES,
   },
   {
