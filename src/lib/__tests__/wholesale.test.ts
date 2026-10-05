@@ -40,9 +40,10 @@ describe("wholesale", () => {
     const ok = (l: object) =>
       orderLineSchema.safeParse({ ...base, ...l }).success;
     expect(ok({ type: "cup" })).toBe(false);
-    expect(ok({ type: "cup", size: "espresso" })).toBe(true);
-    expect(ok({ type: "mug-with-handle", size: "8" })).toBe(false);
-    expect(ok({ type: "sippy-mug", size: "12" })).toBe(true);
+    expect(ok({ type: "cup", size: "espresso" })).toBe(false);
+    expect(ok({ type: "cup", size: "8" })).toBe(true);
+    expect(ok({ type: "mug-with-handle", size: "8" })).toBe(true);
+    expect(ok({ type: "sippy-mug", size: "10" })).toBe(true);
     expect(ok({ type: "matcha-bowl", size: "8" })).toBe(false);
     expect(ok({ type: "matcha-bowl" })).toBe(true);
   });

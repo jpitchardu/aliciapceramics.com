@@ -786,15 +786,7 @@ function Drawer({
       className="ws-drawer"
       style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end" }}
     >
-      {c.sizes.length === 1 && (
-        <div>
-          <SmallLabel>size</SmallLabel>
-          <div style={{ marginTop: 10, padding: "8px 0", fontSize: 15 }}>
-            {sizeLabel(c.sizes[0])}
-          </div>
-        </div>
-      )}
-      {c.sizes.length > 1 && (
+      {c.sizes.length > 0 && (
         <div role="radiogroup" aria-label="size">
           <SmallLabel>size</SmallLabel>
           <div

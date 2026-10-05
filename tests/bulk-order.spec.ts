@@ -62,7 +62,7 @@ test.describe("bulk order", () => {
     await expect(page.getByText(/4 more to reach ten/i).first()).toBeAttached();
     await expect(next).toBeDisabled();
 
-    await addLine(page, "cup", 4, "cortado");
+    await addLine(page, "cup", 4, "8 oz");
     await addLine(page, "jewelry dish", 3);
     await expect(next).toBeEnabled();
     await next.click();

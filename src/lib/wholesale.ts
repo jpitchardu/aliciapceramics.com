@@ -17,14 +17,13 @@ export const MIN_PIECES = 10;
 export const MAX_QTY_PER_LINE = 200;
 
 /*
- * Alicia's real line, matched to her Square categories. Espresso and cortado
- * are sizes of a cup, not their own pieces. A piece with one size has it
- * fixed; a piece with none (bowls, dishes, something else) is one size.
+ * Alicia's real line, matched to her Square categories. For wholesale every
+ * drinking piece comes in 8, 10 or 12 oz; bowls, dishes and something else
+ * are one size. (Espresso and cortado cups are retail only.)
  */
-export const SIZES = ["espresso", "cortado", "8", "10", "12"] as const;
+export const SIZES = ["8", "10", "12"] as const;
 export type Size = (typeof SIZES)[number];
-export const sizeLabel = (s: Size) =>
-  s === "espresso" || s === "cortado" ? s : `${s} oz`;
+export const sizeLabel = (s: Size) => `${s} oz`;
 
 export const PIECE_TYPES = [
   "cup",
@@ -41,30 +40,26 @@ export type CatalogEntry = {
   label: string;
   note: string;
   sizes: readonly Size[];
-  /* the size a new line starts on */
-  defaultSize?: Size;
 };
 
 export const CATALOG: readonly CatalogEntry[] = [
   {
     type: "cup",
     label: "cup",
-    note: "no handle — from an espresso cup up to a 12 oz.",
-    sizes: ["espresso", "cortado", "8", "10", "12"],
-    defaultSize: "10",
+    note: "a handleless mug, easy to hold and stack.",
+    sizes: SIZES,
   },
   {
     type: "mug-with-handle",
     label: "mug, with handle",
     note: "the everyday mug, with a pulled handle.",
-    sizes: ["10", "12"],
-    defaultSize: "12",
+    sizes: SIZES,
   },
   {
     type: "sippy-mug",
     label: "sippy mug",
-    note: "the 12 oz sippy mug.",
-    sizes: ["12"],
+    note: "a cup with a half lid and a drinking hole, so it's easy to take with you.",
+    sizes: SIZES,
   },
   {
     type: "matcha-bowl",
@@ -75,7 +70,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   {
     type: "trinket-dish",
     label: "jewelry dish",
-    note: "a small dish for rings, earrings, and other little things.",
+    note: "a small dish for rings, keys, and other little things.",
     sizes: [],
   },
   {
@@ -90,8 +85,9 @@ export const CAT = Object.fromEntries(
   CATALOG.map((c) => [c.type, c]),
 ) as Record<PieceType, CatalogEntry>;
 
+/* a new line starts on the middle size */
 export const defaultSize = (c: CatalogEntry): Size | undefined =>
-  c.defaultSize ?? c.sizes[0];
+  c.sizes.includes("10") ? "10" : c.sizes[0];
 
 /* the handmade timeline, the brand's "important details" reworded in voice */
 export const TERMS: readonly (readonly [string, string])[] = [
