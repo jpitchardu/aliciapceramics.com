@@ -16,7 +16,7 @@ const contact = {
 const order = (quantity: number) => ({
   code: "BLOOM-24",
   contact,
-  lines: [{ type: "tumbler", size: "12", quantity, description: "" }],
+  lines: [{ type: "cup", size: "12", quantity, description: "" }],
   inspiration: "",
   notes: "",
   consent: true,
@@ -35,19 +35,16 @@ describe("wholesale", () => {
     expect(shortDate("2027-01-01")).toBe("jan 1");
   });
 
-  it("needs a size for sized pieces and none for the rest", () => {
+  it("only takes sizes a piece actually comes in", () => {
     const base = { quantity: 2, description: "" };
-    expect(
-      orderLineSchema.safeParse({ ...base, type: "tumbler" }).success,
-    ).toBe(false);
-    expect(
-      orderLineSchema.safeParse({ ...base, type: "tumbler", size: "8" })
-        .success,
-    ).toBe(true);
-    expect(
-      orderLineSchema.safeParse({ ...base, type: "matcha-bowl", size: "8" })
-        .success,
-    ).toBe(false);
+    const ok = (l: object) =>
+      orderLineSchema.safeParse({ ...base, ...l }).success;
+    expect(ok({ type: "cup" })).toBe(false);
+    expect(ok({ type: "cup", size: "espresso" })).toBe(true);
+    expect(ok({ type: "mug-with-handle", size: "8" })).toBe(false);
+    expect(ok({ type: "sippy-mug", size: "12" })).toBe(true);
+    expect(ok({ type: "matcha-bowl", size: "8" })).toBe(false);
+    expect(ok({ type: "matcha-bowl" })).toBe(true);
   });
 
   it("holds the ten-piece minimum", () => {

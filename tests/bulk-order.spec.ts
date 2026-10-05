@@ -58,12 +58,12 @@ test.describe("bulk order", () => {
     await page.getByRole("button", { name: /to the order/i }).click();
 
     const next = page.getByRole("button", { name: /to the vision/i });
-    await addLine(page, "mug, with handle", 6, "10 oz");
+    await addLine(page, "mug, with handle", 6, "12 oz");
     await expect(page.getByText(/4 more to reach ten/i).first()).toBeAttached();
     await expect(next).toBeDisabled();
 
-    await addLine(page, "tumbler", 4, "12 oz");
-    await addLine(page, "trinket dish", 3);
+    await addLine(page, "cup", 4, "cortado");
+    await addLine(page, "jewelry dish", 3);
     await expect(next).toBeEnabled();
     await next.click();
 

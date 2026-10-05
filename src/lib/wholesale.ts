@@ -16,17 +16,22 @@ import { z } from "zod";
 export const MIN_PIECES = 10;
 export const MAX_QTY_PER_LINE = 200;
 
-export const SIZES = ["8", "10", "12"] as const;
+/*
+ * Alicia's real line, matched to her Square categories. Espresso and cortado
+ * are sizes of a cup, not their own pieces. A piece with one size has it
+ * fixed; a piece with none (bowls, dishes, something else) is one size.
+ */
+export const SIZES = ["espresso", "cortado", "8", "10", "12"] as const;
 export type Size = (typeof SIZES)[number];
-export const sizeLabel = (s: Size) => `${s} oz`;
+export const sizeLabel = (s: Size) =>
+  s === "espresso" || s === "cortado" ? s : `${s} oz`;
 
 export const PIECE_TYPES = [
+  "cup",
   "mug-with-handle",
-  "mug-without-handle",
-  "tumbler",
+  "sippy-mug",
   "matcha-bowl",
   "trinket-dish",
-  "dinnerware",
   "other",
 ] as const;
 export type PieceType = (typeof PIECE_TYPES)[number];
@@ -34,58 +39,59 @@ export type PieceType = (typeof PIECE_TYPES)[number];
 export type CatalogEntry = {
   type: PieceType;
   label: string;
-  sized: boolean;
   note: string;
+  sizes: readonly Size[];
+  /* the size a new line starts on */
+  defaultSize?: Size;
 };
 
 export const CATALOG: readonly CatalogEntry[] = [
   {
+    type: "cup",
+    label: "cup",
+    note: "no handle — from an espresso cup up to a 12 oz.",
+    sizes: ["espresso", "cortado", "8", "10", "12"],
+    defaultSize: "10",
+  },
+  {
     type: "mug-with-handle",
     label: "mug, with handle",
-    sized: true,
     note: "the everyday mug, with a pulled handle.",
+    sizes: ["10", "12"],
+    defaultSize: "12",
   },
   {
-    type: "mug-without-handle",
-    label: "mug, no handle",
-    sized: true,
-    note: "a handleless mug, easy to hold and stack.",
-  },
-  {
-    type: "tumbler",
-    label: "tumbler",
-    sized: true,
-    note: "straight-sided and easy to stack.",
+    type: "sippy-mug",
+    label: "sippy mug",
+    note: "the 12 oz sippy mug.",
+    sizes: ["12"],
   },
   {
     type: "matcha-bowl",
     label: "matcha bowl",
-    sized: false,
     note: "wide and shallow, with room to whisk.",
+    sizes: [],
   },
   {
     type: "trinket-dish",
-    label: "trinket dish",
-    sized: false,
-    note: "a small dish for rings, keys, and other little things.",
-  },
-  {
-    type: "dinnerware",
-    label: "dinnerware",
-    sized: false,
-    note: "plates, bowls, and serving pieces.",
+    label: "jewelry dish",
+    note: "a small dish for rings, earrings, and other little things.",
+    sizes: [],
   },
   {
     type: "other",
     label: "something else",
-    sized: false,
     note: "have something else in mind? tell me about it.",
+    sizes: [],
   },
 ];
 
 export const CAT = Object.fromEntries(
   CATALOG.map((c) => [c.type, c]),
 ) as Record<PieceType, CatalogEntry>;
+
+export const defaultSize = (c: CatalogEntry): Size | undefined =>
+  c.defaultSize ?? c.sizes[0];
 
 /* the handmade timeline, the brand's "important details" reworded in voice */
 export const TERMS: readonly (readonly [string, string])[] = [
@@ -124,9 +130,15 @@ export const orderLineSchema = z
     quantity: z.number().int().min(1).max(MAX_QTY_PER_LINE),
     description: z.string().trim().max(500),
   })
-  .refine((l) => CAT[l.type].sized === (l.size !== undefined), {
-    message: "size is required for sized pieces only",
-  });
+  .refine(
+    (l) => {
+      const sizes = CAT[l.type].sizes;
+      return sizes.length === 0
+        ? l.size === undefined
+        : l.size !== undefined && sizes.includes(l.size);
+    },
+    { message: "that size isn't available for this piece" },
+  );
 export type OrderLine = z.infer<typeof orderLineSchema>;
 
 export const contactSchema = z.object({

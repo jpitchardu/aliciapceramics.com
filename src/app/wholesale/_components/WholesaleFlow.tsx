@@ -10,7 +10,8 @@ import {
   CATALOG,
   MAX_QTY_PER_LINE,
   MIN_PIECES,
-  SIZES,
+  CAT,
+  defaultSize,
   TERMS,
   contactSchema,
   countPieces,
@@ -68,7 +69,7 @@ const EMPTY: State = {
 };
 
 // keeps a half-built order through a refresh; cleared once it's sent
-const STORAGE_KEY = "ws-bulk-order-v1";
+const STORAGE_KEY = "ws-bulk-order-v2";
 
 const newId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -540,8 +541,12 @@ function AboutStep({
 
 /* ── 3 · the order — choices on the left, the line sheet beside ─── */
 
-type Draft = { size: Size; quantity: number; description: string };
-const freshDraft = (): Draft => ({ size: "10", quantity: 1, description: "" });
+type Draft = { size?: Size; quantity: number; description: string };
+const freshDraft = (c?: CatalogEntry): Draft => ({
+  size: c && defaultSize(c),
+  quantity: 1,
+  description: "",
+});
 
 function OrderStep({
   lines,
@@ -567,13 +572,13 @@ function OrderStep({
 
   const choose = (type: CatalogEntry["type"]) => {
     setOpen(open === type ? null : type);
-    setDraft(freshDraft());
+    setDraft(freshDraft(CAT[type]));
   };
 
   const add = (c: CatalogEntry) => {
     onAdd({
       type: c.type,
-      size: c.sized ? draft.size : undefined,
+      size: c.sizes.length ? draft.size : undefined,
       quantity: draft.quantity,
       description: draft.description.trim(),
     });
@@ -781,11 +786,21 @@ function Drawer({
       className="ws-drawer"
       style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end" }}
     >
-      {c.sized && (
+      {c.sizes.length === 1 && (
+        <div>
+          <SmallLabel>size</SmallLabel>
+          <div style={{ marginTop: 10, padding: "8px 0", fontSize: 15 }}>
+            {sizeLabel(c.sizes[0])}
+          </div>
+        </div>
+      )}
+      {c.sizes.length > 1 && (
         <div role="radiogroup" aria-label="size">
           <SmallLabel>size</SmallLabel>
-          <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
-            {SIZES.map((s) => {
+          <div
+            style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}
+          >
+            {c.sizes.map((s) => {
               const on = draft.size === s;
               return (
                 <button
