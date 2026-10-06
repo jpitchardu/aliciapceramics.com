@@ -5,15 +5,14 @@ import { findBulkCode, isProduction } from "@/lib/wholesale-codes";
 import { squareClient } from "@/lib/square";
 import {
   createSquareBulkOrder,
-  isSquareOrderingOn,
+  hasSquareCredentials,
 } from "@/lib/wholesale-square";
 
 /*
- * Receives a bulk order. With WHOLESALE_SQUARE_ORDERS=on (and Square
- * credentials) it becomes a customer, an order and a draft invoice in Square
- * for alicia to accept or decline. Without it, production refuses the order
- * (so nobody is told it was received when it wasn't) and every other
- * environment runs a dry run so the flow can be walked end to end.
+ * Receives a bulk order and turns it into a customer, an order and a draft
+ * invoice in Square for alicia to accept or decline. Without Square
+ * credentials (local dev), production refuses the order so nobody is told it
+ * was received when it wasn't, and anywhere else runs a dry run.
  */
 export async function POST(req: Request) {
   const parsed = bulkOrderSchema.safeParse(await req.json().catch(() => null));
@@ -33,7 +32,7 @@ export async function POST(req: Request) {
       () => {},
     );
 
-  if (!isSquareOrderingOn()) {
+  if (!hasSquareCredentials()) {
     await track_("bulk_order_submitted", { mode: "dry_run" });
     if (isProduction()) {
       return NextResponse.json(

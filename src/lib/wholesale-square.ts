@@ -35,10 +35,9 @@ export const SQUARE_ITEM_NAMES: Record<PieceType, string | null> = {
 /* item name (lowercase) → variation name (lowercase) → variation id */
 export type WholesaleCatalog = Map<string, Map<string, string>>;
 
-export const isSquareOrderingOn = () =>
-  process.env.WHOLESALE_SQUARE_ORDERS === "on" &&
-  !!process.env.SQUARE_ACCESS_TOKEN &&
-  !!process.env.SQUARE_LOCATION_ID;
+/* orders go to square wherever the site has square credentials */
+export const hasSquareCredentials = () =>
+  !!process.env.SQUARE_ACCESS_TOKEN && !!process.env.SQUARE_LOCATION_ID;
 
 export async function fetchWholesaleCatalog(
   client: SquareClient,
