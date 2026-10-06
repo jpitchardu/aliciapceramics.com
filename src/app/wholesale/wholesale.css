@@ -8,6 +8,8 @@
 
 .ws-page {
   --ws-pad: 24px;
+  /* topaze darkened for text: 5.3:1 on paper, 4.6:1 on paper-2 (WCAG AA) */
+  --ws-error: #9c3f18;
   color: var(--ink);
   font-family: var(--serif);
   min-height: 100dvh;
@@ -325,4 +327,14 @@
 }
 .ws-ask:focus {
   outline: none;
+}
+
+/* the progress line eases forward, unless motion is turned down */
+.ws-meter-fill {
+  transition: width 0.3s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-meter-fill {
+    transition: none;
+  }
 }

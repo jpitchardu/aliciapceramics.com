@@ -5,6 +5,7 @@ import {
   CSSProperties,
   ReactNode,
   useId,
+  useRef,
   useState,
 } from "react";
 import { CeramicLabel } from "@/ui/CeramicLabel";
@@ -20,11 +21,12 @@ import {
 /* A line on the sheet carries a client-side id so it can be removed. */
 export type SheetLine = OrderLine & { id: string };
 
-/* small 9–10px labels — the design's quiet field captions */
+/* the quiet field captions — the design drew them at 9px; 11px (the site's
+ * label size) is the smallest that stays readable in spaced capitals */
 export const SmallLabel = ({
   children,
   color = "var(--ink-faint)",
-  size = 9,
+  size = 11,
   style,
 }: {
   children: ReactNode;
@@ -86,6 +88,10 @@ export function Action({
         border: "none",
         borderBottom: `1px solid ${color}`,
         padding: "0 0 4px",
+        // a 24px-tall target (WCAG 2.5.8) without moving the underline
+        minHeight: 24,
+        display: "inline-flex",
+        alignItems: "flex-end",
         cursor: "pointer",
         fontFamily: "var(--serif)",
         fontSize: size,
@@ -181,7 +187,7 @@ export function Field({
       {error && (
         <div
           id={`${id}-err`}
-          style={{ marginTop: 8, fontSize: 13, color: "var(--topaze)" }}
+          style={{ marginTop: 8, fontSize: 13, color: "var(--ws-error)" }}
         >
           {error}
         </div>
@@ -295,7 +301,6 @@ export function Answered({
           </span>
           <Action
             color="var(--ink-faint)"
-            size={9}
             style={{ paddingBottom: 2, flex: "0 0 auto" }}
             onClick={onChange}
             aria-label={`change ${label}`}
@@ -352,8 +357,8 @@ export function MinMeter({ count }: { count: number }) {
             height: 3,
             width: `${pct * 100}%`,
             background: "var(--ink)",
-            transition: "width .3s",
           }}
+          className="ws-meter-fill"
         />
       </div>
       <div style={{ marginTop: 10, fontSize: 15, color: "var(--ink-soft)" }}>
@@ -365,6 +370,11 @@ export function MinMeter({ count }: { count: number }) {
   );
 }
 
+/*
+ * Removing a line deletes the button that had focus, so hand focus to the
+ * next line's remove button (or the previous, or the sheet itself) rather
+ * than letting it drop back to the top of the page.
+ */
 const RemoveButton = ({
   line,
   onRemove,
@@ -374,12 +384,27 @@ const RemoveButton = ({
 }) => (
   <button
     type="button"
-    onClick={() => onRemove(line.id)}
+    data-remove
+    onClick={(e) => {
+      const sheet = e.currentTarget.closest<HTMLElement>("[data-sheet]");
+      const all = sheet
+        ? [...sheet.querySelectorAll<HTMLElement>("[data-remove]")]
+        : [];
+      const i = all.indexOf(e.currentTarget);
+      const next = all[i + 1] ?? all[i - 1] ?? sheet;
+      onRemove(line.id);
+      requestAnimationFrame(() => next?.focus());
+    }}
     aria-label={`remove ${lineLabel(line)}`}
     style={{
+      width: 32,
+      height: 32,
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
       background: "none",
       border: "none",
-      padding: "0 2px",
+      padding: 0,
       cursor: "pointer",
       fontFamily: "var(--serif)",
       fontSize: 15,
@@ -398,9 +423,9 @@ export function LineTable({
   lines: readonly SheetLine[];
   onRemove?: (id: string) => void;
 }) {
-  const cols = onRemove ? "1fr 72px 44px 20px" : "1fr 90px 64px";
+  const cols = onRemove ? "1fr 72px 44px 32px" : "1fr 90px 64px";
   return (
-    <div>
+    <div data-sheet tabIndex={-1} aria-label="your line sheet">
       <div
         style={{
           display: "grid",
@@ -477,9 +502,7 @@ export function LineTable({
           alignItems: "baseline",
         }}
       >
-        <SmallLabel color="var(--ink)" size={10}>
-          pieces in all
-        </SmallLabel>
+        <SmallLabel color="var(--ink)">pieces in all</SmallLabel>
         <div
           style={{
             fontSize: 24,
@@ -511,7 +534,7 @@ function CartLines({
     );
   }
   return (
-    <div>
+    <div data-sheet tabIndex={-1} aria-label="your line sheet">
       {lines.map((l, i) => (
         <div
           key={l.id}
@@ -560,10 +583,20 @@ export function OrderCart({
 }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
+  const toggle = useRef<HTMLButtonElement>(null);
   const count = countPieces(lines);
   return (
-    <div style={{ position: "relative", zIndex: 5 }}>
+    <div
+      style={{ position: "relative", zIndex: 5 }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && open) {
+          setOpen(false);
+          toggle.current?.focus();
+        }
+      }}
+    >
       <button
+        ref={toggle}
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
@@ -586,9 +619,7 @@ export function OrderCart({
         }}
       >
         <span style={{ display: "flex", alignItems: "baseline", gap: 13 }}>
-          <SmallLabel color="var(--ink)" size={10}>
-            your line sheet
-          </SmallLabel>
+          <SmallLabel color="var(--ink)">your line sheet</SmallLabel>
           <span style={{ fontSize: 16, whiteSpace: "nowrap" }}>
             {count} pieces
           </span>

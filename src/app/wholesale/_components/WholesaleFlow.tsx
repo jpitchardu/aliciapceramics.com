@@ -15,6 +15,7 @@ import {
   TERMS,
   contactSchema,
   countPieces,
+  lineLabel,
   numberWords,
   shortDate,
   sizeLabel,
@@ -47,6 +48,15 @@ const STEPS = ["unlock", "about you", "the order", "the vision", "read back"];
 const STEPS_SHORT = ["unlock", "you", "order", "vision", "read"];
 
 type Step = "unlock" | "about" | "order" | "vision" | "review" | "sent";
+
+const STEP_TITLES: Record<Step, string> = {
+  unlock: "your code",
+  about: "about you",
+  order: "the order",
+  vision: "the vision",
+  review: "read back",
+  sent: "sent",
+};
 
 type State = {
   step: Step;
@@ -107,19 +117,31 @@ export function WholesaleFlow() {
     }
   }, [s.step, s.submissionId]);
 
+  // each step gets its own tab title, so it's announced and findable
+  useEffect(() => {
+    document.title = `${STEP_TITLES[s.code ? s.step : "unlock"]} — bulk orders — alicia p. ceramics`;
+  }, [s.step, s.code]);
+
   const update = (patch: Partial<State>) =>
     setS((prev) => ({ ...prev, ...patch }));
 
   const go = (step: Step) => {
     update({ step });
     window.scrollTo({ top: 0 });
-    // let the new step render, then hand focus to its question
-    requestAnimationFrame(() =>
+  };
+
+  // once a new step has rendered, hand focus to its question so screen
+  // readers announce it (skipped on first load, where focus stays put)
+  const shownStep = useRef<Step | null>(null);
+  useEffect(() => {
+    const step = s.code ? s.step : "unlock";
+    if (shownStep.current !== null && shownStep.current !== step) {
       document
         .querySelector<HTMLElement>(".ws-ask")
-        ?.focus({ preventScroll: true }),
-    );
-  };
+        ?.focus({ preventScroll: true });
+    }
+    shownStep.current = step;
+  }, [s.step, s.code]);
 
   const code = s.code;
   if (s.step === "unlock" || !code) {
@@ -262,14 +284,15 @@ function StepNav({
   );
 }
 
-const ErrorNote = ({ children }: { children: ReactNode }) => (
+const ErrorNote = ({ children, id }: { children: ReactNode; id?: string }) => (
   <p
+    id={id}
     role="alert"
     style={{
       margin: "14px 0 0",
       fontSize: 14,
       lineHeight: 1.5,
-      color: "var(--topaze)",
+      color: "var(--ws-error)",
     }}
   >
     {children}
@@ -334,7 +357,7 @@ function GateStep({ onUnlocked }: { onUnlocked: (c: BulkCode) => void }) {
   return (
     <div className="ws-gate">
       <form className="ws-gate-copy" onSubmit={submit} noValidate>
-        <SmallLabel size={10}>
+        <SmallLabel>
           for shops &amp; stockists ·{" "}
           <span className="ws-desktop-only">step </span>1 of 5
         </SmallLabel>
@@ -374,6 +397,7 @@ function GateStep({ onUnlocked }: { onUnlocked: (c: BulkCode) => void }) {
             autoCapitalize="characters"
             spellCheck={false}
             aria-invalid={!!error}
+            aria-describedby={error ? "ws-code-err" : undefined}
             style={{
               width: "100%",
               background: "transparent",
@@ -394,7 +418,7 @@ function GateStep({ onUnlocked }: { onUnlocked: (c: BulkCode) => void }) {
           >
             <SmallLabel>your code</SmallLabel>
           </label>
-          {error && <ErrorNote>{error}</ErrorNote>}
+          {error && <ErrorNote id="ws-code-err">{error}</ErrorNote>}
         </div>
         <div className="ws-gate-actions">
           <FillButton type="submit" disabled={busy}>
@@ -437,7 +461,7 @@ function GateStep({ onUnlocked }: { onUnlocked: (c: BulkCode) => void }) {
             position: "absolute",
             left: 10,
             bottom: 9,
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: 700,
             letterSpacing: "0.18em",
             textTransform: "uppercase",
@@ -486,6 +510,11 @@ function AboutStep({
       next[k] ??= issue.message;
     }
     setErrors(next);
+    requestAnimationFrame(() =>
+      document
+        .querySelector<HTMLElement>('.ws-fields [aria-invalid="true"]')
+        ?.focus(),
+    );
   }
 
   return (
@@ -583,6 +612,23 @@ function OrderStep({
     setDraft(freshDraft(CAT[type]));
   };
 
+  // spoken after every add and remove, so progress toward ten is heard on
+  // phones too, where the meter sits inside the closed cart
+  const progress = (n: number) =>
+    n >= MIN_PIECES
+      ? `${n} pieces — past ten.`
+      : `${n} pieces so far, ${MIN_PIECES - n} more to reach ten.`;
+
+  const remove = (id: string) => {
+    const line = lines.find((l) => l.id === id);
+    onRemove(id);
+    if (line) {
+      setAdded(
+        `removed ${lineLabel(line)}. ${progress(count - line.quantity)}`,
+      );
+    }
+  };
+
   const add = (c: CatalogEntry) => {
     onAdd({
       type: c.type,
@@ -590,15 +636,21 @@ function OrderStep({
       quantity: draft.quantity,
       description: draft.description.trim(),
     });
-    setAdded(`added ${draft.quantity} × ${c.label} to your line sheet.`);
+    setAdded(
+      `added ${draft.quantity} × ${c.label}. ${progress(count + draft.quantity)}`,
+    );
     setOpen(null);
     setDraft(freshDraft());
+    // the drawer that had focus is gone — go back to the piece itself
+    requestAnimationFrame(() =>
+      document.getElementById(`opt-${c.type}`)?.focus(),
+    );
   };
 
   return (
     <StepFrame index={2} answered={answered}>
       <div className="ws-mobile-only" style={{ marginBottom: 26 }}>
-        <OrderCart lines={lines} onRemove={onRemove} />
+        <OrderCart lines={lines} onRemove={remove} />
       </div>
       <div className="ws-split">
         <div>
@@ -670,7 +722,7 @@ function OrderStep({
               {business}
             </Sig>
           </div>
-          <LineTable lines={lines} onRemove={onRemove} />
+          <LineTable lines={lines} onRemove={remove} />
           <div style={{ marginTop: 26 }}>
             <MinMeter count={count} />
           </div>
@@ -707,6 +759,7 @@ function Option({
     >
       <button
         type="button"
+        id={`opt-${c.type}`}
         onClick={onChoose}
         aria-expanded={on}
         className="ws-option-head"
@@ -780,10 +833,12 @@ function Drawer({
       quantity: Math.max(1, Math.min(MAX_QTY_PER_LINE, Math.round(q) || 1)),
     });
   const stepBtn = {
+    width: 32,
+    height: 32,
     background: "none",
     border: "none",
     cursor: "pointer",
-    padding: "0 4px",
+    padding: 0,
     fontFamily: "var(--serif)",
     fontSize: 18,
     color: "var(--ink-soft)",
@@ -795,7 +850,7 @@ function Drawer({
       style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end" }}
     >
       {c.sizes.length > 0 && (
-        <div role="radiogroup" aria-label="size">
+        <div role="group" aria-label="size">
           <SmallLabel>size</SmallLabel>
           <div
             style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}
@@ -806,8 +861,7 @@ function Drawer({
                 <button
                   key={s}
                   type="button"
-                  role="radio"
-                  aria-checked={on}
+                  aria-pressed={on}
                   onClick={() => onDraft({ ...draft, size: s })}
                   style={{
                     fontFamily: "var(--serif)",
@@ -827,7 +881,7 @@ function Drawer({
           </div>
         </div>
       )}
-      <div style={{ width: 130 }}>
+      <div style={{ width: 150 }}>
         <label htmlFor={`qty-${c.type}`}>
           <SmallLabel>quantity</SmallLabel>
         </label>
@@ -894,7 +948,7 @@ function Drawer({
           }
         />
       </div>
-      <Action size={10} style={{ marginBottom: 7 }} onClick={onAdd}>
+      <Action style={{ marginBottom: 7 }} onClick={onAdd}>
         add to line sheet →
       </Action>
     </div>
@@ -1091,11 +1145,7 @@ function ReviewStep({
           </div>
           <LineTable lines={state.lines} />
           <div style={{ marginTop: 14 }}>
-            <Action
-              size={9}
-              color="var(--ink-faint)"
-              onClick={() => onEdit("order")}
-            >
+            <Action color="var(--ink-faint)" onClick={() => onEdit("order")}>
               change the order
             </Action>
           </div>
@@ -1115,11 +1165,7 @@ function ReviewStep({
               }}
             >
               <SmallLabel>the note you left</SmallLabel>
-              <Action
-                size={9}
-                color="var(--ink-faint)"
-                onClick={() => onEdit("vision")}
-              >
+              <Action color="var(--ink-faint)" onClick={() => onEdit("vision")}>
                 change
               </Action>
             </div>
@@ -1183,9 +1229,7 @@ function ReviewStep({
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
-                  <SmallLabel color="var(--ink)" size={10}>
-                    {t}
-                  </SmallLabel>
+                  <SmallLabel color="var(--ink)">{t}</SmallLabel>
                   <p
                     style={{
                       margin: "7px 0 0",
@@ -1277,7 +1321,7 @@ function SentStep({
         paddingBottom: "clamp(20px, 6vw, 60px)",
       }}
     >
-      <SmallLabel size={11}>bulk order · {code.code.toLowerCase()}</SmallLabel>
+      <SmallLabel>bulk order · {code.code.toLowerCase()}</SmallLabel>
       <h1
         className="ws-ask ws-ask--xl"
         tabIndex={-1}
@@ -1312,6 +1356,9 @@ function SentStep({
         <Link
           href="/shop"
           style={{
+            minHeight: 24,
+            display: "inline-flex",
+            alignItems: "flex-end",
             fontSize: 11,
             letterSpacing: "0.22em",
             textTransform: "uppercase",

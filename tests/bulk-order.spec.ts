@@ -16,7 +16,7 @@ async function unlock(page: Page) {
 
 async function addLine(page: Page, piece: string, qty: number, size?: string) {
   await page.getByRole("button", { name: new RegExp(`^${piece}`) }).click();
-  if (size) await page.getByRole("radio", { name: size }).click();
+  if (size) await page.getByRole("button", { name: size, exact: true }).click();
   await page.getByLabel("quantity").fill(String(qty));
   await page.getByRole("button", { name: /add to line sheet/i }).click();
 }

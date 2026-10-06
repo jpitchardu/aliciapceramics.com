@@ -27,11 +27,13 @@ export function WholesaleHeader() {
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: "6px 0",
+              // a 32px target around the 22px glyph
+              padding: "11px 5px",
+              margin: "-11px -5px",
               display: "flex",
               flexDirection: "column",
               gap: 4,
-              width: 22,
+              width: 32,
             }}
           >
             {[22, 22, 18].map((w, i) => (

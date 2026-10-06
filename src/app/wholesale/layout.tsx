@@ -4,7 +4,8 @@ import { WholesaleFooter } from "./_components/WholesaleFooter";
 import "./wholesale.css";
 
 export const metadata: Metadata = {
-  title: "bulk orders — alicia p. ceramics",
+  // the first step's title; the flow retitles the tab as it moves on
+  title: "your code — bulk orders — alicia p. ceramics",
   description:
     "bulk orders for shops, cafés and stockists — handmade by alicia p. in dallas.",
   robots: { index: false },
