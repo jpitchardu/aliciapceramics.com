@@ -128,7 +128,6 @@ export function WholesaleFlow() {
         onUnlocked={(c) => {
           update({
             code: c,
-            contact: { ...s.contact, business: s.contact.business || c.name },
           });
           go("about");
         }}

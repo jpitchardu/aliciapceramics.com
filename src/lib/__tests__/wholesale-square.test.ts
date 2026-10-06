@@ -132,7 +132,6 @@ function mockClient({ existingCustomer }: { existingCustomer?: string } = {}) {
 
 const code = {
   code: "BLOOM-24",
-  name: "still life coffee",
   earliest: "2026-12-15",
 };
 

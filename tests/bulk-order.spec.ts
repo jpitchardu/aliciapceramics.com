@@ -2,7 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 
 /*
  * The /wholesale bulk-order flow. Runs against the demo code (BLOOM-24),
- * which is available whenever WHOLESALE_CODES is unset outside production,
+ * which is available whenever WHOLESALE_CODE is unset outside production,
  * and the order API's dry run.
  */
 
@@ -38,14 +38,13 @@ test.describe("bulk order", () => {
     await expect(page.getByText(/don't recognise that code/i)).toBeVisible();
   });
 
-  test("about you asks for a name and a real email", async ({ page }) => {
+  test("about you asks for a name, the shop and a real email", async ({
+    page,
+  }) => {
     await unlock(page);
-    // the shop's name comes from the code
-    await expect(page.getByLabel("shop or business")).toHaveValue(
-      "still life coffee",
-    );
     await page.getByRole("button", { name: /to the order/i }).click();
     await expect(page.getByText(/your name, please/i)).toBeVisible();
+    await expect(page.getByText(/the shop's name, please/i)).toBeVisible();
     await expect(
       page.getByText(/that email doesn't look right/i),
     ).toBeVisible();
@@ -54,6 +53,7 @@ test.describe("bulk order", () => {
   test("walks from code to sent", async ({ page }) => {
     await unlock(page);
     await page.getByLabel("your name").fill("june park");
+    await page.getByLabel("shop or business").fill("still life coffee");
     await page.getByLabel("email").fill("june@stilllife.coffee");
     await page.getByRole("button", { name: /to the order/i }).click();
 
@@ -70,7 +70,7 @@ test.describe("bulk order", () => {
     await page
       .getByLabel("anything else i should know")
       .fill("for the counter");
-    await expect(page.getByText(/by dec 15/i)).toBeVisible();
+    await expect(page.getByText(/by [a-z]{3} \d{1,2}/i)).toBeVisible();
     await page.getByRole("button", { name: /read it back/i }).click();
 
     const send = page.getByRole("button", { name: /send to alicia/i });
@@ -82,7 +82,7 @@ test.describe("bulk order", () => {
       page.getByRole("heading", { name: /thank you — i got your order/i }),
     ).toBeVisible();
     await expect(
-      page.getByText(/thirteen pieces, estimated for dec 15/i),
+      page.getByText(/thirteen pieces, estimated for [a-z]{3} \d{1,2}/i),
     ).toBeVisible();
   });
 });

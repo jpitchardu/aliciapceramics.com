@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { codeRequestSchema } from "@/lib/wholesale";
 import { findBulkCode } from "@/lib/wholesale-codes";
 
-/* Unlocks the bulk-order flow: a known code returns the shop's name and the
- * earliest completion date; anything else is a quiet "not found". */
+/* Unlocks the bulk-order flow: the right code returns the estimated
+ * completion date; anything else is a quiet "not found". */
 export async function POST(req: Request) {
   const parsed = codeRequestSchema.safeParse(
     await req.json().catch(() => null),

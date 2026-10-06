@@ -3,8 +3,9 @@ import { z } from "zod";
 /*
  * The bulk (wholesale) order — shared by the /wholesale flow and its API.
  *
- * Bulk orders are invite-only: alicia gives a shop or café a code, and the
- * code carries the shop's name and the earliest date she can finish. Once in,
+ * Bulk orders are invite-only: alicia shares one code with the shops and
+ * cafés she's talked to. Unlocking it also sets the estimated completion
+ * date, a fixed lead time from the day they order. Once in,
  * they say who they are, build a line sheet (ten pieces or more), describe
  * what they're picturing, read it all back and send it. Nobody pays here —
  * alicia follows up and invoices once the details are agreed.
@@ -114,8 +115,7 @@ export const codeRequestSchema = z.object({
 /* what a valid code unlocks — returned by /api/wholesale/code */
 export type BulkCode = {
   code: string;
-  name: string;
-  /* earliest completion date, YYYY-MM-DD */
+  /* estimated completion date, YYYY-MM-DD */
   earliest: string;
 };
 
