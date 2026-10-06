@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    // the legacy bulk-order flow lived at /bulk
+    return [{ source: "/bulk", destination: "/wholesale", permanent: true }];
+  },
   async headers() {
     return [
       {

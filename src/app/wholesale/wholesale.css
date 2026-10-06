@@ -1,0 +1,328 @@
+/*
+ * /wholesale — the responsive layout rules for the bulk-order flow.
+ * Static look lives inline in the components (like the rest of the site);
+ * only what changes between phone and desktop lives here, because inline
+ * styles can't hold media queries. Desktop starts at 1024px, matching the
+ * storefront's lg breakpoint.
+ */
+
+.ws-page {
+  --ws-pad: 24px;
+  color: var(--ink);
+  font-family: var(--serif);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.ws-page > main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 640px) {
+  .ws-page {
+    --ws-pad: 40px;
+  }
+}
+@media (min-width: 1024px) {
+  .ws-page {
+    --ws-pad: 64px;
+  }
+}
+
+.ws-pad {
+  padding-left: var(--ws-pad);
+  padding-right: var(--ws-pad);
+}
+
+.ws-desktop-only {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .ws-desktop-only {
+    display: revert;
+  }
+  .ws-mobile-only {
+    display: none !important;
+  }
+}
+
+/* ── header ─────────────────────────────────────────────────────── */
+.ws-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 22px var(--ws-pad) 14px;
+}
+@media (min-width: 1024px) {
+  .ws-header {
+    padding: 40px var(--ws-pad) 24px;
+  }
+}
+
+/* ── footer ─────────────────────────────────────────────────────── */
+.ws-footer {
+  margin: 64px var(--ws-pad) 0;
+  padding: 22px 0 max(32px, env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--rule-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+}
+@media (min-width: 1024px) {
+  .ws-footer {
+    margin-top: 90px;
+    padding: 26px 0 46px;
+    align-items: baseline;
+  }
+}
+
+/* ── step header: rail + answers ────────────────────────────────── */
+.ws-steps {
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ws-rail {
+  max-width: 560px;
+}
+.ws-answered {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+@media (min-width: 1024px) {
+  .ws-steps {
+    padding-top: 8px;
+    gap: 22px;
+  }
+  .ws-answered {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+  }
+}
+
+/* ── the big question ───────────────────────────────────────────── */
+.ws-ask {
+  margin: 0;
+  font-size: clamp(32px, 6vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  text-wrap: pretty;
+}
+.ws-ask--xl {
+  font-size: clamp(36px, 6.5vw, 56px);
+}
+.ws-ask-sub {
+  margin: 14px 0 0;
+  max-width: 520px;
+  font-size: clamp(15px, 1.6vw, 17px);
+  line-height: 1.55;
+  color: var(--ink-soft);
+  text-wrap: pretty;
+}
+
+.ws-body {
+  padding-top: 26px;
+}
+@media (min-width: 1024px) {
+  .ws-body {
+    padding-top: 44px;
+  }
+}
+
+/* ── unlock: photo beside (desktop) / above (phone) ─────────────── */
+.ws-gate {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.ws-gate-photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  order: -1;
+}
+.ws-gate-copy {
+  padding: 26px var(--ws-pad) 12px;
+}
+.ws-gate-code {
+  width: 100%;
+}
+@media (min-width: 1024px) {
+  .ws-gate {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ws-gate-photo {
+    order: 0;
+    aspect-ratio: auto;
+    min-height: 540px;
+  }
+  .ws-gate-copy {
+    padding: 60px var(--ws-pad);
+    max-width: 620px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .ws-gate-code {
+    width: 340px;
+  }
+}
+
+/* ── two columns: choices + line sheet, sheet + terms ───────────── */
+.ws-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 44px;
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .ws-split {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 72px;
+  }
+  .ws-split--review {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+  .ws-sticky {
+    position: sticky;
+    top: 24px;
+    padding-top: 8px;
+  }
+}
+
+/* about you: two fields a row once there's room */
+.ws-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+  max-width: 760px;
+}
+@media (min-width: 640px) {
+  .ws-fields {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px 40px;
+  }
+}
+
+/* ── a catalogue option ─────────────────────────────────────────── */
+.ws-option-head {
+  padding: 16px 18px;
+  gap: 14px;
+}
+.ws-option-title {
+  font-size: 20px;
+}
+.ws-drawer {
+  padding: 0 18px 20px;
+  gap: 22px 28px;
+}
+@media (min-width: 1024px) {
+  .ws-option-head {
+    padding: 20px 26px;
+    gap: 20px;
+  }
+  .ws-option-title {
+    font-size: 24px;
+  }
+  .ws-drawer {
+    padding: 0 26px 24px;
+    gap: 24px 40px;
+  }
+}
+
+/* ── back / continue ────────────────────────────────────────────── */
+.ws-nav {
+  margin-top: 36px;
+  padding-top: 22px;
+  border-top: 1px solid var(--rule-soft);
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 20px;
+}
+.ws-nav > .ws-fill {
+  align-self: stretch;
+}
+@media (min-width: 640px) {
+  .ws-nav {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .ws-nav > .ws-fill {
+    align-self: center;
+  }
+}
+@media (min-width: 1024px) {
+  .ws-nav {
+    margin-top: 52px;
+    padding-top: 26px;
+  }
+}
+
+/* interactive affordances inline styles can't express */
+.ws-fill:hover:not(:disabled) {
+  opacity: 0.88;
+}
+.ws-fill:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+.ws-input::placeholder {
+  color: var(--ink-faint);
+  opacity: 0.7;
+}
+.ws-input:focus {
+  outline: none;
+  border-bottom-color: var(--ink) !important;
+}
+.ws-page :focus-visible:not(input):not(textarea) {
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* unlock actions: full-width button over the note on phones, side by side on desktop */
+.ws-gate-actions {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+  text-align: center;
+}
+@media (min-width: 1024px) {
+  .ws-gate-actions {
+    margin-top: 34px;
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+    text-align: left;
+  }
+}
+
+/* the consent box is drawn, the real checkbox stays focusable */
+.ws-check:focus-visible + .ws-check-box {
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* quantity: no browser spinners — the – / + carry it */
+.ws-qty {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.ws-qty::-webkit-outer-spin-button,
+.ws-qty::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.ws-qty:focus {
+  outline: none;
+}
+.ws-ask:focus {
+  outline: none;
+}
