@@ -23,7 +23,7 @@ const catalog: WholesaleCatalog = new Map([
 
 const order: BulkOrder = {
   submissionId: "5b0c9f8e-3c1a-4c7e-9a51-2f6f7d0b6e21",
-  code: "BLOOM-24",
+  code: "buy-more-mugs",
   contact: {
     name: "june park",
     business: "still life coffee",
@@ -131,7 +131,7 @@ function mockClient({ existingCustomer }: { existingCustomer?: string } = {}) {
 }
 
 const code = {
-  code: "BLOOM-24",
+  code: "buy-more-mugs",
   earliest: "2026-12-15",
 };
 
@@ -162,7 +162,7 @@ describe("createSquareBulkOrder", () => {
     expect(orderReq.order).toMatchObject({
       locationId: "LOC1",
       customerId: "NEWCUST",
-      referenceId: "BLOOM-24",
+      referenceId: "buy-more-mugs",
     });
     expect(orderReq.order.lineItems).toHaveLength(3);
 

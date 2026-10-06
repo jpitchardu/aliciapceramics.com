@@ -1,14 +1,13 @@
 import { test, expect, type Page } from "@playwright/test";
 
 /*
- * The /wholesale bulk-order flow. Runs against the demo code (BLOOM-24),
- * which is available whenever WHOLESALE_CODE is unset outside production,
- * and the order API's dry run.
+ * The /wholesale bulk-order flow. Runs without Square credentials, so the
+ * order API does a dry run instead of creating anything in Square.
  */
 
 async function unlock(page: Page) {
   await page.goto("/wholesale");
-  await page.getByLabel("your code").fill("bloom-24");
+  await page.getByLabel("your code").fill("buy-more-mugs");
   await page.getByRole("button", { name: /continue/i }).click();
   await expect(
     page.getByRole("heading", { name: /who am i talking to/i }),

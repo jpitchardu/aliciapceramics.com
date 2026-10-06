@@ -15,7 +15,7 @@ const contact = {
 
 const order = (quantity: number) => ({
   submissionId: "5b0c9f8e-3c1a-4c7e-9a51-2f6f7d0b6e21",
-  code: "BLOOM-24",
+  code: "buy-more-mugs",
   contact,
   lines: [{ type: "cup", size: "12", quantity, description: "" }],
   inspiration: "",
