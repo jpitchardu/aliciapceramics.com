@@ -26,6 +26,11 @@ export const SIZES = ["8", "10", "12"] as const;
 export type Size = (typeof SIZES)[number];
 export const sizeLabel = (s: Size) => `${s} oz`;
 
+/* any sized piece can also be asked for in a size of their own, described in words */
+export const CUSTOM_SIZE = "custom" as const;
+export const MAX_CUSTOM_SIZE = 60;
+export type LineSize = Size | typeof CUSTOM_SIZE;
+
 export const PIECE_TYPES = [
   "cup",
   "mug-with-handle",
@@ -122,7 +127,8 @@ export type BulkCode = {
 export const orderLineSchema = z
   .object({
     type: z.enum(PIECE_TYPES),
-    size: z.enum(SIZES).optional(),
+    size: z.enum([...SIZES, CUSTOM_SIZE]).optional(),
+    customSize: z.string().trim().max(MAX_CUSTOM_SIZE).optional(),
     quantity: z.number().int().min(1).max(MAX_QTY_PER_LINE),
     description: z.string().trim().max(500),
   })
@@ -131,10 +137,15 @@ export const orderLineSchema = z
       const sizes = CAT[l.type].sizes;
       return sizes.length === 0
         ? l.size === undefined
-        : l.size !== undefined && sizes.includes(l.size);
+        : l.size === CUSTOM_SIZE ||
+            (l.size !== undefined && sizes.includes(l.size));
     },
     { message: "that size isn't available for this piece" },
-  );
+  )
+  .refine((l) => l.size !== CUSTOM_SIZE || !!l.customSize, {
+    message: "what size are you after?",
+    path: ["customSize"],
+  });
 export type OrderLine = z.infer<typeof orderLineSchema>;
 
 export const contactSchema = z.object({
@@ -172,8 +183,16 @@ export type BulkOrder = z.infer<typeof bulkOrderSchema>;
 export const countPieces = (lines: readonly Pick<OrderLine, "quantity">[]) =>
   lines.reduce((s, l) => s + l.quantity, 0);
 
-export const lineLabel = (l: Pick<OrderLine, "type" | "size">) =>
-  `${CAT[l.type].label}${l.size ? " · " + sizeLabel(l.size) : ""}`;
+/* "12 oz", or for a custom size "custom: 16 oz" */
+export const lineSize = (l: Pick<OrderLine, "size" | "customSize">) =>
+  !l.size
+    ? ""
+    : l.size === CUSTOM_SIZE
+      ? `custom: ${l.customSize ?? ""}`
+      : sizeLabel(l.size);
+
+export const lineLabel = (l: Pick<OrderLine, "type" | "size" | "customSize">) =>
+  `${CAT[l.type].label}${l.size ? " · " + lineSize(l) : ""}`;
 
 /* "2026-10-09" → "oct 9". Dates are calendar days, so read them as UTC. */
 export function shortDate(iso: string) {

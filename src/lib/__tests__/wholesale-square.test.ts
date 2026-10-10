@@ -84,6 +84,27 @@ describe("buildLineItems", () => {
       note: "(no wholesale price found in square)",
     });
   });
+
+  it("sends a custom size to alicia to price by hand", () => {
+    const [item] = buildLineItems(
+      [
+        {
+          type: "cup",
+          size: "custom",
+          customSize: "16 oz",
+          quantity: 12,
+          description: "speckled",
+        },
+      ],
+      catalog,
+    );
+    expect(item).toMatchObject({
+      name: "cup · custom: 16 oz",
+      quantity: "12",
+      basePriceMoney: { amount: BigInt(0) },
+      note: "speckled (custom size — price by hand)",
+    });
+  });
 });
 
 describe("toE164", () => {

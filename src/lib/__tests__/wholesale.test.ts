@@ -49,6 +49,18 @@ describe("wholesale", () => {
     expect(ok({ type: "matcha-bowl" })).toBe(true);
   });
 
+  it("takes a custom size on sized pieces, as long as it's described", () => {
+    const base = { quantity: 2, description: "" };
+    const ok = (l: object) =>
+      orderLineSchema.safeParse({ ...base, ...l }).success;
+    expect(ok({ type: "cup", size: "custom", customSize: "16 oz" })).toBe(true);
+    expect(ok({ type: "cup", size: "custom" })).toBe(false);
+    expect(ok({ type: "cup", size: "custom", customSize: "  " })).toBe(false);
+    expect(ok({ type: "matcha-bowl", size: "custom", customSize: "big" })).toBe(
+      false,
+    );
+  });
+
   it("holds the ten-piece minimum", () => {
     expect(bulkOrderSchema.safeParse(order(9)).success).toBe(false);
     expect(bulkOrderSchema.safeParse(order(10)).success).toBe(true);

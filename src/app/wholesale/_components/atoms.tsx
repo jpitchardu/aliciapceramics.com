@@ -14,7 +14,7 @@ import {
   MIN_PIECES,
   countPieces,
   lineLabel,
-  sizeLabel,
+  lineSize,
   type OrderLine,
 } from "@/lib/wholesale";
 
@@ -134,7 +134,9 @@ export function Field({
   autoComplete,
   error,
   inputMode,
+  id: givenId,
 }: {
+  id?: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -146,7 +148,8 @@ export function Field({
   error?: string;
   inputMode?: "text" | "email" | "tel" | "url";
 }) {
-  const id = useId();
+  const autoId = useId();
+  const id = givenId ?? autoId;
   const style: CSSProperties = {
     ...fieldInput,
     fontSize: big ? 19 : 16,
@@ -478,8 +481,14 @@ export function LineTable({
               </div>
             )}
           </div>
-          <div style={{ fontSize: 15, color: "var(--ink-soft)" }}>
-            {l.size ? sizeLabel(l.size) : "—"}
+          <div
+            style={{
+              fontSize: 15,
+              color: "var(--ink-soft)",
+              overflowWrap: "anywhere",
+            }}
+          >
+            {l.size ? lineSize(l) : "—"}
           </div>
           <div
             style={{

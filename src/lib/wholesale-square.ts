@@ -1,6 +1,7 @@
 import type { Square, SquareClient } from "square";
 import {
   CAT,
+  CUSTOM_SIZE,
   countPieces,
   lineLabel,
   sizeLabel,
@@ -72,7 +73,8 @@ export function findVariation(
   catalog: WholesaleCatalog,
 ): string | null {
   const itemName = SQUARE_ITEM_NAMES[line.type];
-  if (!itemName) return null;
+  // a custom size has no catalog price — alicia prices it by hand
+  if (!itemName || line.size === CUSTOM_SIZE) return null;
   const variations = catalog.get(itemName.toLowerCase());
   if (!variations) return null;
   if (line.size) return variations.get(sizeLabel(line.size)) ?? null;
@@ -98,7 +100,12 @@ export function buildLineItems(
       note:
         line.type === "other"
           ? note
-          : [note, "(no wholesale price found in square)"]
+          : [
+              note,
+              line.size === CUSTOM_SIZE
+                ? "(custom size — price by hand)"
+                : "(no wholesale price found in square)",
+            ]
               .filter(Boolean)
               .join(" "),
     };

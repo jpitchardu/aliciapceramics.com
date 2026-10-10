@@ -8,9 +8,11 @@ import { CeramicLabel } from "@/ui/CeramicLabel";
 import { SITE } from "@/lib/config";
 import {
   CATALOG,
+  MAX_CUSTOM_SIZE,
   MAX_QTY_PER_LINE,
   MIN_PIECES,
   CAT,
+  CUSTOM_SIZE,
   defaultSize,
   TERMS,
   contactSchema,
@@ -22,7 +24,7 @@ import {
   type BulkCode,
   type CatalogEntry,
   type Contact,
-  type Size,
+  type LineSize,
 } from "@/lib/wholesale";
 import {
   Action,
@@ -578,9 +580,15 @@ function AboutStep({
 
 /* ── 3 · the order — choices on the left, the line sheet beside ─── */
 
-type Draft = { size?: Size; quantity: number; description: string };
+type Draft = {
+  size?: LineSize;
+  customSize: string;
+  quantity: number;
+  description: string;
+};
 const freshDraft = (c?: CatalogEntry): Draft => ({
   size: c && defaultSize(c),
+  customSize: "",
   quantity: 1,
   description: "",
 });
@@ -605,11 +613,13 @@ function OrderStep({
   const [open, setOpen] = useState<CatalogEntry["type"] | null>(null);
   const [draft, setDraft] = useState<Draft>(freshDraft);
   const [added, setAdded] = useState("");
+  const [sizeError, setSizeError] = useState("");
   const count = countPieces(lines);
 
   const choose = (type: CatalogEntry["type"]) => {
     setOpen(open === type ? null : type);
     setDraft(freshDraft(CAT[type]));
+    setSizeError("");
   };
 
   // spoken after every add and remove, so progress toward ten is heard on
@@ -617,7 +627,7 @@ function OrderStep({
   const progress = (n: number) =>
     n >= MIN_PIECES
       ? `${n} pieces — past ten.`
-      : `${n} pieces so far, ${MIN_PIECES - n} more to reach ten.`;
+      : `${n} ${n === 1 ? "piece" : "pieces"} so far, ${MIN_PIECES - n} more to reach ten.`;
 
   const remove = (id: string) => {
     const line = lines.find((l) => l.id === id);
@@ -630,14 +640,25 @@ function OrderStep({
   };
 
   const add = (c: CatalogEntry) => {
+    const custom = c.sizes.length > 0 && draft.size === CUSTOM_SIZE;
+    const customSize = draft.customSize.trim();
+    if (custom && !customSize) {
+      setSizeError("what size are you after?");
+      requestAnimationFrame(() =>
+        document.getElementById(`custom-size-${c.type}`)?.focus(),
+      );
+      return;
+    }
+    setSizeError("");
     onAdd({
       type: c.type,
       size: c.sizes.length ? draft.size : undefined,
+      customSize: custom ? customSize : undefined,
       quantity: draft.quantity,
       description: draft.description.trim(),
     });
     setAdded(
-      `added ${draft.quantity} × ${c.label}. ${progress(count + draft.quantity)}`,
+      `added ${draft.quantity} × ${c.label}${custom ? `, custom size ${customSize}` : ""}. ${progress(count + draft.quantity)}`,
     );
     setOpen(null);
     setDraft(freshDraft());
@@ -685,7 +706,11 @@ function OrderStep({
                 <Drawer
                   c={c}
                   draft={draft}
-                  onDraft={setDraft}
+                  onDraft={(d) => {
+                    setDraft(d);
+                    if (d.customSize.trim()) setSizeError("");
+                  }}
+                  sizeError={sizeError}
                   onAdd={() => add(c)}
                 />
               </Option>
@@ -820,11 +845,13 @@ function Drawer({
   c,
   draft,
   onDraft,
+  sizeError,
   onAdd,
 }: {
   c: CatalogEntry;
   draft: Draft;
   onDraft: (d: Draft) => void;
+  sizeError: string;
   onAdd: () => void;
 }) {
   const setQty = (q: number) =>
@@ -855,7 +882,7 @@ function Drawer({
           <div
             style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}
           >
-            {c.sizes.map((s) => {
+            {[...c.sizes, CUSTOM_SIZE].map((s) => {
               const on = draft.size === s;
               return (
                 <button
@@ -874,11 +901,28 @@ function Drawer({
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {sizeLabel(s)}
+                  {s === CUSTOM_SIZE ? "custom size" : sizeLabel(s)}
                 </button>
               );
             })}
           </div>
+        </div>
+      )}
+      {draft.size === CUSTOM_SIZE && (
+        <div style={{ flex: "1 1 100%" }}>
+          <Field
+            id={`custom-size-${c.type}`}
+            label="what size would you like?"
+            value={draft.customSize}
+            onChange={(customSize) =>
+              onDraft({
+                ...draft,
+                customSize: customSize.slice(0, MAX_CUSTOM_SIZE),
+              })
+            }
+            placeholder="16 oz, a taller 12 oz, about 4 inches wide…"
+            error={sizeError}
+          />
         </div>
       )}
       <div style={{ width: 150 }}>
@@ -1066,12 +1110,15 @@ function ReviewStep({
         body: JSON.stringify({
           code: code.code,
           contact: state.contact,
-          lines: state.lines.map(({ type, size, quantity, description }) => ({
-            type,
-            size,
-            quantity,
-            description,
-          })),
+          lines: state.lines.map(
+            ({ type, size, customSize, quantity, description }) => ({
+              type,
+              size,
+              customSize,
+              quantity,
+              description,
+            }),
+          ),
           inspiration: state.inspiration,
           notes: state.notes,
           consent: state.consent,

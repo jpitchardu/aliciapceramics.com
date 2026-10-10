@@ -61,7 +61,17 @@ test.describe("bulk order", () => {
     await expect(page.getByText(/4 more to reach ten/i).first()).toBeAttached();
     await expect(next).toBeDisabled();
 
-    await addLine(page, "cup", 4, "8 oz");
+    // a custom size has to say what size it is
+    await page.getByRole("button", { name: /^cup/ }).click();
+    await page
+      .getByRole("button", { name: "custom size", exact: true })
+      .click();
+    await page.getByLabel("quantity").fill("4");
+    await page.getByRole("button", { name: /add to line sheet/i }).click();
+    await expect(page.getByText("what size are you after?")).toBeVisible();
+    await page.getByLabel("what size would you like?").fill("16 oz");
+    await page.getByRole("button", { name: /add to line sheet/i }).click();
+    await expect(page.getByText("custom: 16 oz").first()).toBeAttached();
     await addLine(page, "jewelry dish", 3);
     await expect(next).toBeEnabled();
     await next.click();
