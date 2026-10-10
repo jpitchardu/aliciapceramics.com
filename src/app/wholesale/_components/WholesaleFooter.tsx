@@ -7,7 +7,7 @@ export function WholesaleFooter() {
     <footer className="ws-footer">
       <div>
         <CeramicLabel color="var(--ink-faint)">
-          {SITE.name} · for shops &amp; stockists
+          {SITE.name} · for wholesale/bulk orders
         </CeramicLabel>
         <div style={{ marginTop: 10, fontSize: 14, color: "var(--ink-soft)" }}>
           the studio is at {SITE.studio.address.split(",")[0]} —{" "}

@@ -360,7 +360,7 @@ function GateStep({ onUnlocked }: { onUnlocked: (c: BulkCode) => void }) {
     <div className="ws-gate">
       <form className="ws-gate-copy" onSubmit={submit} noValidate>
         <SmallLabel>
-          for shops &amp; stockists ·{" "}
+          for wholesale/bulk orders ·{" "}
           <span className="ws-desktop-only">step </span>1 of 5
         </SmallLabel>
         <div style={{ marginTop: "clamp(14px, 2.4vw, 26px)" }}>
@@ -432,48 +432,18 @@ function GateStep({ onUnlocked }: { onUnlocked: (c: BulkCode) => void }) {
         </div>
       </form>
       <div className="ws-gate-photo">
-        <span className="ws-desktop-only">
-          <Photo
-            src="/assets/hero-group.png"
-            ratio="auto"
-            sizes="(min-width: 1024px) 50vw, 1px"
-            style={{
-              position: "absolute",
-              inset: 0,
-              height: "100%",
-              background: "var(--paper-2)",
-            }}
-          />
-        </span>
-        <span className="ws-mobile-only">
-          <Photo
-            src="/assets/hero-square.png"
-            ratio="auto"
-            sizes="(max-width: 1023px) 100vw, 1px"
-            style={{
-              position: "absolute",
-              inset: 0,
-              height: "100%",
-              background: "var(--paper-2)",
-            }}
-          />
-        </span>
-        <span
+        <Photo
+          src="/assets/wholesale-cups.jpg"
+          ratio="auto"
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          objectPosition="center 40%"
           style={{
             position: "absolute",
-            left: 10,
-            bottom: 9,
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "var(--ink-soft)",
-            background: "rgba(237,227,208,0.82)",
-            padding: "3px 7px",
+            inset: 0,
+            height: "100%",
+            background: "var(--paper-2)",
           }}
-        >
-          from the spring run
-        </span>
+        />
       </div>
     </div>
   );
