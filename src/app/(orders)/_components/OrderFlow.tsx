@@ -12,6 +12,7 @@ import {
   MAX_QTY_PER_LINE,
   CAT,
   CUSTOM_SIZE,
+  DESIGNABLE,
   defaultSize,
   TERMS,
   contactSchemaFor,
@@ -27,7 +28,7 @@ import {
   type OrderKind,
 } from "@/lib/wholesale";
 import {
-  DESIGN_UPCHARGE,
+  designExtra,
   startingPrice,
   unitPrice,
   usd,
@@ -642,7 +643,7 @@ function OrderStep({
       return;
     }
     setLimitError("");
-    const design = flow.priced && c.sizes.length > 0 && draft.design;
+    const design = flow.priced && DESIGNABLE.includes(c.type) && draft.design;
     onAdd({
       type: c.type,
       size: c.sizes.length ? draft.size : undefined,
@@ -871,6 +872,7 @@ function Drawer({
   const each = flow.priced
     ? unitPrice({ type: c.type, size: draft.size, design: draft.design })
     : null;
+  const extra = designExtra(c.type, draft.size);
   const setQty = (q: number) =>
     onDraft({
       ...draft,
@@ -944,7 +946,7 @@ function Drawer({
           />
         </div>
       )}
-      {flow.priced && c.sizes.length > 0 && (
+      {flow.priced && DESIGNABLE.includes(c.type) && (
         <div role="group" aria-label="design">
           <SmallLabel>design</SmallLabel>
           <div
@@ -964,7 +966,8 @@ function Drawer({
               onClick={() => onDraft({ ...draft, design: true })}
               style={choice(draft.design)}
             >
-              with a design · +{usd(DESIGN_UPCHARGE)}
+              with a design
+              {extra !== null && ` · +${usd(extra)}`}
             </button>
           </div>
         </div>

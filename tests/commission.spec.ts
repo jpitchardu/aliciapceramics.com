@@ -34,19 +34,19 @@ test.describe("commission", () => {
     await expect(next).toBeDisabled();
     await expect(page.getByText("from $28")).toBeVisible();
 
-    // two 12 oz mugs with a design: $36 + $4 each
+    // two 12 oz mugs with a design: $42 each on the sheet
     await page.getByRole("button", { name: /^mug, with handle/ }).click();
     await page.getByRole("button", { name: "12 oz", exact: true }).click();
     await page.getByRole("button", { name: /with a design/ }).click();
     await page.getByLabel("quantity").fill("2");
-    await expect(page.getByText("$40 each")).toBeVisible();
+    await expect(page.getByText("$42 each")).toBeVisible();
     await page.getByRole("button", { name: /add to your order/i }).click();
     await expect(next).toBeEnabled();
 
     // a matcha bowl
     await page.getByRole("button", { name: /^matcha bowl/ }).click();
     await page.getByRole("button", { name: /add to your order/i }).click();
-    await expect(page.getByText("$130").first()).toBeAttached();
+    await expect(page.getByText("$134").first()).toBeAttached();
 
     // past nine is turned away
     await page.getByRole("button", { name: /^cup/ }).click();

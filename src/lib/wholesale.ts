@@ -113,6 +113,14 @@ export const CATALOG: readonly CatalogEntry[] = [
   },
 ];
 
+/* the pieces that can have a design drawn on them (commissions only) */
+export const DESIGNABLE: readonly PieceType[] = [
+  "cup",
+  "mug-with-handle",
+  "tumbler",
+  "cortado-cup",
+];
+
 export const CAT = Object.fromEntries(
   CATALOG.map((c) => [c.type, c]),
 ) as Record<PieceType, CatalogEntry>;
@@ -169,7 +177,7 @@ export const orderLineSchema = z
     type: z.enum(PIECE_TYPES),
     size: z.enum([...SIZES, CUSTOM_SIZE]).optional(),
     customSize: z.string().trim().max(MAX_CUSTOM_SIZE).optional(),
-    /* a drawn design on a cup, mug or tumbler — commissions only, +$4 a piece */
+    /* a drawn design — commissions only, priced per piece and size */
     design: z.boolean().optional(),
     quantity: z.number().int().min(1).max(MAX_QTY_PER_LINE),
     description: z.string().trim().max(500),
@@ -188,8 +196,8 @@ export const orderLineSchema = z
     message: "what size are you after?",
     path: ["customSize"],
   })
-  .refine((l) => !l.design || CAT[l.type].sizes.length > 0, {
-    message: "a design is only for cups, mugs and tumblers",
+  .refine((l) => !l.design || DESIGNABLE.includes(l.type), {
+    message: "a design is only for cups, mugs, tumblers and cortado cups",
     path: ["design"],
   });
 export type OrderLine = z.infer<typeof orderLineSchema>;

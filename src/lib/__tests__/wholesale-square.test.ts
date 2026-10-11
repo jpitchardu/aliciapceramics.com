@@ -231,7 +231,7 @@ describe("createSquareBulkOrder", () => {
       {
         name: "cup · 8 oz · with a design",
         quantity: "2",
-        basePriceMoney: { amount: BigInt(2800), currency: "USD" },
+        basePriceMoney: { amount: BigInt(3000), currency: "USD" },
         note: undefined,
       },
       {
