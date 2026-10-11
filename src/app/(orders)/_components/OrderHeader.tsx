@@ -10,8 +10,8 @@ const LINKS = [
   { href: "/care", label: "care" },
 ];
 
-/* the storefront nav, with "bulk order" standing in for the cart */
-export function WholesaleHeader() {
+/* the storefront nav, with the flow ("bulk order", "commission") standing in for the cart */
+export function OrderHeader({ label }: { label: string }) {
   const [open, setOpen] = useState(false);
   return (
     <header>
@@ -76,7 +76,7 @@ export function WholesaleHeader() {
             color="var(--ink)"
             style={{ borderBottom: "1px solid var(--ink)", paddingBottom: 4 }}
           >
-            bulk order
+            {label}
           </CeramicLabel>
         </span>
       </div>

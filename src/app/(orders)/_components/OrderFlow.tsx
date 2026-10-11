@@ -10,12 +10,11 @@ import {
   CATALOG,
   MAX_CUSTOM_SIZE,
   MAX_QTY_PER_LINE,
-  MIN_PIECES,
   CAT,
   CUSTOM_SIZE,
   defaultSize,
   TERMS,
-  contactSchema,
+  contactSchemaFor,
   countPieces,
   lineLabel,
   numberWords,
@@ -25,7 +24,15 @@ import {
   type CatalogEntry,
   type Contact,
   type LineSize,
+  type OrderKind,
 } from "@/lib/wholesale";
+import {
+  DESIGN_UPCHARGE,
+  startingPrice,
+  unitPrice,
+  usd,
+} from "@/lib/commission-prices";
+import { FLOWS, FlowProvider, pieces, progressText, useFlow } from "./flows";
 import {
   Action,
   Answered,
@@ -33,7 +40,7 @@ import {
   Field,
   FillButton,
   LineTable,
-  MinMeter,
+  PieceMeter,
   OrderCart,
   SmallLabel,
   StepRail,
@@ -41,9 +48,10 @@ import {
 } from "./atoms";
 
 /*
- * The bulk order — "the line sheet, asked". One big question per page with
- * the earlier answers settled above it, a ruled line sheet that fills as
- * pieces are added, and the whole order read back before it's sent.
+ * The bulk order and the small commission — "the line sheet, asked". One
+ * big question per page with the earlier answers settled above it, a ruled
+ * line sheet that fills as pieces are added, and the whole order read back
+ * before it's sent. `kind` picks the words, the piece range and prices.
  */
 
 const STEPS = ["unlock", "about you", "the order", "the vision", "read back"];
@@ -81,13 +89,21 @@ const EMPTY: State = {
   consent: false,
 };
 
-// keeps a half-built order through a refresh; cleared once it's sent
-const STORAGE_KEY = "ws-bulk-order-v2";
-
 const newId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-export function WholesaleFlow() {
+export function OrderFlow({ kind }: { kind: OrderKind }) {
+  return (
+    <FlowProvider value={FLOWS[kind]}>
+      <Steps />
+    </FlowProvider>
+  );
+}
+
+function Steps() {
+  const flow = useFlow();
+  // keeps a half-built order through a refresh; cleared once it's sent
+  const STORAGE_KEY = flow.storageKey;
   const [s, setS] = useState<State>(EMPTY);
   const restored = useRef(false);
 
@@ -99,7 +115,7 @@ export function WholesaleFlow() {
       // storage can be blocked — start fresh
     }
     restored.current = true;
-  }, []);
+  }, [STORAGE_KEY]);
 
   useEffect(() => {
     if (!restored.current) return;
@@ -109,7 +125,7 @@ export function WholesaleFlow() {
     } catch {
       // not worth surfacing
     }
-  }, [s]);
+  }, [s, STORAGE_KEY]);
 
   // one id per order, made on reaching read back, so a retried send can't
   // create a second order in square
@@ -121,8 +137,8 @@ export function WholesaleFlow() {
 
   // each step gets its own tab title, so it's announced and findable
   useEffect(() => {
-    document.title = `${STEP_TITLES[s.code ? s.step : "unlock"]} — bulk orders — alicia p. ceramics`;
-  }, [s.step, s.code]);
+    document.title = `${STEP_TITLES[s.code ? s.step : "unlock"]} — ${flow.plural} — alicia p. ceramics`;
+  }, [s.step, s.code, flow.plural]);
 
   const update = (patch: Partial<State>) =>
     setS((prev) => ({ ...prev, ...patch }));
@@ -167,12 +183,12 @@ export function WholesaleFlow() {
   };
   const answeredYou = {
     label: "you",
-    value: s.contact.business,
+    value: s.contact.business || s.contact.name,
     onChange: () => go("about"),
   };
   const answeredOrder = {
     label: "order",
-    value: `${count} pieces`,
+    value: pieces(count),
     onChange: () => go("order"),
   };
   const removeLine = (id: string) =>
@@ -193,7 +209,7 @@ export function WholesaleFlow() {
       return (
         <OrderStep
           lines={s.lines}
-          business={s.contact.business}
+          business={s.contact.business || s.contact.name}
           answered={[answeredCode, answeredYou]}
           onAdd={(line) =>
             update({ lines: [...s.lines, { ...line, id: newId() }] })
@@ -319,6 +335,7 @@ const instagramLink = (text: string) => (
 /* ── 1 · unlock — the photo beside the question ─────────────────── */
 
 function GateStep({ onUnlocked }: { onUnlocked: (c: BulkCode) => void }) {
+  const flow = useFlow();
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ReactNode>(null);
@@ -333,7 +350,7 @@ function GateStep({ onUnlocked }: { onUnlocked: (c: BulkCode) => void }) {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/wholesale/code", {
+      const res = await fetch(`${flow.api}/code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
@@ -360,8 +377,8 @@ function GateStep({ onUnlocked }: { onUnlocked: (c: BulkCode) => void }) {
     <div className="ws-gate">
       <form className="ws-gate-copy" onSubmit={submit} noValidate>
         <SmallLabel>
-          for wholesale/bulk orders ·{" "}
-          <span className="ws-desktop-only">step </span>1 of 5
+          {flow.gateLabel} · <span className="ws-desktop-only">step </span>1 of
+          5
         </SmallLabel>
         <div style={{ marginTop: "clamp(14px, 2.4vw, 26px)" }}>
           <Ask
@@ -369,15 +386,8 @@ function GateStep({ onUnlocked }: { onUnlocked: (c: BulkCode) => void }) {
             q="do you have a code?"
             sub={
               <>
-                <span className="ws-desktop-only">
-                  bulk orders are for shops i&apos;ve already been in touch
-                  with. if that&apos;s you, i&apos;ll have sent you a code —
-                  enter it below to get started.
-                </span>
-                <span className="ws-mobile-only">
-                  if we&apos;ve been in touch about a bulk order, enter the code
-                  i sent you.
-                </span>
+                <span className="ws-desktop-only">{flow.gateSub}</span>
+                <span className="ws-mobile-only">{flow.gateSubShort}</span>
               </>
             }
           />
@@ -464,6 +474,7 @@ function AboutStep({
   onBack: () => void;
   onNext: () => void;
 }) {
+  const flow = useFlow();
   const [errors, setErrors] = useState<Partial<Record<keyof Contact, string>>>(
     {},
   );
@@ -474,7 +485,7 @@ function AboutStep({
 
   function submit(e: FormEvent) {
     e.preventDefault();
-    const parsed = contactSchema.safeParse(contact);
+    const parsed = contactSchemaFor(flow.kind).safeParse(contact);
     if (parsed.success) return onNext();
     const next: typeof errors = {};
     for (const issue of parsed.error.issues) {
@@ -508,14 +519,16 @@ function AboutStep({
             big
             error={errors.name}
           />
-          <Field
-            label="shop or business"
-            value={contact.business}
-            onChange={set("business")}
-            autoComplete="organization"
-            big
-            error={errors.business}
-          />
+          {flow.askBusiness && (
+            <Field
+              label="shop or business"
+              value={contact.business}
+              onChange={set("business")}
+              autoComplete="organization"
+              big
+              error={errors.business}
+            />
+          )}
           <Field
             label="email"
             type="email"
@@ -553,12 +566,14 @@ function AboutStep({
 type Draft = {
   size?: LineSize;
   customSize: string;
+  design: boolean;
   quantity: number;
   description: string;
 };
 const freshDraft = (c?: CatalogEntry): Draft => ({
   size: c && defaultSize(c),
   customSize: "",
+  design: false,
   quantity: 1,
   description: "",
 });
@@ -582,22 +597,19 @@ function OrderStep({
 }) {
   const [open, setOpen] = useState<CatalogEntry["type"] | null>(null);
   const [draft, setDraft] = useState<Draft>(freshDraft);
+  const flow = useFlow();
   const [added, setAdded] = useState("");
   const [sizeError, setSizeError] = useState("");
+  const [limitError, setLimitError] = useState("");
   const count = countPieces(lines);
+  const progress = (n: number) => progressText(flow, n);
 
   const choose = (type: CatalogEntry["type"]) => {
     setOpen(open === type ? null : type);
     setDraft(freshDraft(CAT[type]));
     setSizeError("");
+    setLimitError("");
   };
-
-  // spoken after every add and remove, so progress toward ten is heard on
-  // phones too, where the meter sits inside the closed cart
-  const progress = (n: number) =>
-    n >= MIN_PIECES
-      ? `${n} pieces — past ten.`
-      : `${n} ${n === 1 ? "piece" : "pieces"} so far, ${MIN_PIECES - n} more to reach ten.`;
 
   const remove = (id: string) => {
     const line = lines.find((l) => l.id === id);
@@ -620,15 +632,27 @@ function OrderStep({
       return;
     }
     setSizeError("");
+    if (count + draft.quantity > flow.max) {
+      const room = flow.max - count;
+      setLimitError(
+        room > 0
+          ? `a small commission is up to ${numberWords(flow.max)} pieces — there's room for ${room} more.`
+          : `that's already ${numberWords(flow.max)} pieces, the most for a small commission. for more, ask me about a bulk order.`,
+      );
+      return;
+    }
+    setLimitError("");
+    const design = flow.priced && c.sizes.length > 0 && draft.design;
     onAdd({
       type: c.type,
       size: c.sizes.length ? draft.size : undefined,
       customSize: custom ? customSize : undefined,
+      design: design || undefined,
       quantity: draft.quantity,
       description: draft.description.trim(),
     });
     setAdded(
-      `added ${draft.quantity} × ${c.label}${custom ? `, custom size ${customSize}` : ""}. ${progress(count + draft.quantity)}`,
+      `added ${draft.quantity} × ${c.label}${custom ? `, custom size ${customSize}` : ""}${design ? ", with a design" : ""}. ${progress(count + draft.quantity)}`,
     );
     setOpen(null);
     setDraft(freshDraft());
@@ -650,10 +674,7 @@ function OrderStep({
             sub={
               <>
                 pick a piece, choose a size and quantity, then add it
-                <span className="ws-desktop-only">
-                  {" "}
-                  to your line sheet. add as many as you need.
-                </span>
+                <span className="ws-desktop-only"> {flow.orderSub}</span>
                 <span className="ws-mobile-only">.</span>
               </>
             }
@@ -679,8 +700,10 @@ function OrderStep({
                   onDraft={(d) => {
                     setDraft(d);
                     if (d.customSize.trim()) setSizeError("");
+                    if (d.quantity !== draft.quantity) setLimitError("");
                   }}
                   sizeError={sizeError}
+                  limitError={limitError}
                   onAdd={() => add(c)}
                 />
               </Option>
@@ -712,14 +735,14 @@ function OrderStep({
               marginBottom: 18,
             }}
           >
-            <CeramicLabel color="var(--ink)">your line sheet</CeramicLabel>
+            <CeramicLabel color="var(--ink)">{flow.sheetTitle}</CeramicLabel>
             <Sig size={24} style={{ textAlign: "right" }}>
               {business}
             </Sig>
           </div>
           <LineTable lines={lines} onRemove={remove} />
           <div style={{ marginTop: 26 }}>
-            <MinMeter count={count} />
+            <PieceMeter count={count} />
           </div>
         </aside>
       </div>
@@ -728,7 +751,7 @@ function OrderStep({
         onBack={onBack}
         next="to the vision"
         onNext={onNext}
-        disabled={count < MIN_PIECES}
+        disabled={count < flow.min || count > flow.max}
       />
     </StepFrame>
   );
@@ -745,6 +768,8 @@ function Option({
   onChoose: () => void;
   children: ReactNode;
 }) {
+  const flow = useFlow();
+  const from = startingPrice(c.type);
   return (
     <div
       style={{
@@ -793,6 +818,22 @@ function Option({
           >
             {c.note}
           </span>
+          {flow.priced && (
+            <span
+              style={{
+                display: "block",
+                marginTop: 7,
+                fontSize: 14.5,
+                color: "var(--ink)",
+              }}
+            >
+              {from === null
+                ? "priced together"
+                : c.sizes.length
+                  ? `from ${usd(from)}`
+                  : usd(from)}
+            </span>
+          )}
         </span>
         <span
           style={{
@@ -816,19 +857,36 @@ function Drawer({
   draft,
   onDraft,
   sizeError,
+  limitError,
   onAdd,
 }: {
   c: CatalogEntry;
   draft: Draft;
   onDraft: (d: Draft) => void;
   sizeError: string;
+  limitError: string;
   onAdd: () => void;
 }) {
+  const flow = useFlow();
+  const each = flow.priced
+    ? unitPrice({ type: c.type, size: draft.size, design: draft.design })
+    : null;
   const setQty = (q: number) =>
     onDraft({
       ...draft,
       quantity: Math.max(1, Math.min(MAX_QTY_PER_LINE, Math.round(q) || 1)),
     });
+  const choice = (on: boolean) =>
+    ({
+      fontFamily: "var(--serif)",
+      fontSize: 13,
+      padding: "8px 16px",
+      border: `1px solid ${on ? "var(--ink)" : "var(--rule-strong)"}`,
+      background: on ? "var(--ink)" : "transparent",
+      color: on ? "var(--paper)" : "var(--ink-soft)",
+      cursor: "pointer",
+      whiteSpace: "nowrap",
+    }) as const;
   const stepBtn = {
     width: 32,
     height: 32,
@@ -860,16 +918,7 @@ function Drawer({
                   type="button"
                   aria-pressed={on}
                   onClick={() => onDraft({ ...draft, size: s })}
-                  style={{
-                    fontFamily: "var(--serif)",
-                    fontSize: 13,
-                    padding: "8px 16px",
-                    border: `1px solid ${on ? "var(--ink)" : "var(--rule-strong)"}`,
-                    background: on ? "var(--ink)" : "transparent",
-                    color: on ? "var(--paper)" : "var(--ink-soft)",
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
-                  }}
+                  style={choice(on)}
                 >
                   {s === CUSTOM_SIZE ? "custom size" : sizeLabel(s)}
                 </button>
@@ -893,6 +942,31 @@ function Drawer({
             placeholder="16 oz, a taller 12 oz, about 4 inches wide…"
             error={sizeError}
           />
+        </div>
+      )}
+      {flow.priced && c.sizes.length > 0 && (
+        <div role="group" aria-label="design">
+          <SmallLabel>design</SmallLabel>
+          <div
+            style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}
+          >
+            <button
+              type="button"
+              aria-pressed={!draft.design}
+              onClick={() => onDraft({ ...draft, design: false })}
+              style={choice(!draft.design)}
+            >
+              plain
+            </button>
+            <button
+              type="button"
+              aria-pressed={draft.design}
+              onClick={() => onDraft({ ...draft, design: true })}
+              style={choice(draft.design)}
+            >
+              with a design · +{usd(DESIGN_UPCHARGE)}
+            </button>
+          </div>
         </div>
       )}
       <div style={{ width: 150 }}>
@@ -962,9 +1036,33 @@ function Drawer({
           }
         />
       </div>
+      {flow.priced && (
+        <div
+          style={{
+            flex: "1 1 100%",
+            fontSize: 15,
+            color: "var(--ink-soft)",
+          }}
+        >
+          {each === null ? (
+            "i'll price this one with you."
+          ) : (
+            <>
+              <span style={{ color: "var(--ink)" }}>{usd(each)} each</span>
+              {draft.quantity > 1 &&
+                ` · ${usd(each * draft.quantity)} for ${draft.quantity}`}
+            </>
+          )}
+        </div>
+      )}
       <Action style={{ marginBottom: 7 }} onClick={onAdd}>
-        add to line sheet →
+        add to {flow.priced ? "your order" : "line sheet"} →
       </Action>
+      {limitError && (
+        <div style={{ flex: "1 1 100%", marginTop: -8 }}>
+          <ErrorNote>{limitError}</ErrorNote>
+        </div>
+      )}
     </div>
   );
 }
@@ -1064,27 +1162,30 @@ function ReviewStep({
   onEdit: (step: Step) => void;
   onSent: () => void;
 }) {
+  const flow = useFlow();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ReactNode>(null);
   const count = countPieces(state.lines);
-  const canSend = state.consent && count >= MIN_PIECES && !busy;
+  const canSend =
+    state.consent && count >= flow.min && count <= flow.max && !busy;
 
   async function send() {
     if (!canSend) return;
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/wholesale/order", {
+      const res = await fetch(`${flow.api}/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: code.code,
           contact: state.contact,
           lines: state.lines.map(
-            ({ type, size, customSize, quantity, description }) => ({
+            ({ type, size, customSize, design, quantity, description }) => ({
               type,
               size,
               customSize,
+              design,
               quantity,
               description,
             }),
@@ -1099,7 +1200,7 @@ function ReviewStep({
       setError(
         res.status === 503 ? (
           <>
-            i can&apos;t take bulk orders through the site just yet —{" "}
+            i can&apos;t take {flow.plural} through the site just yet —{" "}
             {instagramLink("send me a message")} and we&apos;ll sort it out.
           </>
         ) : (
@@ -1140,7 +1241,7 @@ function ReviewStep({
               <div
                 style={{ marginTop: 6, fontSize: 22, overflowWrap: "anywhere" }}
               >
-                {state.contact.business}
+                {state.contact.business || state.contact.name}
               </div>
               <div
                 style={{
@@ -1150,7 +1251,9 @@ function ReviewStep({
                   overflowWrap: "anywhere",
                 }}
               >
-                {state.contact.name} · {state.contact.email}
+                {state.contact.business
+                  ? `${state.contact.name} · ${state.contact.email}`
+                  : state.contact.email}
               </div>
             </div>
             <div style={{ textAlign: "right", flex: "0 0 auto" }}>
@@ -1224,7 +1327,7 @@ function ReviewStep({
         <div>
           <CeramicLabel color="var(--ink)">the terms</CeramicLabel>
           <ol style={{ margin: "14px 0 0", padding: 0, listStyle: "none" }}>
-            {TERMS.map(([t, d], i) => (
+            {TERMS[flow.kind].map(([t, d], i) => (
               <li
                 key={t}
                 style={{
@@ -1295,8 +1398,7 @@ function ReviewStep({
               {state.consent ? "✓" : ""}
             </span>
             <span style={{ fontSize: 15, lineHeight: 1.5 }}>
-              everything looks right. i understand each piece is handmade, and
-              that i&apos;ll be invoiced after we talk.
+              {flow.consent}
             </span>
           </label>
         </div>
@@ -1324,6 +1426,7 @@ function SentStep({
   count: number;
   email: string;
 }) {
+  const flow = useFlow();
   return (
     <div
       className="ws-pad"
@@ -1338,7 +1441,9 @@ function SentStep({
         paddingBottom: "clamp(20px, 6vw, 60px)",
       }}
     >
-      <SmallLabel>bulk order · {code.code.toLowerCase()}</SmallLabel>
+      <SmallLabel>
+        {flow.name} · {code.code.toLowerCase()}
+      </SmallLabel>
       <h1
         className="ws-ask ws-ask--xl"
         tabIndex={-1}
@@ -1356,9 +1461,10 @@ function SentStep({
           textWrap: "pretty",
         }}
       >
-        {numberWords(count)} pieces, estimated for {shortDate(code.earliest)}.
-        i&apos;ll look it over and get back to you within a day or two to go
-        over the details. once we&apos;ve agreed, i&apos;ll send an invoice.
+        {numberWords(count)} {count === 1 ? "piece" : "pieces"}, estimated for{" "}
+        {shortDate(code.earliest)}. i&apos;ll look it over and get back to you
+        within a day or two to go over the details. once we&apos;ve agreed,
+        i&apos;ll send an invoice.
       </p>
       <div
         style={{

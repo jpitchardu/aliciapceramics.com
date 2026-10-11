@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 /*
- * The bulk (wholesale) order — shared by the /wholesale flow and its API.
+ * The bulk (wholesale) order and the small commission — shared by the
+ * /wholesale and /commission flows and their APIs. Both run the same steps;
+ * they differ in their code, how many pieces they take, and whether prices
+ * are shown (commissions are priced from the regular price sheet).
  *
  * Bulk orders are invite-only: alicia shares one code with the shops and
  * cafés she's talked to. Unlocking it also sets the estimated completion
@@ -17,10 +20,19 @@ import { z } from "zod";
 export const MIN_PIECES = 10;
 export const MAX_QTY_PER_LINE = 200;
 
+export const ORDER_KINDS = ["wholesale", "commission"] as const;
+export type OrderKind = (typeof ORDER_KINDS)[number];
+
+/* how many pieces each kind takes: bulk is ten or more, a small commission one to nine */
+export const PIECE_RANGE: Record<OrderKind, { min: number; max: number }> = {
+  wholesale: { min: MIN_PIECES, max: Number.POSITIVE_INFINITY },
+  commission: { min: 1, max: MIN_PIECES - 1 },
+};
+
 /*
- * Alicia's real line, matched to her Square categories. For wholesale every
- * drinking piece comes in 8, 10 or 12 oz; bowls, dishes and something else
- * are one size. (Espresso and cortado cups are retail only.)
+ * Alicia's real line, matched to her Square categories. Cups, mugs and
+ * tumblers come in 8, 10 or 12 oz; espresso and cortado cups, bowls, dishes
+ * and something else are one size.
  */
 export const SIZES = ["8", "10", "12"] as const;
 export type Size = (typeof SIZES)[number];
@@ -35,6 +47,8 @@ export const PIECE_TYPES = [
   "cup",
   "mug-with-handle",
   "tumbler",
+  "espresso-cup",
+  "cortado-cup",
   "matcha-bowl",
   "trinket-dish",
   "other",
@@ -68,6 +82,18 @@ export const CATALOG: readonly CatalogEntry[] = [
     sizes: SIZES,
   },
   {
+    type: "espresso-cup",
+    label: "espresso cup",
+    note: "a little cup for a single or a double shot.",
+    sizes: [],
+  },
+  {
+    type: "cortado-cup",
+    label: "cortado cup",
+    note: "a small cup for a cortado or a short pour.",
+    sizes: [],
+  },
+  {
     type: "matcha-bowl",
     label: "matcha bowl",
     note: "wide and shallow, with room to whisk.",
@@ -96,7 +122,7 @@ export const defaultSize = (c: CatalogEntry): Size | undefined =>
   c.sizes.includes("10") ? "10" : c.sizes[0];
 
 /* the handmade timeline, the brand's "important details" reworded in voice */
-export const TERMS: readonly (readonly [string, string])[] = [
+const HANDMADE_TERMS: readonly (readonly [string, string])[] = [
   [
     "handmade nature",
     "every piece is thrown and glazed by hand, so expect small differences between them. the set will look cohesive, not identical.",
@@ -105,11 +131,25 @@ export const TERMS: readonly (readonly [string, string])[] = [
     "the process",
     "handmade work doesn't always go to plan. if anything needs to change, i'll check with you first.",
   ],
-  [
-    "payment",
-    "you won't be charged here. once we've agreed on the details, i'll send an invoice — usually a deposit to start and the balance when the order is finished.",
-  ],
 ];
+
+export const TERMS: Record<OrderKind, readonly (readonly [string, string])[]> =
+  {
+    wholesale: [
+      ...HANDMADE_TERMS,
+      [
+        "payment",
+        "you won't be charged here. once we've agreed on the details, i'll send an invoice — usually a deposit to start and the balance when the order is finished.",
+      ],
+    ],
+    commission: [
+      ...HANDMADE_TERMS,
+      [
+        "price & payment",
+        "the prices here are a subtotal before tax, and they're subject to change. you won't be charged here — once we've agreed on the details, i'll send an invoice, usually a deposit to start and the balance when it's finished.",
+      ],
+    ],
+  };
 
 /* ── schemas ─────────────────────────────────────────────────────── */
 
@@ -129,6 +169,8 @@ export const orderLineSchema = z
     type: z.enum(PIECE_TYPES),
     size: z.enum([...SIZES, CUSTOM_SIZE]).optional(),
     customSize: z.string().trim().max(MAX_CUSTOM_SIZE).optional(),
+    /* a drawn design on a cup, mug or tumbler — commissions only, +$4 a piece */
+    design: z.boolean().optional(),
     quantity: z.number().int().min(1).max(MAX_QTY_PER_LINE),
     description: z.string().trim().max(500),
   })
@@ -145,6 +187,10 @@ export const orderLineSchema = z
   .refine((l) => l.size !== CUSTOM_SIZE || !!l.customSize, {
     message: "what size are you after?",
     path: ["customSize"],
+  })
+  .refine((l) => !l.design || CAT[l.type].sizes.length > 0, {
+    message: "a design is only for cups, mugs and tumblers",
+    path: ["design"],
   });
 export type OrderLine = z.infer<typeof orderLineSchema>;
 
@@ -162,20 +208,33 @@ export const contactSchema = z.object({
 });
 export type Contact = z.infer<typeof contactSchema>;
 
-export const bulkOrderSchema = z
-  .object({
-    /* generated once per order on the client — keeps retries idempotent */
-    submissionId: z.uuid(),
-    code: z.string().trim().min(1).max(40),
-    contact: contactSchema,
-    lines: z.array(orderLineSchema).min(1).max(50),
-    inspiration: z.string().trim().max(500),
-    notes: z.string().trim().max(2000),
-    consent: z.literal(true),
-  })
-  .refine((o) => countPieces(o.lines) >= MIN_PIECES, {
-    message: `a bulk order is ${MIN_PIECES} pieces or more`,
-  });
+/* a commission is for a person — the shop's name is optional */
+export const contactSchemaFor = (kind: OrderKind) =>
+  kind === "wholesale"
+    ? contactSchema
+    : contactSchema.extend({ business: z.string().trim().max(120) });
+
+export const orderSchemaFor = (kind: OrderKind) => {
+  const { min, max } = PIECE_RANGE[kind];
+  return z
+    .object({
+      /* generated once per order on the client — keeps retries idempotent */
+      submissionId: z.uuid(),
+      code: z.string().trim().min(1).max(40),
+      contact: contactSchemaFor(kind),
+      lines: z.array(orderLineSchema).min(1).max(50),
+      inspiration: z.string().trim().max(500),
+      notes: z.string().trim().max(2000),
+      consent: z.literal(true),
+    })
+    .refine((o) => countPieces(o.lines) >= min && countPieces(o.lines) <= max, {
+      message:
+        kind === "wholesale"
+          ? `a bulk order is ${min} pieces or more`
+          : `a small commission is ${min} to ${max} pieces`,
+    });
+};
+export const bulkOrderSchema = orderSchemaFor("wholesale");
 export type BulkOrder = z.infer<typeof bulkOrderSchema>;
 
 /* ── helpers ─────────────────────────────────────────────────────── */
@@ -191,8 +250,12 @@ export const lineSize = (l: Pick<OrderLine, "size" | "customSize">) =>
       ? `custom: ${l.customSize ?? ""}`
       : sizeLabel(l.size);
 
-export const lineLabel = (l: Pick<OrderLine, "type" | "size" | "customSize">) =>
-  `${CAT[l.type].label}${l.size ? " · " + lineSize(l) : ""}`;
+export const lineLabel = (
+  l: Pick<OrderLine, "type" | "size" | "customSize" | "design">,
+) =>
+  `${CAT[l.type].label}${l.size ? " · " + lineSize(l) : ""}${
+    l.design ? " · with a design" : ""
+  }`;
 
 /* "2026-10-09" → "oct 9". Dates are calendar days, so read them as UTC. */
 export function shortDate(iso: string) {

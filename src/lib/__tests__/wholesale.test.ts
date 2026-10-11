@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   bulkOrderSchema,
   numberWords,
+  lineLabel,
   orderLineSchema,
+  orderSchemaFor,
   shortDate,
 } from "@/lib/wholesale";
 
@@ -64,6 +66,47 @@ describe("wholesale", () => {
   it("holds the ten-piece minimum", () => {
     expect(bulkOrderSchema.safeParse(order(9)).success).toBe(false);
     expect(bulkOrderSchema.safeParse(order(10)).success).toBe(true);
+  });
+
+  it("keeps a small commission to one to nine pieces", () => {
+    const commission = orderSchemaFor("commission");
+    const ok = (q: number) =>
+      commission.safeParse({ ...order(q), code: "little-cute-mugs" }).success;
+    expect(ok(1)).toBe(true);
+    expect(ok(9)).toBe(true);
+    expect(ok(10)).toBe(false);
+  });
+
+  it("doesn't ask a commission for a shop name, but a bulk order does", () => {
+    const noShop = { ...order(3), contact: { ...contact, business: "" } };
+    expect(orderSchemaFor("commission").safeParse(noShop).success).toBe(true);
+    expect(
+      bulkOrderSchema.safeParse({
+        ...noShop,
+        ...order(12),
+        contact: noShop.contact,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("only takes a design on cups, mugs and tumblers", () => {
+    const base = { quantity: 2, description: "", design: true };
+    const ok = (l: object) =>
+      orderLineSchema.safeParse({ ...base, ...l }).success;
+    expect(ok({ type: "cup", size: "8" })).toBe(true);
+    expect(ok({ type: "matcha-bowl" })).toBe(false);
+    expect(lineLabel({ type: "cup", size: "8", design: true })).toBe(
+      "cup · 8 oz · with a design",
+    );
+  });
+
+  it("takes espresso and cortado cups as one-size pieces", () => {
+    const base = { quantity: 2, description: "" };
+    const ok = (l: object) =>
+      orderLineSchema.safeParse({ ...base, ...l }).success;
+    expect(ok({ type: "espresso-cup" })).toBe(true);
+    expect(ok({ type: "cortado-cup" })).toBe(true);
+    expect(ok({ type: "cortado-cup", size: "8" })).toBe(false);
   });
 
   it("requires the terms to be accepted", () => {

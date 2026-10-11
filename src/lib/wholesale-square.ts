@@ -7,12 +7,15 @@ import {
   sizeLabel,
   type BulkCode,
   type BulkOrder,
+  type OrderKind,
   type OrderLine,
   type PieceType,
 } from "@/lib/wholesale";
+import { unitPrice } from "@/lib/commission-prices";
 
 /*
- * Turns a bulk order from /wholesale into Square records alicia works from:
+ * Turns a bulk order from /wholesale (or a small commission from
+ * /commission) into Square records alicia works from:
  * the shop as a customer, an order priced from the "Wholesale …" catalog
  * items, and a DRAFT invoice on it. Nothing is sent to the shop — alicia
  * reviews the draft, adds any extra charges (a design, a logo stamp), sets
@@ -23,11 +26,14 @@ import {
  * "something else") goes on as a $0 line for her to price.
  */
 
-/* the Square item each piece type is priced from; "other" is always custom */
+/* the Square item each piece type is priced from; "other" is always custom.
+ * Commissions don't use these — they're priced from the regular price sheet. */
 export const SQUARE_ITEM_NAMES: Record<PieceType, string | null> = {
   cup: "Wholesale No Handle Mug",
   "mug-with-handle": "Wholesale Handle Mug",
   tumbler: "Wholesale Sippy Mug",
+  "espresso-cup": "Wholesale Espresso Cup",
+  "cortado-cup": "Wholesale Cortado Cup",
   "matcha-bowl": "Wholesale Matcha Bowl",
   "trinket-dish": "Wholesale Jewelry Dish",
   other: null,
@@ -112,6 +118,26 @@ export function buildLineItems(
   });
 }
 
+/* commission lines carry their price-sheet price; anything without one is
+ * a $0 line for alicia to price */
+export function buildCommissionLineItems(
+  lines: readonly OrderLine[],
+): Square.OrderLineItem[] {
+  return lines.map((line) => {
+    const each = unitPrice(line);
+    const note = line.description || undefined;
+    return {
+      name: lineLabel(line),
+      quantity: String(line.quantity),
+      basePriceMoney: { amount: BigInt(each ?? 0), currency: USD },
+      note:
+        each !== null || line.type === "other"
+          ? note
+          : [note, "(custom size — price by hand)"].filter(Boolean).join(" "),
+    };
+  });
+}
+
 /* Square wants E.164; anything that isn't a plain US number is left off */
 export function toE164(phone: string): string | undefined {
   const digits = phone.replace(/\D/g, "");
@@ -120,10 +146,18 @@ export function toE164(phone: string): string | undefined {
   return undefined;
 }
 
-export function invoiceDescription(order: BulkOrder): string {
+const KIND_NAME: Record<OrderKind, string> = {
+  wholesale: "bulk order",
+  commission: "commission",
+};
+
+export function invoiceDescription(
+  order: BulkOrder,
+  kind: OrderKind = "wholesale",
+): string {
   const { contact } = order;
   return [
-    `bulk order from ${contact.business} — ${contact.name}, ${contact.email}${
+    `${KIND_NAME[kind]} from ${contact.business ? `${contact.business} — ` : ""}${contact.name}, ${contact.email}${
       contact.phone ? `, ${contact.phone}` : ""
     }.`,
     `${countPieces(order.lines)} pieces.`,
@@ -138,6 +172,7 @@ async function findOrCreateCustomer(
   client: SquareClient,
   order: BulkOrder,
   key: string,
+  kind: OrderKind,
 ): Promise<string> {
   const { contact } = order;
   const { customers = [] } = await client.customers.search({
@@ -149,10 +184,13 @@ async function findOrCreateCustomer(
   const { customer } = await client.customers.create({
     idempotencyKey: `${key}-customer`,
     givenName: contact.name,
-    companyName: contact.business,
+    companyName: contact.business || undefined,
     emailAddress: contact.email,
     phoneNumber: toE164(contact.phone),
-    note: "wholesale — came in through the bulk order form",
+    note:
+      kind === "wholesale"
+        ? "wholesale — came in through the bulk order form"
+        : "commission — came in through the commission form",
   });
   if (!customer?.id) throw new Error("square returned no customer");
   return customer.id;
@@ -170,14 +208,19 @@ export async function createSquareBulkOrder(
   order: BulkOrder,
   code: BulkCode,
   submissionId: string,
+  kind: OrderKind = "wholesale",
 ): Promise<SquareBulkOrderResult> {
   const locationId = process.env.SQUARE_LOCATION_ID;
   if (!locationId) throw new Error("SQUARE_LOCATION_ID is not set");
   const key = `ws-${submissionId}`;
 
-  const [catalog, customerId] = await Promise.all([
-    fetchWholesaleCatalog(client),
-    findOrCreateCustomer(client, order, key),
+  const [lineItems, customerId] = await Promise.all([
+    kind === "wholesale"
+      ? fetchWholesaleCatalog(client).then((catalog) =>
+          buildLineItems(order.lines, catalog),
+        )
+      : buildCommissionLineItems(order.lines),
+    findOrCreateCustomer(client, order, key, kind),
   ]);
 
   const { order: created } = await client.orders.create({
@@ -186,7 +229,7 @@ export async function createSquareBulkOrder(
       locationId,
       customerId,
       referenceId: code.code.slice(0, 40),
-      lineItems: buildLineItems(order.lines, catalog),
+      lineItems,
     },
   });
   if (!created?.id) throw new Error("square returned no order");
@@ -198,8 +241,8 @@ export async function createSquareBulkOrder(
       orderId: created.id,
       primaryRecipient: { customerId },
       deliveryMethod: "EMAIL",
-      title: `bulk order · ${code.code}`.slice(0, 255),
-      description: invoiceDescription(order),
+      title: `${KIND_NAME[kind]} · ${code.code}`.slice(0, 255),
+      description: invoiceDescription(order, kind),
       // one balance due on the code's completion date — alicia splits it
       // into a deposit + balance when she accepts the order
       paymentRequests: [{ requestType: "BALANCE", dueDate: code.earliest }],

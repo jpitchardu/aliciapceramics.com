@@ -11,12 +11,13 @@ import {
 import { CeramicLabel } from "@/ui/CeramicLabel";
 import {
   CAT,
-  MIN_PIECES,
   countPieces,
   lineLabel,
   lineSize,
   type OrderLine,
 } from "@/lib/wholesale";
+import { subtotal, unitPrice, usd } from "@/lib/commission-prices";
+import { pieces, rangeText, useFlow } from "./flows";
 
 /* A line on the sheet carries a client-side id so it can be removed. */
 export type SheetLine = OrderLine & { id: string };
@@ -336,13 +337,13 @@ export function Ask({
   );
 }
 
-/* progress toward the ten-piece minimum — ambient, never a warning */
-export function MinMeter({ count }: { count: number }) {
-  const met = count >= MIN_PIECES;
-  const pct = Math.min(1, count / MIN_PIECES);
+/* progress through the piece range (ten or more, or one to nine) —
+ * ambient, never a warning */
+export function PieceMeter({ count }: { count: number }) {
+  const { label, status, fill } = rangeText(useFlow(), count);
   return (
     <div role="status" aria-live="polite">
-      <SmallLabel>a bulk order is ten pieces or more</SmallLabel>
+      <SmallLabel>{label}</SmallLabel>
       <div
         aria-hidden
         style={{
@@ -358,16 +359,14 @@ export function MinMeter({ count }: { count: number }) {
             left: 0,
             top: -1,
             height: 3,
-            width: `${pct * 100}%`,
+            width: `${fill * 100}%`,
             background: "var(--ink)",
           }}
           className="ws-meter-fill"
         />
       </div>
       <div style={{ marginTop: 10, fontSize: 15, color: "var(--ink-soft)" }}>
-        {met
-          ? `that's ${count} pieces — you're past ten, whenever you're ready.`
-          : `${count} so far · ${MIN_PIECES - count} more to reach ten.`}
+        {status}
       </div>
     </div>
   );
@@ -418,7 +417,56 @@ const RemoveButton = ({
   </button>
 );
 
-/* the ruled line sheet — piece · size · qty, then the total */
+/* the line's total, or "—" when alicia prices it with them */
+const linePrice = (l: SheetLine) => {
+  const each = unitPrice(l);
+  return each === null ? "—" : usd(each * l.quantity);
+};
+
+/* the subtotal and its caveats — commissions only */
+function Subtotal({ lines }: { lines: readonly SheetLine[] }) {
+  const { cents, unpriced } = subtotal(lines);
+  return (
+    <div style={{ paddingTop: 12 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto",
+          gap: 14,
+          alignItems: "baseline",
+        }}
+      >
+        <SmallLabel color="var(--ink)">subtotal</SmallLabel>
+        <div
+          style={{
+            fontSize: 24,
+            fontWeight: 700,
+            textAlign: "right",
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {usd(cents)}
+          {unpriced > 0 && "+"}
+        </div>
+      </div>
+      <p
+        style={{
+          margin: "8px 0 0",
+          fontSize: 13,
+          lineHeight: 1.5,
+          color: "var(--ink-soft)",
+        }}
+      >
+        before tax. prices are subject to change — i&apos;ll confirm the final
+        price before i invoice you.
+        {unpriced > 0 &&
+          ` ${unpriced === 1 ? "one line is" : `${unpriced} lines are`} priced with you, so ${unpriced === 1 ? "it isn't" : "they aren't"} counted yet.`}
+      </p>
+    </div>
+  );
+}
+
+/* the ruled line sheet — piece · size · qty (· price), then the total */
 export function LineTable({
   lines,
   onRemove,
@@ -426,9 +474,18 @@ export function LineTable({
   lines: readonly SheetLine[];
   onRemove?: (id: string) => void;
 }) {
-  const cols = onRemove ? "1fr 72px 44px 32px" : "1fr 90px 64px";
+  const flow = useFlow();
+  const { priced } = flow;
+  // priced sheets fold the size under the piece to make room for the price
+  const cols = priced
+    ? onRemove
+      ? "1fr 36px 64px 32px"
+      : "1fr 44px 72px"
+    : onRemove
+      ? "1fr 72px 44px 32px"
+      : "1fr 90px 64px";
   return (
-    <div data-sheet tabIndex={-1} aria-label="your line sheet">
+    <div data-sheet tabIndex={-1} aria-label={flow.sheetTitle}>
       <div
         style={{
           display: "grid",
@@ -439,8 +496,11 @@ export function LineTable({
         }}
       >
         <SmallLabel>piece</SmallLabel>
-        <SmallLabel>size</SmallLabel>
+        {!priced && <SmallLabel>size</SmallLabel>}
         <SmallLabel style={{ textAlign: "right" }}>qty</SmallLabel>
+        {priced && (
+          <SmallLabel style={{ textAlign: "right" }}>price</SmallLabel>
+        )}
       </div>
       {lines.length === 0 && (
         <div
@@ -451,7 +511,7 @@ export function LineTable({
             color: "var(--ink-faint)",
           }}
         >
-          nothing yet — choose a piece to start your line sheet.
+          nothing yet — choose a piece to start {flow.sheetTitle}.
         </div>
       )}
       {lines.map((l) => (
@@ -468,6 +528,20 @@ export function LineTable({
         >
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 18 }}>{CAT[l.type].label}</div>
+            {priced && (l.size || l.design) && (
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 14,
+                  color: "var(--ink-soft)",
+                  overflowWrap: "anywhere",
+                }}
+              >
+                {[l.size && lineSize(l), l.design && "with a design"]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </div>
+            )}
             {l.description && (
               <div
                 style={{
@@ -481,15 +555,17 @@ export function LineTable({
               </div>
             )}
           </div>
-          <div
-            style={{
-              fontSize: 15,
-              color: "var(--ink-soft)",
-              overflowWrap: "anywhere",
-            }}
-          >
-            {l.size ? lineSize(l) : "—"}
-          </div>
+          {!priced && (
+            <div
+              style={{
+                fontSize: 15,
+                color: "var(--ink-soft)",
+                overflowWrap: "anywhere",
+              }}
+            >
+              {l.size ? lineSize(l) : "—"}
+            </div>
+          )}
           <div
             style={{
               fontSize: 18,
@@ -499,6 +575,17 @@ export function LineTable({
           >
             {l.quantity}
           </div>
+          {priced && (
+            <div
+              style={{
+                fontSize: 16,
+                textAlign: "right",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {linePrice(l)}
+            </div>
+          )}
           {onRemove && <RemoveButton line={l} onRemove={onRemove} />}
         </div>
       ))}
@@ -514,7 +601,7 @@ export function LineTable({
         <SmallLabel color="var(--ink)">pieces in all</SmallLabel>
         <div
           style={{
-            fontSize: 24,
+            fontSize: priced ? 18 : 24,
             fontWeight: 700,
             textAlign: "right",
             fontVariantNumeric: "tabular-nums",
@@ -523,6 +610,7 @@ export function LineTable({
           {countPieces(lines)}
         </div>
       </div>
+      {priced && <Subtotal lines={lines} />}
     </div>
   );
 }
@@ -535,6 +623,7 @@ function CartLines({
   lines: readonly SheetLine[];
   onRemove: (id: string) => void;
 }) {
+  const flow = useFlow();
   if (lines.length === 0) {
     return (
       <div style={{ fontSize: 14, color: "var(--ink-faint)" }}>
@@ -543,13 +632,15 @@ function CartLines({
     );
   }
   return (
-    <div data-sheet tabIndex={-1} aria-label="your line sheet">
+    <div data-sheet tabIndex={-1} aria-label={flow.sheetTitle}>
       {lines.map((l, i) => (
         <div
           key={l.id}
           style={{
             display: "grid",
-            gridTemplateColumns: "30px 1fr auto",
+            gridTemplateColumns: flow.priced
+              ? "30px 1fr auto auto"
+              : "30px 1fr auto",
             gap: 12,
             alignItems: "baseline",
             padding: "11px 0",
@@ -575,9 +666,19 @@ function CartLines({
               </div>
             )}
           </div>
+          {flow.priced && (
+            <span style={{ fontSize: 15, fontVariantNumeric: "tabular-nums" }}>
+              {linePrice(l)}
+            </span>
+          )}
           <RemoveButton line={l} onRemove={onRemove} />
         </div>
       ))}
+      {flow.priced && (
+        <div style={{ borderTop: "1px solid var(--rule-soft)", marginTop: 4 }}>
+          <Subtotal lines={lines} />
+        </div>
+      )}
     </div>
   );
 }
@@ -590,6 +691,7 @@ export function OrderCart({
   lines: readonly SheetLine[];
   onRemove: (id: string) => void;
 }) {
+  const flow = useFlow();
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const toggle = useRef<HTMLButtonElement>(null);
@@ -628,9 +730,10 @@ export function OrderCart({
         }}
       >
         <span style={{ display: "flex", alignItems: "baseline", gap: 13 }}>
-          <SmallLabel color="var(--ink)">your line sheet</SmallLabel>
+          <SmallLabel color="var(--ink)">{flow.sheetTitle}</SmallLabel>
           <span style={{ fontSize: 16, whiteSpace: "nowrap" }}>
-            {count} pieces
+            {pieces(count)}
+            {flow.priced && count > 0 && ` · ${usd(subtotal(lines).cents)}`}
           </span>
         </span>
         <span
@@ -683,7 +786,7 @@ export function OrderCart({
               borderTop: "1px solid var(--rule-strong)",
             }}
           >
-            <MinMeter count={count} />
+            <PieceMeter count={count} />
             <div
               style={{
                 marginTop: 10,

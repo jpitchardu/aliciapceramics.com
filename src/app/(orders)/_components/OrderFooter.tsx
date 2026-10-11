@@ -2,12 +2,12 @@ import { CeramicLabel } from "@/ui/CeramicLabel";
 import { Sig } from "@/ui/Sig";
 import { SITE } from "@/lib/config";
 
-export function WholesaleFooter() {
+export function OrderFooter({ label }: { label: string }) {
   return (
     <footer className="ws-footer">
       <div>
         <CeramicLabel color="var(--ink-faint)">
-          {SITE.name} · for wholesale/bulk orders
+          {SITE.name} · {label}
         </CeramicLabel>
         <div style={{ marginTop: 10, fontSize: 14, color: "var(--ink-soft)" }}>
           the studio is at {SITE.studio.address.split(",")[0]} —{" "}

@@ -199,6 +199,53 @@ describe("createSquareBulkOrder", () => {
     expect(invoiceReq.invoice.description).toContain("for the new location");
   });
 
+  it("prices a commission from the price sheet, without the catalog", async () => {
+    const client = mockClient();
+    const commission: BulkOrder = {
+      ...order,
+      code: "little-cute-mugs",
+      contact: { ...order.contact, business: "" },
+      lines: [
+        { type: "cup", size: "8", design: true, quantity: 2, description: "" },
+        {
+          type: "tumbler",
+          size: "custom",
+          customSize: "16 oz",
+          quantity: 1,
+          description: "",
+        },
+      ],
+    };
+    await createSquareBulkOrder(
+      client as unknown as SquareClient,
+      commission,
+      { code: "little-cute-mugs", earliest: "2026-12-15" },
+      commission.submissionId,
+      "commission",
+    );
+    expect(client.catalog.search).not.toHaveBeenCalled();
+    expect(client.customers.create).toHaveBeenCalledWith(
+      expect.objectContaining({ companyName: undefined }),
+    );
+    expect(client.orders.create.mock.calls[0][0].order.lineItems).toEqual([
+      {
+        name: "cup · 8 oz · with a design",
+        quantity: "2",
+        basePriceMoney: { amount: BigInt(2800), currency: "USD" },
+        note: undefined,
+      },
+      {
+        name: "tumbler · custom: 16 oz",
+        quantity: "1",
+        basePriceMoney: { amount: BigInt(0), currency: "USD" },
+        note: "(custom size — price by hand)",
+      },
+    ]);
+    const invoice = client.invoices.create.mock.calls[0][0].invoice;
+    expect(invoice.title).toBe("commission · little-cute-mugs");
+    expect(invoice.description).toMatch(/^commission from june park, /);
+  });
+
   it("reuses a customer square already has for that email", async () => {
     const client = mockClient({ existingCustomer: "OLDCUST" });
     await createSquareBulkOrder(

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { estimatedCompletion, findBulkCode } from "@/lib/wholesale-codes";
+import {
+  estimatedCompletion,
+  findBulkCode,
+  findCode,
+} from "@/lib/wholesale-codes";
 
 const now = new Date("2026-10-06T15:00:00Z");
 
@@ -14,6 +18,17 @@ describe("findBulkCode", () => {
   it("turns away anything else", () => {
     expect(findBulkCode("bloom-24", now)).toBeNull();
     expect(findBulkCode("", now)).toBeNull();
+  });
+});
+
+describe("findCode", () => {
+  it("keeps each flow to its own code", () => {
+    expect(findCode("commission", "Little-Cute-Mugs", now)).toEqual({
+      code: "little-cute-mugs",
+      earliest: "2026-12-29",
+    });
+    expect(findCode("commission", "buy-more-mugs", now)).toBeNull();
+    expect(findCode("wholesale", "little-cute-mugs", now)).toBeNull();
   });
 });
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { WholesaleHeader } from "./_components/WholesaleHeader";
-import { WholesaleFooter } from "./_components/WholesaleFooter";
-import "./wholesale.css";
+import { OrderHeader } from "../_components/OrderHeader";
+import { OrderFooter } from "../_components/OrderFooter";
+import "../orders.css";
 
 export const metadata: Metadata = {
   // the first step's title; the flow retitles the tab as it moves on
@@ -18,9 +18,9 @@ export default function WholesaleLayout({
 }) {
   return (
     <div className="ws-page">
-      <WholesaleHeader />
+      <OrderHeader label="bulk order" />
       <main>{children}</main>
-      <WholesaleFooter />
+      <OrderFooter label="for wholesale/bulk orders" />
     </div>
   );
 }
