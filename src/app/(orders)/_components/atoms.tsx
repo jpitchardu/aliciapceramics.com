@@ -528,7 +528,7 @@ export function LineTable({
         >
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 18 }}>{CAT[l.type].label}</div>
-            {priced && (l.size || l.design) && (
+            {((priced && l.size) || l.design) && (
               <div
                 style={{
                   marginTop: 4,
@@ -537,7 +537,7 @@ export function LineTable({
                   overflowWrap: "anywhere",
                 }}
               >
-                {[l.size && lineSize(l), l.design && "with a design"]
+                {[priced && l.size && lineSize(l), l.design && "with a design"]
                   .filter(Boolean)
                   .join(" · ")}
               </div>

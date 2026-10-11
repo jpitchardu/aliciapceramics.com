@@ -52,6 +52,41 @@ describe("findVariation", () => {
   });
 });
 
+describe("findVariation with designs", () => {
+  const withDesigns: WholesaleCatalog = new Map([
+    [
+      "wholesale handle mug",
+      new Map([
+        ["8 oz", "MUG8"],
+        ["8 oz · with a design", "MUG8D"],
+      ]),
+    ],
+    [
+      "wholesale matcha bowl",
+      new Map([
+        ["regular", "MATCHA"],
+        ["with a design", "MATCHAD"],
+      ]),
+    ],
+  ]);
+
+  it("picks the design variation when the line has a design", () => {
+    const mug = { type: "mug-with-handle", size: "8" } as const;
+    expect(findVariation(mug, withDesigns)).toBe("MUG8");
+    expect(findVariation({ ...mug, design: true }, withDesigns)).toBe("MUG8D");
+    expect(findVariation({ type: "matcha-bowl" }, withDesigns)).toBe("MATCHA");
+    expect(
+      findVariation({ type: "matcha-bowl", design: true }, withDesigns),
+    ).toBe("MATCHAD");
+  });
+
+  it("leaves a design square doesn't have yet for alicia to price", () => {
+    expect(
+      findVariation({ type: "matcha-bowl", design: true }, catalog),
+    ).toBeNull();
+  });
+});
+
 describe("buildLineItems", () => {
   it("prices catalog pieces from square and leaves the rest at $0", () => {
     const items = buildLineItems(

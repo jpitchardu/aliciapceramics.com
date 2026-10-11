@@ -32,10 +32,10 @@ const PRICES: Record<PieceType, Readonly<Record<Size, Price>> | Price | null> =
       "10": { plain: 4000, design: 4400 },
       "12": { plain: 4600, design: 4800 },
     },
-    "espresso-cup": { plain: 1500 },
+    "espresso-cup": { plain: 1500, design: 1900 },
     "cortado-cup": { plain: 2000, design: 2400 },
-    "matcha-bowl": { plain: 5000 },
-    "trinket-dish": { plain: 1500 },
+    "matcha-bowl": { plain: 5000, design: 5400 },
+    "trinket-dish": { plain: 1500, design: 1900 },
     // something else is priced together
     other: null,
   };

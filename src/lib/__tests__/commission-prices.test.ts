@@ -37,6 +37,9 @@ describe("commission prices", () => {
       );
     }
     expect(unitPrice({ type: "cortado-cup", design: true })).toBe(2400);
+    expect(unitPrice({ type: "espresso-cup", design: true })).toBe(1900);
+    expect(unitPrice({ type: "matcha-bowl", design: true })).toBe(5400);
+    expect(unitPrice({ type: "trinket-dish", design: true })).toBe(1900);
     expect(designExtra("cup", "8")).toBe(600);
     expect(designExtra("tumbler", "12")).toBe(200);
     expect(designExtra("cup", "custom")).toBeNull();

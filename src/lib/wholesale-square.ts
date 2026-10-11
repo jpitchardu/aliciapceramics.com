@@ -73,9 +73,13 @@ export async function fetchWholesaleCatalog(
   return catalog;
 }
 
+/* a design is its own variation: "8 oz · with a design", or "with a
+ * design" on a one-size piece */
+export const DESIGN_VARIATION = "with a design";
+
 /* the variation a line is priced from, or null to price it by hand */
 export function findVariation(
-  line: Pick<OrderLine, "type" | "size">,
+  line: Pick<OrderLine, "type" | "size" | "design">,
   catalog: WholesaleCatalog,
 ): string | null {
   const itemName = SQUARE_ITEM_NAMES[line.type];
@@ -83,9 +87,17 @@ export function findVariation(
   if (!itemName || line.size === CUSTOM_SIZE) return null;
   const variations = catalog.get(itemName.toLowerCase());
   if (!variations) return null;
-  if (line.size) return variations.get(sizeLabel(line.size)) ?? null;
-  // one-size pieces: the item's only variation, whatever it's called
-  return variations.size === 1 ? [...variations.values()][0] : null;
+  if (line.size) {
+    const size = sizeLabel(line.size);
+    return (
+      variations.get(line.design ? `${size} · ${DESIGN_VARIATION}` : size) ??
+      null
+    );
+  }
+  if (line.design) return variations.get(DESIGN_VARIATION) ?? null;
+  // one-size pieces: the item's only plain variation, whatever it's called
+  const plain = [...variations].filter(([n]) => !n.includes(DESIGN_VARIATION));
+  return plain.length === 1 ? plain[0][1] : null;
 }
 
 const USD = "USD" as Square.Currency;

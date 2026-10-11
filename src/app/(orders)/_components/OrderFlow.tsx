@@ -643,7 +643,7 @@ function OrderStep({
       return;
     }
     setLimitError("");
-    const design = flow.priced && DESIGNABLE.includes(c.type) && draft.design;
+    const design = DESIGNABLE.includes(c.type) && draft.design;
     onAdd({
       type: c.type,
       size: c.sizes.length ? draft.size : undefined,
@@ -946,7 +946,7 @@ function Drawer({
           />
         </div>
       )}
-      {flow.priced && DESIGNABLE.includes(c.type) && (
+      {DESIGNABLE.includes(c.type) && (
         <div role="group" aria-label="design">
           <SmallLabel>design</SmallLabel>
           <div
@@ -967,7 +967,7 @@ function Drawer({
               style={choice(draft.design)}
             >
               with a design
-              {extra !== null && ` · +${usd(extra)}`}
+              {flow.priced && extra !== null && ` · +${usd(extra)}`}
             </button>
           </div>
         </div>

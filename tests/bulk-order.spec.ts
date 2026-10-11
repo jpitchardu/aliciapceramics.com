@@ -72,7 +72,11 @@ test.describe("bulk order", () => {
     await page.getByLabel("what size would you like?").fill("16 oz");
     await page.getByRole("button", { name: /add to line sheet/i }).click();
     await expect(page.getByText("custom: 16 oz").first()).toBeAttached();
-    await addLine(page, "jewelry dish", 3);
+    await page.getByRole("button", { name: /^jewelry dish/ }).click();
+    await page.getByRole("button", { name: "with a design" }).click();
+    await page.getByLabel("quantity").fill("3");
+    await page.getByRole("button", { name: /add to line sheet/i }).click();
+    await expect(page.getByText("with a design").first()).toBeAttached();
     await expect(next).toBeEnabled();
     await next.click();
 

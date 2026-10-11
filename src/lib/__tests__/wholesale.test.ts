@@ -89,14 +89,15 @@ describe("wholesale", () => {
     ).toBe(false);
   });
 
-  it("only takes a design on cups, mugs, tumblers and cortado cups", () => {
+  it("takes a design on every catalog piece but something else", () => {
     const base = { quantity: 2, description: "", design: true };
     const ok = (l: object) =>
       orderLineSchema.safeParse({ ...base, ...l }).success;
     expect(ok({ type: "cup", size: "8" })).toBe(true);
     expect(ok({ type: "cortado-cup" })).toBe(true);
-    expect(ok({ type: "matcha-bowl" })).toBe(false);
-    expect(ok({ type: "espresso-cup" })).toBe(false);
+    expect(ok({ type: "matcha-bowl" })).toBe(true);
+    expect(ok({ type: "espresso-cup" })).toBe(true);
+    expect(ok({ type: "other" })).toBe(false);
     expect(lineLabel({ type: "cup", size: "8", design: true })).toBe(
       "cup · 8 oz · with a design",
     );
