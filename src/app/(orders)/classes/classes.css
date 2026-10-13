@@ -1,0 +1,311 @@
+/*
+ * /classes — the responsive rules for the booking pages. Like the order
+ * flows, the look lives inline in the components; only what changes between
+ * phone and desktop lives here. Desktop starts at 1024px.
+ */
+
+.cl-wrap {
+  /* main is a flex column — without this the wrapper shrinks to its content */
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 14px var(--ws-pad) 0;
+}
+@media (min-width: 1024px) {
+  .cl-wrap {
+    padding-top: 26px;
+  }
+}
+
+/* the preview ribbon — this is a test page, nothing is charged */
+.cl-preview {
+  margin: 0 var(--ws-pad);
+  padding: 10px 14px;
+  border: 1px dashed var(--rule-strong);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* ── the date numeral ───────────────────────────────────────────── */
+.cl-date-num {
+  font-size: 42px;
+}
+.cl-date-day {
+  font-size: 11px;
+}
+@media (min-width: 1024px) {
+  .cl-date--lg .cl-date-num {
+    font-size: 66px;
+  }
+  .cl-date--lg .cl-date-day {
+    font-size: 12px;
+  }
+}
+
+/* ── the list ───────────────────────────────────────────────────── */
+.cl-head {
+  text-align: left;
+}
+.cl-head-title {
+  font-size: 34px;
+}
+@media (min-width: 1024px) {
+  .cl-head {
+    text-align: center;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .cl-head-title {
+    font-size: 50px;
+  }
+  .cl-head-sub {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+.cl-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "date body"
+    "date buy";
+  gap: 12px 16px;
+  align-items: start;
+  padding: 20px 0;
+}
+.cl-row--joint {
+  padding: 20px 14px;
+}
+.cl-row-date {
+  grid-area: date;
+}
+.cl-row-body {
+  grid-area: body;
+}
+.cl-row-buy {
+  grid-area: buy;
+}
+.cl-row-title {
+  font-size: 21px;
+}
+/* a two-session date block is wide — on a phone it gets its own line */
+.cl-row--multi {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "date"
+    "body"
+    "buy";
+}
+.cl-row--multi .cl-row-date > .cl-date {
+  display: inline-block;
+}
+.cl-row-price {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.cl-row-cta {
+  width: 100%;
+}
+@media (min-width: 1024px) {
+  .cl-row-price {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .cl-row-cta {
+    width: auto;
+    min-width: 160px;
+  }
+  .cl-row,
+  .cl-row--multi {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "date body buy";
+    gap: 34px;
+    align-items: center;
+    padding: 30px 0;
+  }
+  .cl-row--joint {
+    padding: 30px 26px;
+  }
+  .cl-row-buy {
+    text-align: right;
+  }
+  .cl-row-title {
+    font-size: 30px;
+  }
+}
+
+/* the private invitation that closes the list */
+.cl-invite {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+@media (min-width: 1024px) {
+  .cl-invite {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 56px;
+  }
+}
+
+/* ── one event ──────────────────────────────────────────────────── */
+.cl-mast {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.cl-mast--multi {
+  flex-direction: column;
+}
+.cl-mast-title {
+  font-size: 30px;
+}
+@media (min-width: 1024px) {
+  .cl-mast,
+  .cl-mast--multi {
+    flex-direction: row;
+    gap: 40px;
+  }
+  .cl-mast-title {
+    font-size: 52px;
+  }
+}
+
+.cl-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.cl-blurb {
+  font-size: 16px;
+}
+@media (min-width: 1024px) {
+  .cl-detail {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 56px;
+  }
+  .cl-detail--private {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.72fr);
+    gap: 60px;
+  }
+  .cl-sticky {
+    position: sticky;
+    top: 32px;
+  }
+  .cl-blurb {
+    font-size: 21px;
+  }
+}
+
+/* key → value rows; stacked on a phone */
+.cl-fact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+@media (min-width: 640px) {
+  .cl-fact {
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 22px;
+    align-items: baseline;
+  }
+}
+
+/* who brings what — side by side on desktop */
+.cl-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+@media (min-width: 640px) {
+  .cl-split {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+  }
+}
+
+/* two choices / two fields a row once there's room */
+.cl-two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+.cl-two--fields {
+  gap: 20px;
+}
+@media (min-width: 640px) {
+  .cl-two {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .cl-two--fields {
+    gap: 28px;
+  }
+}
+
+.cl-title-xl {
+  font-size: 32px;
+}
+@media (min-width: 1024px) {
+  .cl-title-xl {
+    font-size: 50px;
+  }
+}
+
+/* the seat stepper buttons */
+.cl-step:disabled {
+  color: var(--ink-faint);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* chosen tiles (place, format, dates) */
+.cl-choice:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cl-textarea {
+  width: 100%;
+  min-height: 84px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink);
+  resize: vertical;
+}
+.cl-textarea::placeholder {
+  color: var(--ink-faint);
+  opacity: 0.7;
+}
+.cl-textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+/* private request: on a phone the terms come before the form */
+.cl-private-aside {
+  order: -1;
+}
+.cl-send {
+  width: 100%;
+}
+@media (min-width: 1024px) {
+  .cl-private-aside {
+    order: 0;
+  }
+  .cl-send {
+    width: auto;
+    min-width: 260px;
+  }
+}
