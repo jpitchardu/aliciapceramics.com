@@ -135,9 +135,11 @@ export function Field({
   autoComplete,
   error,
   inputMode,
+  maxLength,
   id: givenId,
 }: {
   id?: string;
+  maxLength?: number;
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -170,6 +172,7 @@ export function Field({
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
+          maxLength={maxLength}
           style={{ ...style, fontSize: 17 }}
           rows={3}
         />
@@ -185,6 +188,7 @@ export function Field({
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-err` : undefined}
           onChange={(e) => onChange(e.target.value)}
+          maxLength={maxLength}
           style={style}
         />
       )}

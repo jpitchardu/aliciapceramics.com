@@ -26,6 +26,16 @@ import { unitPrice } from "@/lib/commission-prices";
  * "something else") goes on as a $0 line for her to price.
  */
 
+/*
+ * Where what they typed lands, like special instructions on a delivery
+ * order: each piece's details are that line's note, and their note to
+ * alicia plus their inspiration are the order's note (a pickup note, the
+ * only order-level note Square has — max 500 characters). Both are their
+ * own words. The invoice description is just a short thank-you, and their
+ * phone lives on the customer profile.
+ */
+export const ORDER_NOTE_MAX = 500;
+
 /* the Square item each piece type is priced from; "other" is always custom.
  * Commissions don't use these — they're priced from the regular price sheet. */
 export const SQUARE_ITEM_NAMES: Record<PieceType, string | null> = {
@@ -108,6 +118,7 @@ export function buildLineItems(
 ): Square.OrderLineItem[] {
   return lines.map((line) => {
     const quantity = String(line.quantity);
+    // only their own words — a $0 line already says it needs pricing
     const note = line.description || undefined;
     const variationId = findVariation(line, catalog);
     if (variationId) return { catalogObjectId: variationId, quantity, note };
@@ -115,17 +126,7 @@ export function buildLineItems(
       name: line.type === "other" ? CAT.other.label : lineLabel(line),
       quantity,
       basePriceMoney: { amount: BigInt(0), currency: USD },
-      note:
-        line.type === "other"
-          ? note
-          : [
-              note,
-              line.size === CUSTOM_SIZE
-                ? "(custom size — price by hand)"
-                : "(no wholesale price found in square)",
-            ]
-              .filter(Boolean)
-              .join(" "),
+      note,
     };
   });
 }
@@ -135,19 +136,12 @@ export function buildLineItems(
 export function buildCommissionLineItems(
   lines: readonly OrderLine[],
 ): Square.OrderLineItem[] {
-  return lines.map((line) => {
-    const each = unitPrice(line);
-    const note = line.description || undefined;
-    return {
-      name: lineLabel(line),
-      quantity: String(line.quantity),
-      basePriceMoney: { amount: BigInt(each ?? 0), currency: USD },
-      note:
-        each !== null || line.type === "other"
-          ? note
-          : [note, "(custom size — price by hand)"].filter(Boolean).join(" "),
-    };
-  });
+  return lines.map((line) => ({
+    name: lineLabel(line),
+    quantity: String(line.quantity),
+    basePriceMoney: { amount: BigInt(unitPrice(line) ?? 0), currency: USD },
+    note: line.description || undefined,
+  }));
 }
 
 /* Square wants E.164; anything that isn't a plain US number is left off */
@@ -163,21 +157,62 @@ const KIND_NAME: Record<OrderKind, string> = {
   commission: "commission",
 };
 
+/* printed on the invoice the customer gets — a thank-you, nothing they
+ * typed; alicia can rewrite it before she sends it */
 export function invoiceDescription(
   order: BulkOrder,
   kind: OrderKind = "wholesale",
 ): string {
-  const { contact } = order;
-  return [
-    `${KIND_NAME[kind]} from ${contact.business ? `${contact.business} — ` : ""}${contact.name}, ${contact.email}${
-      contact.phone ? `, ${contact.phone}` : ""
-    }.`,
-    `${countPieces(order.lines)} pieces.`,
-    order.inspiration && `inspiration: ${order.inspiration}`,
+  const n = countPieces(order.lines);
+  return `thank you for your ${KIND_NAME[kind]} — ${n} ${
+    n === 1 ? "piece" : "pieces"
+  }, each one made by hand.`;
+}
+
+/* their note and inspiration, as the order's special instructions */
+export function orderNote(order: BulkOrder): string | null {
+  const phone =
+    order.contact.phone && !toE164(order.contact.phone)
+      ? `phone: ${order.contact.phone}`
+      : "";
+  const note = [
     order.notes && `their note: ${order.notes}`,
+    order.inspiration && `inspiration: ${order.inspiration}`,
+    // a number Square couldn't store on the profile
+    phone,
   ]
     .filter(Boolean)
     .join("\n\n");
+  if (!note) return null;
+  return note.length > ORDER_NOTE_MAX
+    ? `${note.slice(0, ORDER_NOTE_MAX - 1)}…`
+    : note;
+}
+
+/* the order note rides on a pickup, the only order-level note Square has;
+ * dated for the estimated completion, midday in dallas */
+export function notesFulfillment(
+  order: BulkOrder,
+  code: BulkCode,
+): Square.Fulfillment[] | undefined {
+  const note = orderNote(order);
+  if (!note) return undefined;
+  return [
+    {
+      type: "PICKUP",
+      state: "PROPOSED",
+      pickupDetails: {
+        scheduleType: "SCHEDULED",
+        pickupAt: `${code.earliest}T18:00:00Z`,
+        note,
+        recipient: {
+          displayName: order.contact.name,
+          emailAddress: order.contact.email,
+          phoneNumber: toE164(order.contact.phone),
+        },
+      },
+    },
+  ];
 }
 
 async function findOrCreateCustomer(
@@ -242,6 +277,7 @@ export async function createSquareBulkOrder(
       customerId,
       referenceId: code.code.slice(0, 40),
       lineItems,
+      fulfillments: notesFulfillment(order, code),
     },
   });
   if (!created?.id) throw new Error("square returned no order");

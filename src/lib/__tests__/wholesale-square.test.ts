@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SquareClient } from "square";
 import {
+  ORDER_NOTE_MAX,
   buildLineItems,
   createSquareBulkOrder,
+  orderNote,
   findVariation,
   toE164,
   type WholesaleCatalog,
@@ -112,12 +114,13 @@ describe("buildLineItems", () => {
       basePriceMoney: { amount: BigInt(0) },
       note: "small bud vases",
     });
-    // a priced piece square doesn't know about is flagged for alicia
+    // a priced piece square doesn't know about comes in at $0, with no
+    // working notes printed on the customer's invoice
     expect(items[3]).toMatchObject({
       name: "tumbler · 8 oz",
       basePriceMoney: { amount: BigInt(0) },
-      note: "(no wholesale price found in square)",
     });
+    expect(items[3].note).toBeUndefined();
   });
 
   it("sends a custom size to alicia to price by hand", () => {
@@ -137,8 +140,28 @@ describe("buildLineItems", () => {
       name: "cup · custom: 16 oz",
       quantity: "12",
       basePriceMoney: { amount: BigInt(0) },
-      note: "speckled (custom size — price by hand)",
+      note: "speckled",
     });
+  });
+});
+
+describe("orderNote", () => {
+  it("fits square's 500 characters and keeps a number square couldn't store", () => {
+    const long = orderNote({
+      ...order,
+      notes: "x".repeat(2000),
+      contact: { ...order.contact, phone: "+44 20 7946 0958" },
+    })!;
+    expect(long.length).toBe(ORDER_NOTE_MAX);
+    expect(long.endsWith("…")).toBe(true);
+    expect(
+      orderNote({
+        ...order,
+        notes: "",
+        inspiration: "",
+        contact: { ...order.contact, phone: "+44 20 7946 0958" },
+      }),
+    ).toBe("phone: +44 20 7946 0958");
   });
 });
 
@@ -231,7 +254,41 @@ describe("createSquareBulkOrder", () => {
     });
     // never scheduled or published from here — it stays a draft
     expect(invoiceReq.invoice.scheduledAt).toBeUndefined();
-    expect(invoiceReq.invoice.description).toContain("for the new location");
+    // the invoice the shop receives carries nothing they typed…
+    expect(invoiceReq.invoice.description).toBe(
+      "thank you for your bulk order — 12 pieces, each one made by hand.",
+    );
+    expect(invoiceReq.invoice.description).not.toContain("(214)");
+    // …their note and inspiration are the order's special instructions
+    expect(orderReq.order.fulfillments).toEqual([
+      {
+        type: "PICKUP",
+        state: "PROPOSED",
+        pickupDetails: {
+          scheduleType: "SCHEDULED",
+          pickupAt: "2026-12-15T18:00:00Z",
+          note: "their note: for the new location\n\ninspiration: pinterest.com/stilllife",
+          recipient: {
+            displayName: "june park",
+            emailAddress: "june@stilllife.coffee",
+            phoneNumber: "+12145550134",
+          },
+        },
+      },
+    ]);
+  });
+
+  it("leaves the order note off when there's nothing to say", async () => {
+    const client = mockClient();
+    await createSquareBulkOrder(
+      client as unknown as SquareClient,
+      { ...order, notes: "", inspiration: "" },
+      code,
+      order.submissionId,
+    );
+    expect(
+      client.orders.create.mock.calls[0][0].order.fulfillments,
+    ).toBeUndefined();
   });
 
   it("prices a commission from the price sheet, without the catalog", async () => {
@@ -273,12 +330,14 @@ describe("createSquareBulkOrder", () => {
         name: "tumbler · custom: 16 oz",
         quantity: "1",
         basePriceMoney: { amount: BigInt(0), currency: "USD" },
-        note: "(custom size — price by hand)",
+        note: undefined,
       },
     ]);
     const invoice = client.invoices.create.mock.calls[0][0].invoice;
     expect(invoice.title).toBe("commission · little-cute-mugs");
-    expect(invoice.description).toMatch(/^commission from june park, /);
+    expect(invoice.description).toBe(
+      "thank you for your commission — 3 pieces, each one made by hand.",
+    );
   });
 
   it("reuses a customer square already has for that email", async () => {

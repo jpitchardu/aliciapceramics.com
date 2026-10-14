@@ -20,6 +20,13 @@ import { z } from "zod";
 export const MIN_PIECES = 10;
 export const MAX_QTY_PER_LINE = 200;
 
+/*
+ * The inspiration and the note to alicia travel as the Square order's note,
+ * which Square caps at 500 characters — these leave room for the labels.
+ */
+export const MAX_INSPIRATION = 120;
+export const MAX_NOTES = 350;
+
 export const ORDER_KINDS = ["wholesale", "commission"] as const;
 export type OrderKind = (typeof ORDER_KINDS)[number];
 
@@ -228,8 +235,8 @@ export const orderSchemaFor = (kind: OrderKind) => {
       code: z.string().trim().min(1).max(40),
       contact: contactSchemaFor(kind),
       lines: z.array(orderLineSchema).min(1).max(50),
-      inspiration: z.string().trim().max(500),
-      notes: z.string().trim().max(2000),
+      inspiration: z.string().trim().max(MAX_INSPIRATION),
+      notes: z.string().trim().max(MAX_NOTES),
       consent: z.literal(true),
     })
     .refine((o) => countPieces(o.lines) >= min && countPieces(o.lines) <= max, {

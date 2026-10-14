@@ -9,6 +9,8 @@ import { SITE } from "@/lib/config";
 import {
   CATALOG,
   MAX_CUSTOM_SIZE,
+  MAX_INSPIRATION,
+  MAX_NOTES,
   MAX_QTY_PER_LINE,
   CAT,
   CUSTOM_SIZE,
@@ -1110,15 +1112,29 @@ function VisionStep({
             onChange={(v) => onChange({ inspiration: v })}
             placeholder="a pinterest board, an instagram post, a website…"
             inputMode="url"
+            maxLength={MAX_INSPIRATION}
             big
           />
-          <Field
-            label="anything else i should know"
-            value={notes}
-            onChange={(v) => onChange({ notes: v })}
-            placeholder="dates, colors, how the pieces will be used…"
-            multiline
-          />
+          <div>
+            <Field
+              label="anything else i should know"
+              value={notes}
+              onChange={(v) => onChange({ notes: v })}
+              placeholder="dates, colors, how the pieces will be used…"
+              maxLength={MAX_NOTES}
+              multiline
+            />
+            <p
+              style={{
+                margin: "8px 0 0",
+                fontSize: 13,
+                color: "var(--ink-soft)",
+                textAlign: "right",
+              }}
+            >
+              {MAX_NOTES - notes.length} characters left
+            </p>
+          </div>
           <div
             style={{
               display: "flex",
