@@ -37,10 +37,13 @@ export function DateBlock({
   e,
   size = "lg",
   dim,
+  struck,
 }: {
   e: ClassEvent;
   size?: "lg" | "sm";
   dim?: boolean;
+  /* sold out in the list: the date is struck through */
+  struck?: boolean;
 }) {
   const one = (iso: string) => (
     <div key={iso} style={{ textAlign: "center", minWidth: 62 }}>
@@ -54,6 +57,8 @@ export function DateBlock({
           lineHeight: 1,
           // sold out reads quieter, but stays legible (no transparency)
           color: dim ? "var(--ink-soft)" : "var(--ink)",
+          textDecoration: struck ? "line-through" : undefined,
+          textDecorationThickness: struck ? 1 : undefined,
         }}
       >
         {dayOf(iso)}
@@ -157,17 +162,13 @@ export const EventBadge = ({
 );
 
 /* seats — silent when there's room, plain when it's low or gone */
+/* seats — in the same spaced capitals as "sold out"; plum when it's low */
 export function SeatsNote({ e }: { e: ClassEvent }) {
   if (isSoldOut(e)) return <Label>sold out</Label>;
   return (
-    <span
-      style={{
-        fontSize: 13,
-        color: isLow(e) ? "var(--cassis)" : "var(--ink-soft)",
-      }}
-    >
+    <Label color={isLow(e) ? "var(--cassis)" : "var(--ink)"}>
       {seatNote(e)}
-    </span>
+    </Label>
   );
 }
 

@@ -108,7 +108,7 @@ function EventRow({ e }: { e: ClassEvent }) {
       }}
     >
       <div className="cl-row-date">
-        <DateBlock e={e} dim={out} />
+        <DateBlock e={e} dim={out} struck={out} />
       </div>
       <div className="cl-row-body" style={{ minWidth: 0 }}>
         {joint && (
@@ -164,7 +164,7 @@ function EventRow({ e }: { e: ClassEvent }) {
             color: "var(--ink-soft)",
           }}
         >
-          <span>
+          <span style={out ? { textDecoration: "line-through" } : undefined}>
             {isMulti(e)
               ? `${datesLabel(e)} · ${timeLabel(e)}`
               : `${whenLabel(first(e))} · ${timeLabel(e)}`}
