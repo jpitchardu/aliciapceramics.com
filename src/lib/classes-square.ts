@@ -29,8 +29,8 @@ export const CLASS_ATTRS = {
   make: "you'll leave with",
   duration: "how long",
   seats: "total seats",
+  /* "poppy & fern @poppyandfern" — the handle is split off */
   collabWith: "collab with",
-  collabInstagram: "collab instagram",
   collabNote: "collab note",
 } as const;
 
@@ -118,7 +118,10 @@ export function mapClass(
     (imageId && (related.get(imageId) as any)?.imageData?.url) ||
     "/assets/photo-placeholder.png";
 
-  const collabWith = a("collabWith");
+  // "poppy & fern @poppyandfern" → name + handle
+  const collabRaw = a("collabWith");
+  const handle = collabRaw.match(/@([\w.]+)/)?.[1] ?? "";
+  const collabWith = collabRaw.replace(/@[\w.]+/, "").trim();
   const description = (
     data.descriptionPlaintext ??
     data.description ??
@@ -142,7 +145,7 @@ export function mapClass(
     collab: collabWith
       ? {
           with: collabWith,
-          handle: a("collabInstagram").replace(/^@/, ""),
+          handle,
           trade: "",
           brings: "",
           aliciaBrings: "",
