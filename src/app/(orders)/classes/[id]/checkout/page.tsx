@@ -10,6 +10,7 @@ import {
   whenLabel,
 } from "@/lib/classes";
 import { getClass } from "@/lib/classes-square";
+import { HOLD_MINUTES } from "@/lib/holds";
 import { BackLink, DateBlock, EventBadge, Label } from "../../_components/bits";
 import { ContinueToSquare } from "../../_components/forms";
 
@@ -71,8 +72,8 @@ export default async function CheckoutPage({
         }}
       >
         i keep the card side of things with square, so the last step happens
-        there. your {seatWord} {n === 1 ? "is" : "are"} held as soon as you
-        continue.
+        there. once you continue, your {seatWord} {n === 1 ? "is" : "are"} held
+        for {HOLD_MINUTES} minutes while you pay.
       </p>
 
       <div

@@ -1,6 +1,7 @@
 import type { CatalogObject } from "square";
 import { squareClient } from "@/lib/square";
 import { EVENTS_CATEGORY_NAME } from "@/lib/config";
+import { releaseStaleHolds } from "@/lib/holds";
 import {
   SAMPLE_EVENTS,
   upcoming,
@@ -215,6 +216,10 @@ async function fetchFromSquare(): Promise<ClassEvent[]> {
 /* every upcoming class, soonest first — samples when Square isn't set up */
 export async function getClasses(): Promise<ClassEvent[]> {
   if (!hasSquare()) return upcoming(SAMPLE_EVENTS);
+  // give back seats from checkouts nobody finished, before counting
+  await releaseStaleHolds(squareClient).catch((err) =>
+    console.error("[classes] couldn't release unpaid holds:", err),
+  );
   try {
     return upcoming(await fetchFromSquare());
   } catch (err) {
