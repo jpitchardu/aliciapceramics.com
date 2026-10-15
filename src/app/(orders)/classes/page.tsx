@@ -2,17 +2,18 @@ import { Photo } from "@/ui/Photo";
 import { Sig } from "@/ui/Sig";
 import {
   PRIVATE,
-  SAMPLE_EVENTS,
   datesLabel,
+  fromPrice,
+  hasUpgrades,
   isMulti,
   isSoldOut,
   money,
   timeLabel,
-  upcoming,
   whenLabel,
   first,
   type ClassEvent,
 } from "@/lib/classes";
+import { getClasses } from "@/lib/classes-square";
 import {
   CollabMark,
   DateBlock,
@@ -28,13 +29,16 @@ import { NotifyMe } from "./_components/forms";
  * The landing: upcoming dated classes, soonest first, with the private
  * invitation at the foot. `?preview=empty` shows the quiet month.
  */
+// seats change as people book — always read fresh
+export const dynamic = "force-dynamic";
+
 export default async function ClassesPage({
   searchParams,
 }: {
   searchParams: Promise<{ preview?: string }>;
 }) {
   const { preview } = await searchParams;
-  const events = preview === "empty" ? [] : upcoming(SAMPLE_EVENTS);
+  const events = preview === "empty" ? [] : await getClasses();
 
   return (
     <div className="cl-wrap">
@@ -170,7 +174,10 @@ function EventRow({ e }: { e: ClassEvent }) {
       </div>
       <div className="cl-row-buy">
         <div className="cl-row-price">
-          <span style={{ fontSize: 24 }}>{money(e.price)}</span>
+          <span style={{ fontSize: 24 }}>
+            {hasUpgrades(e) ? "from " : ""}
+            {money(fromPrice(e))}
+          </span>
           <Label>{isMulti(e) ? "both sessions" : "a seat"}</Label>
         </div>
         <div style={{ marginTop: 12 }}>

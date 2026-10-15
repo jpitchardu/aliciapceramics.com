@@ -1,35 +1,55 @@
 import { notFound, redirect } from "next/navigation";
 import {
-  clampSeats,
-  findEvent,
   isMulti,
   isSoldOut,
   money,
+  parsePicks,
+  pieceName,
+  seatPrice,
+  total,
   whenLabel,
 } from "@/lib/classes";
+import { getClass } from "@/lib/classes-square";
 import { BackLink, DateBlock, EventBadge, Label } from "../../_components/bits";
 import { ContinueToSquare } from "../../_components/forms";
 
-/* the handoff to square — stated out loud, with the order read back */
+export const dynamic = "force-dynamic";
+
+/* the handoff to square — stated out loud, with the booking read back */
 export default async function CheckoutPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ seats?: string }>;
+  searchParams: Promise<{ seats?: string; pieces?: string }>;
 }) {
-  const e = findEvent((await params).id);
+  const e = await getClass((await params).id);
   if (!e) notFound();
   if (isSoldOut(e)) redirect(`/classes/${e.id}`);
-  const n = clampSeats(e, (await searchParams).seats ?? 1);
-  const seats = `${n} ${n === 1 ? "seat" : "seats"}`;
+  const q = await searchParams;
+  const n = Math.max(1, Math.floor(Number(q.seats) || 1));
+  const raw = q.pieces ? q.pieces.split(",") : Array(n).fill(null);
+  const picks = parsePicks(
+    e,
+    raw.slice(0, n).length === n ? raw.slice(0, n) : [],
+  );
+  // a stale or edited link goes back to the class to choose again
+  if (!picks) redirect(`/classes/${e.id}`);
+
+  // seats making the same piece read back as one line
+  const lines = [...new Set(picks)].map((p) => ({
+    piece: pieceName(e, p),
+    count: picks.filter((x) => x === p).length,
+    each: seatPrice(e, p),
+  }));
+  const seatWord = n === 1 ? "seat" : "seats";
 
   return (
     <div
       className="cl-wrap"
       style={{ maxWidth: 620, textAlign: "center", paddingBottom: 10 }}
     >
-      <Label>holding your {n === 1 ? "seat" : "seats"}</Label>
+      <Label>almost there</Label>
       <h1
         className="cl-title-xl"
         style={{
@@ -51,8 +71,8 @@ export default async function CheckoutPage({
         }}
       >
         i keep the card side of things with square, so the last step happens
-        there. your {n === 1 ? "seat is" : "seats are"} held for the next ten
-        minutes.
+        there. your {seatWord} {n === 1 ? "is" : "are"} held as soon as you
+        continue.
       </p>
 
       <div
@@ -109,9 +129,37 @@ export default async function CheckoutPage({
             </li>
           ))}
         </ul>
+        <ul
+          style={{
+            listStyle: "none",
+            margin: "12px 0 0",
+            padding: "12px 0 0",
+            borderTop: "1px solid var(--rule-soft)",
+          }}
+        >
+          {lines.map((l) => (
+            <li
+              key={l.piece ?? "seat"}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                padding: "5px 0",
+                fontSize: 15,
+              }}
+            >
+              <span>
+                {l.count} × {l.piece ? `seat · ${l.piece}` : "seat"}
+              </span>
+              <span style={{ color: "var(--ink-soft)" }}>
+                {money(l.each * l.count)}
+              </span>
+            </li>
+          ))}
+        </ul>
         <div
           style={{
-            marginTop: 14,
+            marginTop: 12,
             paddingTop: 14,
             borderTop: "1px solid var(--rule-soft)",
             display: "flex",
@@ -121,21 +169,20 @@ export default async function CheckoutPage({
           }}
         >
           <span style={{ fontSize: 15, color: "var(--ink-soft)" }}>
-            {n} × {money(e.price)}
+            {n} {seatWord}
             {isMulti(e) ? ", both sessions" : ""}
           </span>
           <span style={{ fontSize: 28, fontWeight: 700 }}>
-            {money(e.price * n)}
+            {money(total(e, picks))}
           </span>
         </div>
-        <span className="sr-only">{seats}</span>
       </div>
 
       <div style={{ marginTop: 28 }}>
-        <ContinueToSquare />
+        <ContinueToSquare id={e.id} picks={picks} />
       </div>
       <div style={{ marginTop: 10 }}>
-        <BackLink href={`/classes/${e.id}`}>← back to the event</BackLink>
+        <BackLink href={`/classes/${e.id}`}>← back to the class</BackLink>
       </div>
       <p
         style={{

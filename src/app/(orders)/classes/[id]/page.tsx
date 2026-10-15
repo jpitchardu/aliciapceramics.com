@@ -2,10 +2,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Photo } from "@/ui/Photo";
 import {
-  SAMPLE_EVENTS,
   STUDIO,
-  findEvent,
   first,
+  hasChoice,
+  money,
   isMulti,
   isSoldOut,
   nextOpen,
@@ -27,16 +27,17 @@ import {
   TextLink,
 } from "../_components/bits";
 import { BookPanel, WaitList } from "../_components/forms";
+import { getClass, getClasses } from "@/lib/classes-square";
 
-export const generateStaticParams = () =>
-  SAMPLE_EVENTS.map((e) => ({ id: e.id }));
+// seats change as people book — always read fresh
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  const e = findEvent((await params).id);
+  const e = await getClass((await params).id);
   return { title: e ? `${e.title} — classes — alicia p. ceramics` : undefined };
 }
 
@@ -49,7 +50,9 @@ export default async function EventPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const e = findEvent((await params).id);
+  const { id } = await params;
+  const all = await getClasses();
+  const e = all.find((c) => c.id === id);
   if (!e) notFound();
   const out = isSoldOut(e);
 
@@ -85,7 +88,9 @@ export default async function EventPage({
             {e.blurb}
           </p>
           {isMulti(e) && <TwoSessions e={e} />}
-          {e.collab && <WhoBringsWhat e={e} />}
+          {e.collab && (e.collab.brings || e.collab.note) && (
+            <WhoBringsWhat e={e} />
+          )}
           <Facts
             style={{
               marginTop: 28,
@@ -94,10 +99,27 @@ export default async function EventPage({
             }}
             rows={[
               ["when", <When key="when" e={e} />],
-              ["you'll leave with", e.make],
-              ["how long", e.duration],
+              ...(hasChoice(e)
+                ? ([
+                    [
+                      "pick your piece",
+                      e.pieces
+                        .map(
+                          (p) =>
+                            `${p.name}${p.extra > 0 ? ` (+${money(p.extra)})` : ""}`,
+                        )
+                        .join(" · "),
+                    ],
+                  ] as [string, string][])
+                : []),
+              ...(e.make
+                ? [["you'll leave with", e.make] as [string, string]]
+                : []),
+              ...(e.duration
+                ? [["how long", e.duration] as [string, string]]
+                : []),
               ["where", STUDIO],
-              ...e.facts,
+              ...(e.facts ?? []),
             ]}
           />
         </div>
@@ -106,7 +128,7 @@ export default async function EventPage({
           {out ? (
             <>
               <WaitList e={e} />
-              <NextOne e={e} />
+              <NextOne e={e} all={all} />
             </>
           ) : (
             <>
@@ -155,7 +177,12 @@ function Mast({ e }: { e: ClassEvent }) {
             <div
               style={{ marginTop: 8, fontSize: 14, color: "var(--ink-soft)" }}
             >
-              with {e.collab.trade} · @{e.collab.handle}
+              {[
+                e.collab.trade && `with ${e.collab.trade}`,
+                e.collab.handle && `@${e.collab.handle}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
             </div>
           </div>
         )}
@@ -196,11 +223,14 @@ function Mast({ e }: { e: ClassEvent }) {
             flexWrap: "wrap",
           }}
         >
-          <Label color="var(--ink-soft)">{e.kind}</Label>
+          {e.kind && <Label color="var(--ink-soft)">{e.kind}</Label>}
           <span style={{ fontSize: 15, color: "var(--ink-soft)" }}>
-            {isMulti(e)
-              ? e.duration
-              : `${whenLabel(first(e))} · ${timeLabel(e)} · ${e.duration}`}
+            {(isMulti(e)
+              ? [e.duration]
+              : [whenLabel(first(e)), timeLabel(e), e.duration]
+            )
+              .filter(Boolean)
+              .join(" · ")}
           </span>
         </div>
       </div>
@@ -291,51 +321,57 @@ function WhoBringsWhat({ e }: { e: ClassEvent }) {
         padding: "22px 22px 24px",
       }}
     >
-      <Label color="var(--ink)">who brings what</Label>
-      <div className="cl-split" style={{ marginTop: 18 }}>
-        <div>
-          <Label>aliciapceramics</Label>
-          <div style={{ marginTop: 8, fontSize: 17, lineHeight: 1.5 }}>
-            {c.aliciaBrings}
+      <Label color="var(--ink)">
+        {c.brings ? "who brings what" : `with ${c.with}`}
+      </Label>
+      {c.brings && (
+        <div className="cl-split" style={{ marginTop: 18 }}>
+          <div>
+            <Label>aliciapceramics</Label>
+            <div style={{ marginTop: 8, fontSize: 17, lineHeight: 1.5 }}>
+              {c.aliciaBrings}
+            </div>
+          </div>
+          <span
+            aria-hidden
+            style={{
+              fontSize: 24,
+              color: "var(--ink-faint)",
+              alignSelf: "center",
+              textAlign: "center",
+            }}
+          >
+            ×
+          </span>
+          <div>
+            <Label>{c.with}</Label>
+            <div style={{ marginTop: 8, fontSize: 17, lineHeight: 1.5 }}>
+              {c.brings}
+            </div>
           </div>
         </div>
-        <span
-          aria-hidden
+      )}
+      {c.note && (
+        <p
           style={{
-            fontSize: 24,
-            color: "var(--ink-faint)",
-            alignSelf: "center",
-            textAlign: "center",
+            margin: "18px 0 0",
+            paddingTop: 14,
+            borderTop: c.brings ? "1px solid var(--rule-soft)" : "none",
+            fontSize: 14,
+            color: "var(--ink-soft)",
+            lineHeight: 1.6,
           }}
         >
-          ×
-        </span>
-        <div>
-          <Label>{c.with}</Label>
-          <div style={{ marginTop: 8, fontSize: 17, lineHeight: 1.5 }}>
-            {c.brings}
-          </div>
-        </div>
-      </div>
-      <p
-        style={{
-          margin: "18px 0 0",
-          paddingTop: 14,
-          borderTop: "1px solid var(--rule-soft)",
-          fontSize: 14,
-          color: "var(--ink-soft)",
-          lineHeight: 1.6,
-        }}
-      >
-        {c.note}
-      </p>
+          {c.note}
+        </p>
+      )}
     </section>
   );
 }
 
 /* sold out: point at the next open one */
-function NextOne({ e }: { e: ClassEvent }) {
-  const next = nextOpen(e);
+function NextOne({ e, all }: { e: ClassEvent; all: ClassEvent[] }) {
+  const next = nextOpen(e, all);
   if (!next) return null;
   return (
     <div

@@ -9,8 +9,12 @@
  *     the guest's own (travel added, handbuilding only). Nothing is charged —
  *     alicia replies by hand.
  *
- * This is the preview: the events below are samples, and nothing here takes
- * money or creates anything in Square yet.
+ * Each class is a Square item in the "events" category: its price is the
+ * base ticket, its stock is the seats left, and an optional modifier list
+ * holds the pieces a seat can be made into, each with its upgrade price.
+ * The date, time and the rest are custom attributes on the item (see
+ * classes-square.ts). Without Square credentials (local dev, tests) the
+ * samples below stand in.
  */
 
 export type Session = {
@@ -30,21 +34,34 @@ export type Collab = {
   note: string;
 };
 
+/* a piece a seat can be made into — a Square modifier */
+export type PieceOption = {
+  id: string;
+  name: string;
+  /* dollars on top of the base ticket; 0 when it's included */
+  extra: number;
+};
+
 export type ClassEvent = {
   id: string;
+  /* the Square variation the seats are sold from (none for samples) */
+  variationId?: string;
   title: string;
   kind: string;
   sessions: Session[];
   duration: string;
-  /* dollars per seat */
+  /* the base ticket, in dollars per seat */
   price: number;
-  seats: number;
+  /* every seat in the class, when known */
+  seats?: number;
   left: number;
+  /* what a seat can be made into; empty when the piece is set */
+  pieces: PieceOption[];
   photo: string;
   make: string;
   blurb: string;
   /* the page's extra fact rows, after "you'll leave with / how long / where" */
-  facts: [string, string][];
+  facts?: [string, string][];
   /* a line under the booking panel */
   aside?: string;
   sessionNote?: string;
@@ -69,6 +86,7 @@ export const SAMPLE_EVENTS: ClassEvent[] = [
     seats: 8,
     left: 5,
     photo: "/assets/piece-tall.png",
+    pieces: [],
     make: "your own bisque-fired pieces, glazed and ready for the kiln.",
     blurb:
       "bring what you made in class and we'll glaze it together. i'll talk you through everything on the shelf and fire it all that week.",
@@ -84,6 +102,10 @@ export const SAMPLE_EVENTS: ClassEvent[] = [
     seats: 6,
     left: 2,
     photo: "/assets/piece-cobalt.png",
+    pieces: [
+      { id: "sample-mug-8", name: "an 8 oz mug", extra: 0 },
+      { id: "sample-mug-12", name: "a 12 oz mug", extra: 10 },
+    ],
     make: "one mug with a pulled handle — i trim, glaze and fire it for you.",
     blurb:
       "a morning at the wheel making the one thing you'll actually use every day. we throw, then pull handles after a short break.",
@@ -99,6 +121,11 @@ export const SAMPLE_EVENTS: ClassEvent[] = [
     seats: 6,
     left: 6,
     photo: "/assets/piece-pour.png",
+    pieces: [
+      { id: "sample-cup", name: "a cup", extra: 0 },
+      { id: "sample-mug", name: "a mug with a handle", extra: 8 },
+      { id: "sample-vase", name: "a small vase", extra: 15 },
+    ],
     make: "two thrown pieces, ready about three weeks later.",
     blurb:
       "we start with a wedged ball of clay. you'll learn to centre, open and pull a wall, and leave with two pieces to glaze.",
@@ -114,6 +141,7 @@ export const SAMPLE_EVENTS: ClassEvent[] = [
     seats: 8,
     left: 0,
     photo: "/assets/piece-speckled.png",
+    pieces: [],
     make: "a small pinch bowl and a slab tray.",
     blurb:
       "no wheel, no rush. we build by hand — pinching a bowl and rolling a slab into a small tray.",
@@ -132,6 +160,7 @@ export const SAMPLE_EVENTS: ClassEvent[] = [
     seats: 6,
     left: 4,
     photo: "/assets/piece-speckled.png",
+    pieces: [],
     make: "four bowls that stack and match — trimmed, footed and glazed by you.",
     blurb:
       "a set takes two evenings because the clay has to firm up before it can be trimmed. we throw all four the first night, then foot and glaze them the next.",
@@ -155,6 +184,10 @@ export const SAMPLE_EVENTS: ClassEvent[] = [
     seats: 10,
     left: 7,
     photo: "/assets/piece-pour.png",
+    pieces: [
+      { id: "sample-bud-vase", name: "a bud vase", extra: 0 },
+      { id: "sample-tall-vase", name: "a tall vase", extra: 15 },
+    ],
     make: "a thrown vase, and an arrangement cut to sit in it.",
     blurb:
       "we throw a vase in the morning while lila talks through what's in season. you'll take home the arrangement the same day, and the vase once it's fired.",
@@ -182,9 +215,6 @@ export const upcoming = (events: readonly ClassEvent[]) =>
   [...events].sort((a, b) =>
     a.sessions[0].date.localeCompare(b.sessions[0].date),
   );
-
-export const findEvent = (id: string) =>
-  SAMPLE_EVENTS.find((e) => e.id === id) ?? null;
 
 /* ── dates ───────────────────────────────────────────────────────── */
 
@@ -232,8 +262,52 @@ export const clampSeats = (e: ClassEvent, n: unknown) => {
 export const money = (n: number) => `$${n}`;
 
 /* the soonest open event that isn't this one — "the next one like it" */
-export const nextOpen = (e: ClassEvent) =>
-  upcoming(SAMPLE_EVENTS).find((o) => o.id !== e.id && !isSoldOut(o)) ?? null;
+export const nextOpen = (e: ClassEvent, all: readonly ClassEvent[]) =>
+  upcoming(all).find((o) => o.id !== e.id && !isSoldOut(o)) ?? null;
+
+/* ── pieces and prices ───────────────────────────────────────────── */
+
+export const hasChoice = (e: ClassEvent) => e.pieces.length > 0;
+
+/* what one seat costs with this piece */
+export const seatPrice = (e: ClassEvent, pieceId: string | null) =>
+  e.price + (e.pieces.find((p) => p.id === pieceId)?.extra ?? 0);
+
+/* the lowest a seat can cost — "from $95" when there are upgrades */
+export const fromPrice = (e: ClassEvent) =>
+  e.price + (e.pieces.length ? Math.min(...e.pieces.map((p) => p.extra)) : 0);
+export const hasUpgrades = (e: ClassEvent) =>
+  new Set(e.pieces.map((p) => p.extra)).size > 1;
+
+/* a new seat starts on the included piece (or the cheapest) */
+export const defaultPiece = (e: ClassEvent) =>
+  e.pieces.length
+    ? [...e.pieces].sort((a, b) => a.extra - b.extra)[0].id
+    : null;
+
+export const total = (e: ClassEvent, picks: readonly (string | null)[]) =>
+  picks.reduce((sum, id) => sum + seatPrice(e, id), 0);
+
+/*
+ * The seats a booking asks for, one piece per seat: the piece ids it names
+ * must all belong to this class (or all be empty when the piece is set),
+ * between one seat and what's left. Anything else is null.
+ */
+export function parsePicks(
+  e: ClassEvent,
+  raw: readonly (string | null | undefined)[],
+): (string | null)[] | null {
+  if (raw.length < 1 || raw.length > e.left) return null;
+  const ids = new Set(e.pieces.map((p) => p.id));
+  const picks = raw.map((r) => r || null);
+  const ok = hasChoice(e)
+    ? picks.every((p) => p !== null && ids.has(p))
+    : picks.every((p) => p === null);
+  return ok ? picks : null;
+}
+
+export const pieceName = (e: ClassEvent, id: string | null) =>
+  e.pieces.find((p) => p.id === id)?.name ?? null;
 
 /* ── private events ──────────────────────────────────────────────── */
 

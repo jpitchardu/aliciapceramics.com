@@ -10,8 +10,13 @@ import {
   PLACES,
   PRIVATE,
   STUDIO,
+  defaultPiece,
+  fromPrice,
+  hasChoice,
+  hasUpgrades,
   isMulti,
   money,
+  total,
   suggestedDates,
   type ClassEvent,
   type FormatId,
@@ -171,11 +176,19 @@ export function WaitList({ e }: { e: ClassEvent }) {
   );
 }
 
-/* ── the booking panel: price, how many seats, the one button ───── */
+/* ── the booking panel: price, seats, each seat's piece ─────────── */
 export function BookPanel({ e }: { e: ClassEvent }) {
   const router = useRouter();
-  const [n, setN] = useState(1);
+  const [picks, setPicks] = useState<(string | null)[]>([defaultPiece(e)]);
+  const n = picks.length;
   const multi = isMulti(e);
+  const upgrades = hasUpgrades(e);
+  const setSeats = (next: number) =>
+    setPicks((prev) =>
+      next > prev.length
+        ? [...prev, ...Array(next - prev.length).fill(defaultPiece(e))]
+        : prev.slice(0, next),
+    );
   const step = {
     width: 40,
     height: 40,
@@ -189,6 +202,12 @@ export function BookPanel({ e }: { e: ClassEvent }) {
     fontSize: 17,
     color: "var(--ink)",
   } as const;
+
+  const book = () => {
+    const q = new URLSearchParams({ seats: String(n) });
+    if (hasChoice(e)) q.set("pieces", picks.join(","));
+    router.push(`/classes/${e.id}/checkout?${q}`);
+  };
 
   return (
     <div
@@ -209,9 +228,12 @@ export function BookPanel({ e }: { e: ClassEvent }) {
         }}
       >
         <div>
-          <Label>{multi ? "a seat, both sessions" : "a seat"}</Label>
+          <Label>
+            {multi ? "a seat, both sessions" : "a seat"}
+            {upgrades ? ", from" : ""}
+          </Label>
           <div style={{ marginTop: 6, fontSize: 30, fontWeight: 700 }}>
-            {money(e.price)}
+            {money(fromPrice(e))}
           </div>
         </div>
         <SeatsNote e={e} />
@@ -243,58 +265,138 @@ export function BookPanel({ e }: { e: ClassEvent }) {
           style={{
             marginTop: 12,
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
-            gap: 12,
+            gap: 16,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <button
-              type="button"
-              className="cl-step"
-              style={step}
-              aria-label="one fewer seat"
-              disabled={n <= 1}
-              onClick={() => setN((v) => Math.max(1, v - 1))}
-            >
-              –
-            </button>
-            <output
-              aria-live="polite"
-              aria-label={`${n} ${n === 1 ? "seat" : "seats"}`}
-              style={{ minWidth: 26, textAlign: "center", fontSize: 28 }}
-            >
-              {n}
-            </output>
-            <button
-              type="button"
-              className="cl-step"
-              style={step}
-              aria-label="one more seat"
-              disabled={n >= e.left}
-              onClick={() => setN((v) => Math.min(e.left, v + 1))}
-            >
-              +
-            </button>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <Label>total</Label>
-            <div style={{ marginTop: 5, fontSize: 26 }}>
-              {money(e.price * n)}
-            </div>
-          </div>
+          <button
+            type="button"
+            className="cl-step"
+            style={step}
+            aria-label="one fewer seat"
+            disabled={n <= 1}
+            onClick={() => setSeats(n - 1)}
+          >
+            –
+          </button>
+          <output
+            aria-live="polite"
+            aria-label={`${n} ${n === 1 ? "seat" : "seats"}`}
+            style={{ minWidth: 26, textAlign: "center", fontSize: 28 }}
+          >
+            {n}
+          </output>
+          <button
+            type="button"
+            className="cl-step"
+            style={step}
+            aria-label="one more seat"
+            disabled={n >= e.left}
+            onClick={() => setSeats(n + 1)}
+          >
+            +
+          </button>
         </div>
         <p
           style={{ margin: "12px 0 0", fontSize: 12, color: "var(--ink-soft)" }}
         >
-          {e.left} of {e.seats} seats still open — bring whoever you like.
+          {e.seats
+            ? `${e.left} of ${e.seats} seats still open`
+            : `${e.left} ${e.left === 1 ? "seat" : "seats"} still open`}{" "}
+          — bring whoever you like.
         </p>
+      </div>
+
+      {hasChoice(e) && (
+        <div style={{ marginTop: 22 }}>
+          {picks.map((pick, i) => (
+            <fieldset
+              key={i}
+              style={{
+                border: "none",
+                margin: 0,
+                padding: "14px 0",
+                borderTop: "1px solid var(--rule-soft)",
+                minWidth: 0,
+              }}
+            >
+              <legend style={{ padding: 0, float: "left", width: "100%" }}>
+                <Label>
+                  {n === 1 ? "your piece" : `seat ${i + 1} — their piece`}
+                </Label>
+              </legend>
+              <div
+                style={{
+                  clear: "both",
+                  paddingTop: 10,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 8,
+                }}
+              >
+                {e.pieces.map((p) => {
+                  const on = pick === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() =>
+                        setPicks((prev) =>
+                          prev.map((x, j) => (j === i ? p.id : x)),
+                        )
+                      }
+                      style={{
+                        fontFamily: "var(--serif)",
+                        fontSize: 13,
+                        padding: "9px 13px",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        border: `1px solid ${on ? "var(--ink)" : "var(--rule-strong)"}`,
+                        background: on ? "var(--ink)" : "transparent",
+                        color: on ? "var(--paper)" : "var(--ink)",
+                      }}
+                    >
+                      {p.name}
+                      <span
+                        style={{
+                          marginLeft: 8,
+                          color: on
+                            ? "rgba(237,227,208,0.8)"
+                            : "var(--ink-soft)",
+                        }}
+                      >
+                        {p.extra > 0 ? `+${money(p.extra)}` : "included"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+      )}
+
+      <div
+        style={{
+          marginTop: 8,
+          paddingTop: 16,
+          borderTop: "1px solid var(--rule-soft)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+        }}
+      >
+        <Label>total</Label>
+        <div aria-live="polite" style={{ fontSize: 26 }}>
+          {money(total(e, picks))}
+        </div>
       </div>
 
       <FillButton
         type="button"
-        style={{ marginTop: 22, width: "100%" }}
-        onClick={() => router.push(`/classes/${e.id}/checkout?seats=${n}`)}
+        style={{ marginTop: 18, width: "100%" }}
+        onClick={book}
       >
         book {n} {n === 1 ? "seat" : "seats"}
       </FillButton>
@@ -303,17 +405,54 @@ export function BookPanel({ e }: { e: ClassEvent }) {
   );
 }
 
-/* ── the handoff button: in the preview, nothing is charged ────── */
-export function ContinueToSquare() {
-  const [tried, setTried] = useState(false);
+/* ── the handoff button ─────────────────────────────────────────── */
+export function ContinueToSquare({
+  id,
+  picks,
+}: {
+  id: string;
+  picks: (string | null)[];
+}) {
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState("");
+  async function go() {
+    setBusy(true);
+    setNote("");
+    try {
+      const res = await fetch("/api/classes/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, pieces: picks }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setNote(
+        data.preview
+          ? "this is the preview — square checkout isn't connected here, so nothing was charged."
+          : res.status === 409
+            ? "those seats just went — head back and pick again."
+            : "something went wrong reaching square — give it another try in a moment.",
+      );
+    } catch {
+      setNote(
+        "something went wrong reaching square — give it another try in a moment.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <div>
       <FillButton
         type="button"
+        disabled={busy}
         style={{ minWidth: 280, width: "100%", maxWidth: 360 }}
-        onClick={() => setTried(true)}
+        onClick={go}
       >
-        continue to square →
+        {busy ? "opening square…" : "continue to square →"}
       </FillButton>
       <p
         role="status"
@@ -326,8 +465,7 @@ export function ContinueToSquare() {
           color: "var(--ink-soft)",
         }}
       >
-        {tried &&
-          "this is the preview — square checkout isn't connected yet, so nothing was charged."}
+        {note}
       </p>
     </div>
   );

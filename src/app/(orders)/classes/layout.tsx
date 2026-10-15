@@ -3,6 +3,7 @@ import { OrderHeader } from "../_components/OrderHeader";
 import { OrderFooter } from "../_components/OrderFooter";
 import "../orders.css";
 import "./classes.css";
+import { hasSquare } from "@/lib/classes-square";
 
 export const metadata: Metadata = {
   title: "classes — alicia p. ceramics",
@@ -20,8 +21,9 @@ export default function ClassesLayout({
     <div className="ws-page">
       <OrderHeader label="book" />
       <p className="cl-preview">
-        preview — these are sample classes. nothing here is charged or sent
-        anywhere yet.
+        {hasSquare()
+          ? "preview — this page isn't linked from the site yet."
+          : "preview — these are sample classes. nothing here is charged or sent anywhere yet."}
       </p>
       <main>{children}</main>
       <OrderFooter label="classes at the studio" />
