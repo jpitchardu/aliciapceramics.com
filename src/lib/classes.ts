@@ -322,6 +322,10 @@ export const PRIVATE = {
   windows: ["weekday evenings", "saturday mornings", "sunday afternoons"],
 };
 
+/* their note on a private request — it travels in Square's 500-character
+ * order note with the dates and the rest */
+export const PRIVATE_NOTE_MAX = 250;
+
 export const PLACES = [
   {
     id: "studio",
@@ -358,10 +362,12 @@ export type FormatId = (typeof FORMATS)[number]["id"];
 
 /*
  * A few dates to suggest, two weeks out or more: the next thursday evening,
- * saturday morning and sunday afternoon after that. Returned as labels like
+ * saturday morning and sunday afternoon after that, each with a label like
  * "thu nov 5 · evening".
  */
-export function suggestedDates(today: Date): string[] {
+export type SuggestedDate = { date: string; part: string; label: string };
+
+export function suggestedDates(today: Date): SuggestedDate[] {
   const start = new Date(
     Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
   );
@@ -374,7 +380,11 @@ export function suggestedDates(today: Date): string[] {
   return wanted.map(([dow, part]) => {
     const d = new Date(start);
     d.setUTCDate(d.getUTCDate() + ((dow - d.getUTCDay() + 7) % 7));
-    const iso = d.toISOString().slice(0, 10);
-    return `${fmt(iso, { weekday: "short" })} ${shortDay(iso)} · ${part}`;
+    const date = d.toISOString().slice(0, 10);
+    return {
+      date,
+      part,
+      label: `${fmt(date, { weekday: "short" })} ${shortDay(date)} · ${part}`,
+    };
   });
 }

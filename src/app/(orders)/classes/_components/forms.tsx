@@ -18,6 +18,8 @@ import {
   money,
   total,
   suggestedDates,
+  PRIVATE_NOTE_MAX as NOTE_MAX,
+  type SuggestedDate,
   type ClassEvent,
   type FormatId,
   type PlaceId,
@@ -477,12 +479,13 @@ type Request = {
   place: PlaceId;
   address: string;
   format: FormatId;
-  dates: string[];
+  dates: SuggestedDate[];
   ownDate: string;
   guests: string;
   occasion: string;
   name: string;
-  contact: string;
+  email: string;
+  phone: string;
   notes: string;
 };
 
@@ -604,9 +607,14 @@ export function PrivateForm({
     guests: "",
     occasion: "",
     name: "",
-    contact: "",
+    email: "",
+    phone: "",
     notes: "",
   });
+  // one id per request, so a retried send can't make a second draft
+  const [submissionId] = useState(() => crypto.randomUUID());
+  const [busy, setBusy] = useState(false);
+  const [sendError, setSendError] = useState("");
   const [errors, setErrors] = useState<Partial<Record<keyof Request, string>>>(
     {},
   );
@@ -627,15 +635,17 @@ export function PrivateForm({
       format: place === "yours" ? "handbuilding" : prev.format,
     }));
 
-  const toggleDate = (d: string) => {
+  const toggleDate = (d: SuggestedDate) => {
     set(
       "dates",
-      r.dates.includes(d) ? r.dates.filter((x) => x !== d) : [...r.dates, d],
+      r.dates.some((x) => x.date === d.date)
+        ? r.dates.filter((x) => x.date !== d.date)
+        : [...r.dates, d],
     );
     setErrors((prev) => ({ ...prev, dates: undefined }));
   };
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     const guests = Number(r.guests);
     const next: typeof errors = {
@@ -654,11 +664,13 @@ export function PrivateForm({
             ? "the studio holds ten — for more, choose a place of your own"
             : undefined,
       name: r.name.trim() ? undefined : "your name, please",
-      contact:
-        email.safeParse(r.contact.trim()).success ||
-        r.contact.replace(/\D/g, "").length >= 10
+      email: email.safeParse(r.email.trim()).success
+        ? undefined
+        : "that email doesn't look right",
+      phone:
+        !r.phone.trim() || r.phone.replace(/\D/g, "").length >= 10
           ? undefined
-          : "an email or a phone number, please",
+          : "that number looks short",
     };
     setErrors(next);
     if (Object.values(next).some(Boolean)) {
@@ -671,7 +683,36 @@ export function PrivateForm({
       );
       return;
     }
-    // preview: nothing is sent yet
+    setBusy(true);
+    setSendError("");
+    try {
+      const res = await fetch("/api/classes/private", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          submissionId,
+          place: r.place,
+          address: r.address,
+          format: r.format,
+          dates: r.dates.map(({ date, label }) => ({ date, label })),
+          ownDate: r.ownDate,
+          guests,
+          occasion: r.occasion,
+          name: r.name,
+          email: r.email.trim(),
+          phone: r.phone,
+          notes: r.notes,
+        }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+    } catch {
+      setSendError(
+        "something went wrong sending that — give it another try in a moment.",
+      );
+      return;
+    } finally {
+      setBusy(false);
+    }
     setSent(true);
     window.scrollTo({ top: 0 });
     requestAnimationFrame(() =>
@@ -740,6 +781,7 @@ export function PrivateForm({
                 <div style={{ marginTop: 18 }}>
                   <Field
                     label="where are we coming to"
+                    maxLength={120}
                     placeholder="a backyard in oak cliff — i'll send the address"
                     value={r.address}
                     onChange={(v) => set("address", v)}
@@ -791,10 +833,10 @@ export function PrivateForm({
                 style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
               >
                 {chips.map((d) => {
-                  const on = r.dates.includes(d);
+                  const on = r.dates.some((x) => x.date === d.date);
                   return (
                     <button
-                      key={d}
+                      key={d.date}
                       type="button"
                       aria-pressed={on}
                       onClick={() => toggleDate(d)}
@@ -809,7 +851,7 @@ export function PrivateForm({
                         color: on ? "var(--paper)" : "var(--ink-soft)",
                       }}
                     >
-                      {d}
+                      {d.label}
                     </button>
                   );
                 })}
@@ -818,6 +860,7 @@ export function PrivateForm({
                 <Field
                   label="or a date of your own"
                   placeholder="the week of nov 9th, any evening…"
+                  maxLength={80}
                   value={r.ownDate}
                   onChange={(v) => {
                     set("ownDate", v);
@@ -839,6 +882,7 @@ export function PrivateForm({
               />
               <Field
                 label="what's the occasion (optional)"
+                maxLength={80}
                 placeholder="my sister's birthday"
                 value={r.occasion}
                 onChange={(v) => set("occasion", v)}
@@ -851,12 +895,22 @@ export function PrivateForm({
                 error={errors.name}
               />
               <Field
-                label="how to reach you"
-                placeholder="an email or a phone number"
+                label="your email"
+                type="email"
+                inputMode="email"
                 autoComplete="email"
-                value={r.contact}
-                onChange={(v) => set("contact", v)}
-                error={errors.contact}
+                value={r.email}
+                onChange={(v) => set("email", v)}
+                error={errors.email}
+              />
+              <Field
+                label="phone (optional)"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                value={r.phone}
+                onChange={(v) => set("phone", v)}
+                error={errors.phone}
               />
             </div>
 
@@ -872,9 +926,19 @@ export function PrivateForm({
                 style={{ marginTop: 10 }}
                 placeholder="two of us have thrown before, the rest are complete beginners."
                 value={r.notes}
-                maxLength={2000}
+                maxLength={NOTE_MAX}
                 onChange={(e) => set("notes", e.target.value)}
               />
+              <p
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: 13,
+                  color: "var(--ink-soft)",
+                  textAlign: "right",
+                }}
+              >
+                {NOTE_MAX - r.notes.length} characters left
+              </p>
             </div>
 
             <div
@@ -887,8 +951,8 @@ export function PrivateForm({
                 flexWrap: "wrap",
               }}
             >
-              <FillButton type="submit" className="cl-send">
-                send this to alicia
+              <FillButton type="submit" className="cl-send" disabled={busy}>
+                {busy ? "sending…" : "send this to alicia"}
               </FillButton>
               <span
                 style={{
@@ -902,6 +966,18 @@ export function PrivateForm({
                 booking.
               </span>
             </div>
+            {sendError && (
+              <p
+                role="alert"
+                style={{
+                  margin: "-18px 0 0",
+                  fontSize: 14,
+                  color: "var(--ws-error)",
+                }}
+              >
+                {sendError}
+              </p>
+            )}
           </div>
 
           <aside
@@ -1006,7 +1082,10 @@ function SpaceNeeds() {
 function PrivateSent({ r }: { r: Request }) {
   const place = PLACES.find((p) => p.id === r.place)!;
   const format = FORMATS.find((f) => f.id === r.format)!;
-  const dates = [...r.dates.map((d) => d.split(" · ")[0]), r.ownDate.trim()]
+  const dates = [
+    ...r.dates.map((d) => d.label.split(" · ")[0]),
+    r.ownDate.trim(),
+  ]
     .filter(Boolean)
     .join(" · ");
   const where = r.place === "studio" ? "here at the studio" : "at your place";
@@ -1076,7 +1155,7 @@ function PrivateSent({ r }: { r: Request }) {
             ["making", format.title],
             ["how many", `roughly ${r.guests}`],
             ["dates", dates],
-            ["reply to", r.contact.trim()],
+            ["reply to", r.email.trim()],
           ]}
         />
       </div>

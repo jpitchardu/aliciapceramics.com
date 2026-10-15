@@ -95,7 +95,7 @@ test.describe("classes preview", () => {
       .fill("any saturday in december");
     await page.getByLabel("how many of you").fill("14");
     await page.getByLabel("your name").fill("marisol reyes");
-    await page.getByLabel("how to reach you").fill("marisol@example.com");
+    await page.getByLabel("your email").fill("marisol@example.com");
     await page.getByRole("button", { name: /send this to alicia/ }).click();
     await expect(
       page.getByRole("heading", { name: "that's with me — thank you." }),

@@ -215,29 +215,26 @@ export function notesFulfillment(
   ];
 }
 
-async function findOrCreateCustomer(
+/* the person in Square, found by email or created */
+export async function findOrCreateCustomer(
   client: SquareClient,
-  order: BulkOrder,
+  person: { name: string; business?: string; email: string; phone?: string },
   key: string,
-  kind: OrderKind,
+  note: string,
 ): Promise<string> {
-  const { contact } = order;
   const { customers = [] } = await client.customers.search({
-    query: { filter: { emailAddress: { exact: contact.email } } },
+    query: { filter: { emailAddress: { exact: person.email } } },
     limit: BigInt(1),
   });
   if (customers[0]?.id) return customers[0].id;
 
   const { customer } = await client.customers.create({
     idempotencyKey: `${key}-customer`,
-    givenName: contact.name,
-    companyName: contact.business || undefined,
-    emailAddress: contact.email,
-    phoneNumber: toE164(contact.phone),
-    note:
-      kind === "wholesale"
-        ? "wholesale — came in through the bulk order form"
-        : "commission — came in through the commission form",
+    givenName: person.name,
+    companyName: person.business || undefined,
+    emailAddress: person.email,
+    phoneNumber: toE164(person.phone ?? ""),
+    note,
   });
   if (!customer?.id) throw new Error("square returned no customer");
   return customer.id;
@@ -267,7 +264,14 @@ export async function createSquareBulkOrder(
           buildLineItems(order.lines, catalog),
         )
       : buildCommissionLineItems(order.lines),
-    findOrCreateCustomer(client, order, key, kind),
+    findOrCreateCustomer(
+      client,
+      order.contact,
+      key,
+      kind === "wholesale"
+        ? "wholesale — came in through the bulk order form"
+        : "commission — came in through the commission form",
+    ),
   ]);
 
   const { order: created } = await client.orders.create({
