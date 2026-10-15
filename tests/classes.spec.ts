@@ -65,13 +65,17 @@ test.describe("classes preview", () => {
     await expect(page).toHaveURL(/\/classes\/an-evening-at-the-wheel$/);
   });
 
-  test("a sold-out class takes a wait-list name instead", async ({ page }) => {
+  test("a sold-out class points to instagram for the next one", async ({
+    page,
+  }) => {
     await page.goto("/classes/pinch-and-slab");
     await expect(page.getByRole("button", { name: /book/ })).toHaveCount(0);
-    await page.getByLabel("your name").fill("marisol reyes");
-    await page.getByLabel("your email").fill("marisol@example.com");
-    await page.getByRole("button", { name: "join the wait-list" }).click();
-    await expect(page.getByText(/you're on the list, marisol/)).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "all 8 seats are taken." }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /follow @aliciapceramics/ }),
+    ).toHaveAttribute("href", "https://instagram.com/aliciapceramics");
   });
 
   test("a private request away from the studio drops the wheel", async ({

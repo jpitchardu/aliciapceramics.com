@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { CeramicLabel } from "@/ui/CeramicLabel";
+import { SITE } from "@/lib/config";
 import {
   dayOf,
   isLow,
@@ -319,3 +320,71 @@ export const TextLink = ({
     {children}
   </Link>
 );
+
+/* new dates and freed-up seats are posted on instagram — point there */
+export function FollowInstagram({
+  title,
+  children,
+  style,
+}: {
+  title?: ReactNode;
+  children: ReactNode;
+  style?: CSSProperties;
+}) {
+  return (
+    <div
+      style={{
+        border: "1px solid var(--rule-strong)",
+        padding: "26px 24px",
+        textAlign: "left",
+        ...style,
+      }}
+    >
+      {title && (
+        <h2
+          style={{
+            margin: "0 0 12px",
+            fontSize: 24,
+            fontWeight: 400,
+            lineHeight: 1.2,
+          }}
+        >
+          {title}
+        </h2>
+      )}
+      <p
+        style={{
+          margin: 0,
+          fontSize: 15,
+          color: "var(--ink-soft)",
+          lineHeight: 1.6,
+        }}
+      >
+        {children}
+      </p>
+      <a
+        href={`https://instagram.com/${SITE.instagram}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="ws-fill"
+        style={{
+          marginTop: 20,
+          display: "block",
+          textAlign: "center",
+          padding: "15px 20px",
+          background: "var(--ink)",
+          color: "var(--paper)",
+          fontFamily: "var(--serif)",
+          fontSize: 12,
+          fontWeight: 700,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          textDecoration: "none",
+        }}
+      >
+        follow @{SITE.instagram}
+        <span className="sr-only"> on instagram (opens in a new tab)</span>
+      </a>
+    </div>
+  );
+}

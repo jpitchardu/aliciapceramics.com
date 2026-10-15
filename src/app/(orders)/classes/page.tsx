@@ -18,12 +18,12 @@ import {
   CollabMark,
   DateBlock,
   EventBadge,
+  FollowInstagram,
   FillLink,
   Label,
   QuietLink,
   SeatsNote,
 } from "./_components/bits";
-import { NotifyMe } from "./_components/forms";
 
 /*
  * The landing: upcoming dated classes, soonest first, with the private
@@ -183,7 +183,8 @@ function EventRow({ e }: { e: ClassEvent }) {
         <div style={{ marginTop: 12 }}>
           {out ? (
             <QuietLink href={href} color="var(--ink-soft)">
-              join the wait-list
+              see the class
+              <span className="sr-only"> — {e.title}</span>
             </QuietLink>
           ) : (
             <FillLink
@@ -235,7 +236,9 @@ function QuietMonth() {
         new dates go up at the start of next month — or book the studio
         privately whenever suits you.
       </p>
-      <NotifyMe />
+      <FollowInstagram style={{ margin: "32px auto 0", maxWidth: 400 }}>
+        new dates go up on instagram first — follow along for updates.
+      </FollowInstagram>
       <Sig size={30} style={{ marginTop: 30 }}>
         — a.
       </Sig>

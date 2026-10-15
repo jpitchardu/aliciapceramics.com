@@ -22,11 +22,12 @@ import {
   DateBlock,
   EventBadge,
   Facts,
+  FollowInstagram,
   Label,
   QuietLink,
   TextLink,
 } from "../_components/bits";
-import { BookPanel, WaitList } from "../_components/forms";
+import { BookPanel } from "../_components/forms";
 import { getClass, getClasses } from "@/lib/classes-square";
 
 // seats change as people book — always read fresh
@@ -43,7 +44,7 @@ export async function generateMetadata({
 
 /*
  * One ticketed event: a plain evening, a two-session class (the schedule
- * spelled out), a collaboration (who brings what), or sold out (wait-list).
+ * spelled out), a collaboration (who brings what), or sold out (follow along for the next one).
  */
 export default async function EventPage({
   params,
@@ -127,7 +128,16 @@ export default async function EventPage({
         <div className="cl-sticky">
           {out ? (
             <>
-              <WaitList e={e} />
+              <FollowInstagram
+                title={
+                  e.seats
+                    ? `all ${e.seats} seats are taken.`
+                    : "every seat is taken."
+                }
+              >
+                new dates — and any seat that opens up — go up on instagram
+                first. follow along so you don&apos;t miss the next one.
+              </FollowInstagram>
               <NextOne e={e} all={all} />
             </>
           ) : (
