@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { Square, SquareClient } from "square";
-import { FORMATS, PLACES, PRIVATE_NOTE_MAX } from "@/lib/classes";
+import { FORMATS, formatFor, PLACES, PRIVATE_NOTE_MAX } from "@/lib/classes";
 import {
   ORDER_NOTE_MAX,
   findOrCreateCustomer,
@@ -8,7 +8,7 @@ import {
 } from "@/lib/wholesale-square";
 
 /*
- * A private event request — the studio to themselves, or the bench brought
+ * A private event request — the studio to themselves, or the tools brought
  * to a place of their own. Nothing is charged: it lands in Square like a
  * commission does, as the person, an order and an unsent draft invoice
  * alicia prices and sends (or deletes to say no). The order is priced at
@@ -28,11 +28,10 @@ export const privateRequestSchema = z
     submissionId: z.uuid(),
     place: z.enum(["studio", "yours"]),
     address: z.string().trim().max(120),
-    format: z.enum(["handbuilding", "wheel"]),
+    format: z.enum(["handbuilding", "painting"]),
     dates: z
       .array(z.object({ date: isoDay, label: z.string().trim().max(40) }))
       .max(3),
-    ownDate: z.string().trim().max(80),
     guests: z.number().int().min(1).max(200),
     occasion: z.string().trim().max(80),
     name: z.string().trim().min(1, "your name, please").max(120),
@@ -48,12 +47,12 @@ export const privateRequestSchema = z
     message: "the studio holds ten — for more, choose a place of your own",
     path: ["guests"],
   })
-  .refine((r) => r.place === "studio" || r.format === "handbuilding", {
-    message: "the wheels don't travel",
+  .refine((r) => r.format === formatFor(r.place), {
+    message: "handbuilding at the studio, mug painting at yours",
     path: ["format"],
   })
-  .refine((r) => r.dates.length > 0 || r.ownDate, {
-    message: "pick a date or write one of your own",
+  .refine((r) => r.dates.length > 0, {
+    message: "pick at least one date",
     path: ["dates"],
   });
 export type PrivateRequest = z.infer<typeof privateRequestSchema>;
@@ -65,9 +64,7 @@ const formatTitle = (r: PrivateRequest) =>
 
 /* everything alicia needs to reply, as the order's note (max 500) */
 export function requestNote(r: PrivateRequest): string {
-  const dates = [...r.dates.map((d) => d.label), r.ownDate]
-    .filter(Boolean)
-    .join("; ");
+  const dates = r.dates.map((d) => d.label).join("; ");
   const note = [
     `dates: ${dates}`,
     r.place === "yours" && `where: ${r.address}`,

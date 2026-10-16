@@ -109,7 +109,7 @@ export async function POST(req: Request) {
         },
       },
       checkoutOptions: {
-        redirectUrl: `${siteUrl}/order-confirmed`,
+        redirectUrl: `${siteUrl}/classes/${e.id}/booked`,
         askForShippingAddress: false,
       },
     });

@@ -78,14 +78,11 @@ test.describe("classes preview", () => {
     ).toHaveAttribute("href", "https://instagram.com/aliciapceramics");
   });
 
-  test("a private request away from the studio drops the wheel", async ({
+  test("a private request away from the studio is mug painting", async ({
     page,
   }) => {
     await page.goto("/classes/private");
     await page.getByRole("button", { name: /a place of your own/ }).click();
-    await expect(
-      page.getByRole("button", { name: /at the wheel/ }),
-    ).toBeDisabled();
     await page.getByRole("button", { name: /send this to alicia/ }).click();
     await expect(
       page.getByText("roughly where are we coming to?"),
@@ -94,9 +91,7 @@ test.describe("classes preview", () => {
     await page
       .getByLabel("where are we coming to")
       .fill("a backyard in oak cliff");
-    await page
-      .getByLabel("or a date of your own")
-      .fill("any saturday in december");
+    await page.getByRole("button", { name: /· evening/ }).click();
     await page.getByLabel("how many of you").fill("14");
     await page.getByLabel("your name").fill("marisol reyes");
     await page.getByLabel("your email").fill("marisol@example.com");
@@ -105,6 +100,7 @@ test.describe("classes preview", () => {
       page.getByRole("heading", { name: "that's with me — thank you." }),
     ).toBeVisible();
     await expect(page.getByText("a backyard in oak cliff")).toBeVisible();
+    await expect(page.getByText(/mug painting for 14/)).toBeVisible();
   });
 
   test("the studio holds ten", async ({ page }) => {

@@ -195,7 +195,7 @@ export default async function CheckoutPage({
         }}
       >
         your receipt comes from square; anything else about the class comes from
-        me.
+        me!
       </p>
     </div>
   );

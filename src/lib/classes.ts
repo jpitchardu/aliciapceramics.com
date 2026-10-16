@@ -314,11 +314,11 @@ export const pieceName = (e: ClassEvent, id: string | null) =>
 export const PRIVATE = {
   title: "the studio, to yourselves",
   minGuests: 6,
-  maxGuests: 12,
+  maxGuests: 10,
   priceNote: "from $55 a head",
   photo: "/assets/hero-group.png",
   blurb:
-    "have the bench to yourselves — a few friends, a birthday, your team. tell me roughly when and how many, and i'll write back with a plan and a price.",
+    "have the studio to yourselves — a few friends, a birthday, your team. tell me roughly when and how many, and i'll write back with a plan and a price.",
   windows: ["weekday evenings", "saturday mornings", "sunday afternoons"],
 };
 
@@ -331,7 +331,7 @@ export const PLACES = [
     id: "studio",
     title: "here at the studio",
     cap: 10 as number | null,
-    note: "everything's already where it needs to be — wheels, glazes, kiln.",
+    note: "everything's already where it needs to be — tables, glazes, kiln.",
     price: "from $55 a head",
     limit: "up to 10 comfortably",
   },
@@ -339,7 +339,7 @@ export const PLACES = [
     id: "yours",
     title: "a place of your own",
     cap: null as number | null,
-    note: "i pack the bench into the van and bring it to you. handbuilding only — the wheels stay put.",
+    note: "i pack the tools into the car and bring them to you. mug painting only.",
     price: "from $55 a head + travel",
     limit: "travel quoted by distance",
   },
@@ -353,12 +353,15 @@ export const FORMATS = [
     note: "pinch bowls and slab trays — easiest with a group",
   },
   {
-    id: "wheel",
-    title: "at the wheel",
-    note: "one thrown piece each; i'll be on my feet all night",
+    id: "painting",
+    title: "mug painting",
+    note: "a mug each to paint — i bring everything to you",
   },
 ] as const;
 export type FormatId = (typeof FORMATS)[number]["id"];
+/* handbuilding at the studio; mug painting when i come to you */
+export const formatFor = (place: PlaceId): FormatId =>
+  place === "yours" ? "painting" : "handbuilding";
 
 /*
  * A few dates to suggest, two weeks out or more: the next thursday evening,
@@ -377,7 +380,7 @@ export function suggestedDates(today: Date): SuggestedDate[] {
     [6, "morning"],
     [0, "afternoon"],
   ];
-  return wanted.map(([dow, part]) => {
+  const picks = wanted.map(([dow, part]) => {
     const d = new Date(start);
     d.setUTCDate(d.getUTCDate() + ((dow - d.getUTCDay() + 7) % 7));
     const date = d.toISOString().slice(0, 10);
@@ -387,4 +390,6 @@ export function suggestedDates(today: Date): SuggestedDate[] {
       label: `${fmt(date, { weekday: "short" })} ${shortDay(date)} · ${part}`,
     };
   });
+  // soonest first
+  return picks.sort((a, b) => a.date.localeCompare(b.date));
 }

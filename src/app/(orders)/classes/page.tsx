@@ -45,17 +45,16 @@ export default async function ClassesPage({
       {events.length ? (
         <>
           <div className="cl-head" style={{ paddingTop: 10 }}>
-            <Label>what&apos;s on at the studio</Label>
             <h1
               className="cl-head-title"
               style={{
-                margin: "14px 0 0",
+                margin: 0,
                 fontWeight: 700,
                 letterSpacing: "-0.02em",
                 lineHeight: 1.05,
               }}
             >
-              come and make something.
+              let&apos;s create together
             </h1>
             <p
               className="cl-head-sub"
@@ -67,8 +66,7 @@ export default async function ClassesPage({
                 maxWidth: 470,
               }}
             >
-              a few evenings and mornings each month, six or eight seats apiece.
-              book one and it&apos;s yours.
+              a couple of days a month, 10 seats per class.
             </p>
           </div>
           <ul
@@ -212,7 +210,7 @@ function QuietMonth() {
         padding: "30px 0 8px",
       }}
     >
-      <Label>what&apos;s on at the studio</Label>
+      <Label>what&apos;s going on at the studio</Label>
       <h1
         className="cl-head-title"
         style={{
@@ -232,7 +230,7 @@ function QuietMonth() {
           lineHeight: 1.6,
         }}
       >
-        i&apos;m firing a big batch of orders this month, so the bench is full.
+        i&apos;m firing a big batch of orders this month, so the studio is full.
         new dates go up at the start of next month — or book the studio
         privately whenever suits you.
       </p>
@@ -283,7 +281,7 @@ function PrivateInvite() {
             {PRIVATE.blurb}
           </p>
           <p style={{ margin: "16px 0 0", fontSize: 15, lineHeight: 1.6 }}>
-            here at the studio, up to ten — or i&apos;ll bring the bench to you.
+            here at the studio, up to ten — or i&apos;ll bring the event to you.
           </p>
           <div
             style={{

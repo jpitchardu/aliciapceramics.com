@@ -14,7 +14,6 @@ const base: PrivateRequest = {
   address: "",
   format: "handbuilding",
   dates: [{ date: "2026-11-05", label: "thu nov 5 · evening" }],
-  ownDate: "",
   guests: 8,
   occasion: "my sister's birthday",
   name: "marisol reyes",
@@ -30,14 +29,23 @@ describe("private requests", () => {
     expect(ok({})).toBe(true);
     expect(ok({ guests: 11 })).toBe(false);
     expect(ok({ place: "yours", guests: 14 })).toBe(false);
-    expect(ok({ place: "yours", guests: 14, address: "oak cliff" })).toBe(true);
+    expect(
+      ok({
+        place: "yours",
+        guests: 14,
+        address: "oak cliff",
+        format: "painting",
+      }),
+    ).toBe(true);
   });
 
-  it("keeps the wheel at the studio and needs a date", () => {
-    expect(ok({ format: "wheel" })).toBe(true);
-    expect(ok({ place: "yours", address: "x", format: "wheel" })).toBe(false);
-    expect(ok({ dates: [], ownDate: "" })).toBe(false);
-    expect(ok({ dates: [], ownDate: "any saturday in december" })).toBe(true);
+  it("matches the format to the place and needs a date", () => {
+    expect(ok({ place: "yours", address: "x", format: "painting" })).toBe(true);
+    expect(ok({ place: "yours", address: "x", format: "handbuilding" })).toBe(
+      false,
+    );
+    expect(ok({ format: "painting" })).toBe(false);
+    expect(ok({ dates: [] })).toBe(false);
   });
 
   it("puts what alicia needs in the order note, under 500", () => {
@@ -48,7 +56,6 @@ describe("private requests", () => {
       ...base,
       place: "yours",
       address: "a".repeat(120),
-      ownDate: "b".repeat(80),
       occasion: "c".repeat(80),
       notes: "d".repeat(250),
     });

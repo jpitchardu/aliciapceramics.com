@@ -311,8 +311,8 @@ function TwoSessions({ e }: { e: ClassEvent }) {
           lineHeight: 1.6,
         }}
       >
-        the gap isn&apos;t padding — thrown clay has to firm up to leather-hard
-        before it can be trimmed. a week is about right.
+        the week between gives me time to trim, dry and fire your piece before
+        you glaze it.
       </p>
     </section>
   );

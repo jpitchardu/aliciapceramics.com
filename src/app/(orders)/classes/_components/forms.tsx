@@ -7,6 +7,7 @@ import { Sig } from "@/ui/Sig";
 import { Photo } from "@/ui/Photo";
 import {
   FORMATS,
+  formatFor,
   PLACES,
   PRIVATE,
   STUDIO,
@@ -156,7 +157,7 @@ export function BookPanel({ e }: { e: ClassEvent }) {
           {e.seats
             ? `${e.left} of ${e.seats} seats still open`
             : `${e.left} ${e.left === 1 ? "seat" : "seats"} still open`}{" "}
-          — bring whoever you like.
+          — bring a friend!
         </p>
       </div>
 
@@ -331,7 +332,6 @@ type Request = {
   address: string;
   format: FormatId;
   dates: SuggestedDate[];
-  ownDate: string;
   guests: string;
   occasion: string;
   name: string;
@@ -452,9 +452,8 @@ export function PrivateForm({
   const [r, setR] = useState<Request>({
     place: initialPlace,
     address: "",
-    format: "handbuilding",
+    format: formatFor(initialPlace),
     dates: [],
-    ownDate: "",
     guests: "",
     occasion: "",
     name: "",
@@ -482,8 +481,7 @@ export function PrivateForm({
     setR((prev) => ({
       ...prev,
       place,
-      // the wheels don't travel
-      format: place === "yours" ? "handbuilding" : prev.format,
+      format: formatFor(place),
     }));
 
   const toggleDate = (d: SuggestedDate) => {
@@ -504,10 +502,7 @@ export function PrivateForm({
         away && !r.address.trim()
           ? "roughly where are we coming to?"
           : undefined,
-      dates:
-        r.dates.length === 0 && !r.ownDate.trim()
-          ? "pick a date or write one of your own"
-          : undefined,
+      dates: r.dates.length === 0 ? "pick at least one date" : undefined,
       guests:
         !r.guests.trim() || !Number.isFinite(guests) || guests < 1
           ? "roughly how many of you?"
@@ -546,7 +541,6 @@ export function PrivateForm({
           address: r.address,
           format: r.format,
           dates: r.dates.map(({ date, label }) => ({ date, label })),
-          ownDate: r.ownDate,
           guests,
           occasion: r.occasion,
           name: r.name,
@@ -592,7 +586,7 @@ export function PrivateForm({
                 outline: "none",
               }}
             >
-              {away ? "the bench, brought to you." : PRIVATE.title}
+              {away ? "the studio, brought to you." : PRIVATE.title}
             </h1>
             <p
               style={{
@@ -603,7 +597,7 @@ export function PrivateForm({
               }}
             >
               {away
-                ? "clay, boards, tools and aprons pack into the van — so a backyard, an office or a hall works just as well as the studio. handbuilding only, and travel gets added to the quote."
+                ? "clay, boards, tools and glaze, all brought to you! a backyard, an office or a hall works just as well as the studio. mug painting only, and travel gets added to the quote."
                 : PRIVATE.blurb}
             </p>
           </div>
@@ -647,36 +641,16 @@ export function PrivateForm({
                     }}
                   >
                     i&apos;ll work the travel into the quote once i know where —
-                    it&apos;s usually $40–90 around dallas. i need a table, a
-                    tap and a parking spot near the door.
+                    it&apos;s usually $40–90 around dallas. i need a table,
+                    chairs and a parking spot near the door.
                   </p>
                 </div>
               )}
             </Section>
 
-            <Section title="what you'd like to make">
-              <div className="cl-two">
-                {FORMATS.map((f) => {
-                  const off = away && f.id === "wheel";
-                  return (
-                    <Choice
-                      key={f.id}
-                      on={r.format === f.id}
-                      disabled={off}
-                      onClick={() => set("format", f.id)}
-                      title={f.title}
-                      note={
-                        off ? "studio only — the wheels don't travel" : f.note
-                      }
-                    />
-                  );
-                })}
-              </div>
-            </Section>
-
             <Section
               title="a few dates that would work"
-              hint="pick any that suit, or write your own — more options means a faster yes."
+              hint="pick any that suit — more options means a faster yes."
             >
               <div
                 data-error={errors.dates ? "" : undefined}
@@ -706,19 +680,6 @@ export function PrivateForm({
                     </button>
                   );
                 })}
-              </div>
-              <div style={{ marginTop: 16 }}>
-                <Field
-                  label="or a date of your own"
-                  placeholder="the week of nov 9th, any evening…"
-                  maxLength={80}
-                  value={r.ownDate}
-                  onChange={(v) => {
-                    set("ownDate", v);
-                    setErrors((prev) => ({ ...prev, dates: undefined }));
-                  }}
-                  error={errors.dates}
-                />
               </div>
             </Section>
 
@@ -775,7 +736,7 @@ export function PrivateForm({
                 id="cl-notes"
                 className="cl-textarea"
                 style={{ marginTop: 10 }}
-                placeholder="two of us have thrown before, the rest are complete beginners."
+                placeholder="two of us have made pottery before, the rest are complete beginners."
                 value={r.notes}
                 maxLength={NOTE_MAX}
                 onChange={(e) => set("notes", e.target.value)}
@@ -845,7 +806,7 @@ export function PrivateForm({
             </div>
             {away && <SpaceNeeds />}
             <Sig size={28} style={{ marginTop: 24 }}>
-              {away ? "— happy to travel, a." : "— looking forward to it, a."}
+              {away ? "— see you soon, a." : "— looking forward to it, a."}
             </Sig>
           </aside>
         </div>
@@ -867,7 +828,7 @@ function PrivateTerms() {
       <Facts
         style={{ marginTop: 12 }}
         rows={[
-          ["where", "here at the studio, or i bring the bench to you"],
+          ["where", "here at the studio, or i bring the tools to you"],
           ["how many", "6–10 at the studio · more if we come to you"],
           ["how much", `${PRIVATE.priceNote} — travel added if i'm coming out`],
           ["how long", "about two hours, plus time to sit"],
@@ -903,8 +864,7 @@ function SpaceNeeds() {
         }}
       >
         {[
-          "a table everyone can sit around",
-          "a tap and a sink within reach",
+          "a table everyone can sit around comfortably, with chairs",
           "somewhere to park near the door",
           "about an hour before and after to set up",
         ].map((s) => (
@@ -933,10 +893,7 @@ function SpaceNeeds() {
 function PrivateSent({ r }: { r: Request }) {
   const place = PLACES.find((p) => p.id === r.place)!;
   const format = FORMATS.find((f) => f.id === r.format)!;
-  const dates = [
-    ...r.dates.map((d) => d.label.split(" · ")[0]),
-    r.ownDate.trim(),
-  ]
+  const dates = [...r.dates.map((d) => d.label.split(" · ")[0])]
     .filter(Boolean)
     .join(" · ");
   const where = r.place === "studio" ? "here at the studio" : "at your place";
