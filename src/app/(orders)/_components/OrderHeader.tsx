@@ -8,6 +8,7 @@ import { CeramicLabel } from "@/ui/CeramicLabel";
 const LINKS = [
   { href: "/shop", label: "shop" },
   { href: "/care", label: "care" },
+  { href: "/classes", label: "classes" },
 ];
 
 /* the storefront nav, with the flow ("bulk order", "commission") standing in for the cart */

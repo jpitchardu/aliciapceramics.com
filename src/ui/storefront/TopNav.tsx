@@ -94,6 +94,13 @@ export function TopNav() {
           >
             <CeramicLabel color="var(--ink-soft)">care</CeramicLabel>
           </Link>
+          <Link
+            href="/classes"
+            onClick={() => setOpen(false)}
+            style={{ textDecoration: "none" }}
+          >
+            <CeramicLabel color="var(--ink-soft)">classes</CeramicLabel>
+          </Link>
         </div>
       )}
     </div>
