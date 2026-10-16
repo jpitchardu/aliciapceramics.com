@@ -23,30 +23,47 @@ async function firstPieceHref(page: import("@playwright/test").Page) {
 // ── Home page ─────────────────────────────────────────────────────────────────
 
 test.describe("home page", () => {
-  test("renders logo and enter the shop link", async ({ page }) => {
+  test("renders logo and the next class", async ({ page }) => {
     await page.goto("/");
     await expect(
       page.locator('img[alt="alicia p. ceramics"]').nth(1),
     ).toBeVisible();
+    await expect(page.getByText(/next at the studio/i).first()).toBeVisible();
     await expect(
-      page.getByRole("link", { name: /enter the shop/i }).first(),
+      page.getByRole("link", { name: /book a seat/i }).first(),
     ).toBeVisible();
   });
 
-  test("enter the shop link navigates to /shop", async ({ page }) => {
+  test("leads with the soonest class a beginner can book", async ({ page }) => {
+    await page.goto("/");
+    await expect(
+      page.getByRole("heading", { name: /create your own mug/i }),
+    ).toBeVisible();
+  });
+
+  test("book a seat navigates to that class", async ({ page }) => {
     await page.goto("/");
     await page
-      .getByRole("link", { name: /enter the shop/i })
+      .getByRole("link", { name: /book a seat/i })
       .first()
       .click();
-    await expect(page).toHaveURL("/shop");
+    await expect(page).toHaveURL("/classes/create-your-own-mug");
+  });
+
+  test("every class link navigates to /classes", async ({ page }) => {
+    await page.goto("/");
+    await page
+      .getByRole("link", { name: /every class/i })
+      .first()
+      .click();
+    await expect(page).toHaveURL("/classes");
   });
 
   test("bypass cookie shows home page not countdown", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByText(/hours/i)).not.toBeVisible();
     await expect(
-      page.getByRole("link", { name: /enter the shop/i }).first(),
+      page.getByRole("link", { name: /book a seat/i }).first(),
     ).toBeVisible();
   });
 });

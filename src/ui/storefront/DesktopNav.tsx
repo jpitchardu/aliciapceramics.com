@@ -14,14 +14,14 @@ export function DesktopNav() {
       }}
     >
       <div style={{ display: "flex", gap: 36 }}>
+        <Link href="/classes" style={{ textDecoration: "none" }}>
+          <CeramicLabel color="var(--ink-soft)">classes</CeramicLabel>
+        </Link>
         <Link href="/shop" style={{ textDecoration: "none" }}>
           <CeramicLabel color="var(--ink-soft)">shop</CeramicLabel>
         </Link>
         <Link href="/care" style={{ textDecoration: "none" }}>
           <CeramicLabel color="var(--ink-soft)">care</CeramicLabel>
-        </Link>
-        <Link href="/classes" style={{ textDecoration: "none" }}>
-          <CeramicLabel color="var(--ink-soft)">classes</CeramicLabel>
         </Link>
         <a
           href={`https://instagram.com/${SITE.instagram}`}

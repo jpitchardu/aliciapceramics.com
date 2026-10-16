@@ -29,10 +29,12 @@ test.describe("gate — closed (no bypass)", () => {
     await expect(page.getByText(/seconds/i)).toBeVisible();
   });
 
-  test("countdown page does not show enter the shop link", async ({ page }) => {
+  test("countdown page does not show the book a seat link", async ({
+    page,
+  }) => {
     await page.goto("/");
     await expect(
-      page.getByRole("link", { name: /enter the shop/i }),
+      page.getByRole("link", { name: /book a seat/i }),
     ).not.toBeVisible();
   });
 });
@@ -63,7 +65,7 @@ test.describe("gate — bypass cookie", () => {
     await page.goto("/");
     await expect(page.getByText(/hours/i)).not.toBeVisible();
     await expect(
-      page.getByRole("link", { name: /enter the shop/i }).first(),
+      page.getByRole("link", { name: /book a seat/i }).first(),
     ).toBeVisible();
   });
 });

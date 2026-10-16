@@ -1,20 +1,50 @@
-import Link from "next/link";
 import Image from "next/image";
 import { cookies } from "next/headers";
 import { DROP, BYPASS_COOKIE, SHOP_CLOSED } from "@/lib/config";
 import { isGateOpen } from "@/lib/countdown";
+import {
+  datesLabel,
+  featuredClass,
+  first,
+  fromPrice,
+  hasUpgrades,
+  isMulti,
+  money,
+  timeLabel,
+  whenLabel,
+  type ClassEvent,
+} from "@/lib/classes";
+import { getClasses } from "@/lib/classes-square";
 import { Countdown } from "@/ui/Countdown";
 import { ShopClosed } from "@/ui/ShopClosed";
+import {
+  FillLink,
+  Label,
+  QuietLink,
+  SeatsNote,
+} from "@/app/(orders)/classes/_components/bits";
 
 /*
- * Two crops of the same studio photograph, cut so the pots fill the frame and
- * a band of plain wall is left for the headline to sit on — top-right on the
- * landscape crop, across the top on the portrait one. That wall band is what
- * makes the type legible, so the headline must not be moved off it: no scrim,
- * no gradient, no tinted type.
+ * Classes first: one photograph of a class, full-bleed, with the next class
+ * a newcomer can book laid over it on a paper card (desktop) or set beneath
+ * it (phones). The card is opaque paper, so the type reads on any part of
+ * the photo — no scrim, no gradient.
+ *
+ * The photo is cropped to the bottom half of the original. Its focus sits on
+ * her hands painting the mug, so object-position is tuned to keep them near
+ * the middle of the frame at every width — not the table, not her face.
  */
-const HERO_DESKTOP = "/assets/hero-desktop.jpg"; // 2880 × 1390
-const HERO_MOBILE = "/assets/hero-mobile.jpg"; // 1800 × 2100
+const CLASS_PHOTO = "/assets/class-glazing.jpg"; // 1072 × 800
+const PHOTO_ALT = "a student painting her mug at the studio table";
+const PHOTO_FOCUS = "42% 38%";
+
+// seats change as people book — always read fresh
+export const dynamic = "force-dynamic";
+
+const priceLabel = (e: ClassEvent) =>
+  `${hasUpgrades(e) ? "from " : ""}${money(fromPrice(e))}`;
+const dateLabel = (e: ClassEvent) =>
+  isMulti(e) ? datesLabel(e) : whenLabel(first(e));
 
 export default async function HomePage() {
   const bypassed = (await cookies()).get(BYPASS_COOKIE)?.value === "1";
@@ -34,12 +64,16 @@ export default async function HomePage() {
     );
   }
 
+  const e = featuredClass(await getClasses());
+
   return (
     <div
       style={{
         color: "var(--ink)",
         fontFamily: "var(--serif)",
         height: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       {/*
@@ -54,15 +88,18 @@ export default async function HomePage() {
         body > footer { flex-shrink: 0; }
 
         /*
-         * On phones this page is one locked screen, so the footer's usual
-         * breathing room reads as dead space under the photo rather than as
-         * rhythm. Tighten it here only — scrolling pages keep the roomy
-         * footer. Whatever we take off the footer, the hero gains.
-         * The bottom pad never drops below the home-indicator inset.
+         * This page is one locked screen, so the footer sits right under the
+         * photo (desktop) or the class details (phones) — its usual breathing
+         * room would read as dead space. Whatever we take off the footer, the
+         * photo gains. The bottom pad never drops below the home-indicator
+         * inset.
          */
+        body {
+          --sf-footer-gap: 0px;
+          --sf-footer-pad-bottom: 30px;
+        }
         @media (max-width: 1023px) {
           body {
-            --sf-footer-gap: 14px;
             --sf-footer-pad-top: 12px;
             --sf-footer-pad-bottom: max(18px, env(safe-area-inset-bottom, 0px));
           }
@@ -71,100 +108,200 @@ export default async function HomePage() {
 
       <h1 className="sr-only">alicia p. ceramics</h1>
 
-      {/* ── MOBILE ─────────────────────────────────────────────────── */}
       <div
-        className="lg:hidden"
-        style={{ position: "relative", height: "100%", overflow: "hidden" }}
+        style={{
+          position: "relative",
+          flex: 1,
+          minHeight: 0,
+          overflow: "hidden",
+        }}
       >
         <Image
-          src={HERO_MOBILE}
-          alt=""
+          src={CLASS_PHOTO}
+          alt={PHOTO_ALT}
           fill
           priority
-          sizes="(max-width: 1023px) 100vw, 1px"
-          style={{ objectFit: "cover", objectPosition: "center center" }}
+          sizes="100vw"
+          style={{ objectFit: "cover", objectPosition: PHOTO_FOCUS }}
         />
 
-        {/* headline sits on the band of wall across the top of the crop */}
+        {/* ── DESKTOP: the card, on the wall right of her ─────────── */}
         <div
+          className="hidden lg:block"
           style={{
             position: "absolute",
-            left: 0,
-            right: 0,
-            top: 22,
-            padding: "0 22px",
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              fontFamily: "var(--serif)",
-              fontSize: 19,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              lineHeight: 1.3,
-              color: "var(--ink)",
-            }}
-          >
-            {DROP.description}
-          </div>
-          <div style={{ marginTop: 18 }}>
-            <Link href="/shop" className="ds-action">
-              enter the shop
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* ── DESKTOP ────────────────────────────────────────────────── */}
-      <div
-        className="hidden lg:block"
-        style={{ position: "relative", height: "100%", overflow: "hidden" }}
-      >
-        <Image
-          src={HERO_DESKTOP}
-          alt=""
-          fill
-          priority
-          sizes="(min-width: 1024px) 100vw, 1px"
-          style={{ objectFit: "cover", objectPosition: "center top" }}
-        />
-
-        {/* headline sits in the quiet wall corner of the photo — no overlay */}
-        <div
-          style={{
-            position: "absolute",
-            top: 22,
+            top: 32,
             right: 56,
-            width: 420,
+            width: 440,
             textAlign: "right",
+            background: "var(--paper)",
+            padding: "26px 30px",
           }}
         >
-          <div
-            style={{
-              fontFamily: "var(--serif)",
-              fontSize: 28,
-              fontWeight: 700,
-              letterSpacing: "0.09em",
-              textTransform: "uppercase",
-              lineHeight: 1.25,
-              color: "var(--ink)",
-            }}
-          >
-            {DROP.description}
-          </div>
-          <div style={{ marginTop: 14 }}>
-            <Link
-              href="/shop"
-              className="ds-action"
-              style={{ fontSize: 13, fontWeight: 700 }}
-            >
-              see the collection →
-            </Link>
-          </div>
+          {e ? <DesktopCard e={e} /> : <NoDatesCard />}
         </div>
       </div>
+
+      {/* ── MOBILE: the details, under the photo ───────────────────── */}
+      <div className="lg:hidden">
+        {e ? <MobileDetails e={e} /> : <NoDatesMobile />}
+      </div>
+    </div>
+  );
+}
+
+function DesktopCard({ e }: { e: ClassEvent }) {
+  return (
+    <>
+      <Label color="var(--ink)">next at the studio · {e.kind}</Label>
+      <h2
+        style={{
+          margin: "12px 0 0",
+          fontSize: 28,
+          fontWeight: 700,
+          letterSpacing: "0.09em",
+          textTransform: "uppercase",
+          lineHeight: 1.25,
+        }}
+      >
+        {e.title}
+      </h2>
+      <div style={{ marginTop: 10, fontSize: 16, lineHeight: 1.5 }}>
+        {dateLabel(e)} · {timeLabel(e)} · {priceLabel(e)}
+      </div>
+      <div style={{ marginTop: 6 }}>
+        <SeatsNote e={e} />
+      </div>
+      <div
+        style={{
+          marginTop: 20,
+          display: "flex",
+          gap: 26,
+          alignItems: "center",
+          justifyContent: "flex-end",
+        }}
+      >
+        <QuietLink href="/classes">every class →</QuietLink>
+        <FillLink
+          href={`/classes/${e.id}`}
+          style={{ padding: "14px 24px", fontSize: 11 }}
+        >
+          book a seat<span className="sr-only"> — {e.title}</span>
+        </FillLink>
+      </div>
+    </>
+  );
+}
+
+function MobileDetails({ e }: { e: ClassEvent }) {
+  return (
+    <>
+      <div style={{ padding: "24px 24px 0", textAlign: "center" }}>
+        <Label color="var(--ink)">next at the studio</Label>
+        <h2
+          style={{
+            margin: "10px 0 0",
+            fontSize: 19,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            lineHeight: 1.3,
+          }}
+        >
+          {e.title}
+        </h2>
+        <div style={{ marginTop: 8, fontSize: 14 }}>
+          {dateLabel(e)} · {timeLabel(e)}
+        </div>
+        <div style={{ marginTop: 4 }}>
+          <SeatsNote e={e} />
+        </div>
+        <div style={{ marginTop: 18 }}>
+          <QuietLink href={`/classes/${e.id}`}>
+            book a seat · {priceLabel(e)}
+            <span className="sr-only"> — {e.title}</span>
+          </QuietLink>
+        </div>
+      </div>
+      <MobileMore more="more dates →" />
+    </>
+  );
+}
+
+/* between seasons: nothing to book yet, so point at the classes page */
+function NoDatesCard() {
+  return (
+    <>
+      <Label color="var(--ink)">classes at the studio</Label>
+      <h2
+        style={{
+          margin: "12px 0 0",
+          fontSize: 28,
+          fontWeight: 700,
+          letterSpacing: "0.09em",
+          textTransform: "uppercase",
+          lineHeight: 1.25,
+        }}
+      >
+        new dates soon
+      </h2>
+      <div style={{ marginTop: 10, fontSize: 16, lineHeight: 1.5 }}>
+        they show up first on instagram.
+      </div>
+      <div style={{ marginTop: 20 }}>
+        <QuietLink href="/classes">every class →</QuietLink>
+      </div>
+    </>
+  );
+}
+
+function NoDatesMobile() {
+  return (
+    <>
+      <div style={{ padding: "24px 24px 0", textAlign: "center" }}>
+        <Label color="var(--ink)">classes at the studio</Label>
+        <h2
+          style={{
+            margin: "10px 0 0",
+            fontSize: 19,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            lineHeight: 1.3,
+          }}
+        >
+          new dates soon
+        </h2>
+      </div>
+      <MobileMore more="every class →" />
+    </>
+  );
+}
+
+function MobileMore({ more }: { more: string }) {
+  return (
+    <div
+      style={{
+        padding: "22px 24px 14px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "baseline",
+      }}
+    >
+      <QuietLink
+        href="/classes"
+        color="var(--ink-soft)"
+        style={{ borderBottom: "none" }}
+      >
+        {more}
+      </QuietLink>
+      <QuietLink
+        href="/shop"
+        color="var(--ink-soft)"
+        style={{ borderBottom: "none" }}
+      >
+        the shop →
+      </QuietLink>
     </div>
   );
 }

@@ -81,6 +81,13 @@ export function TopNav() {
           }}
         >
           <Link
+            href="/classes"
+            onClick={() => setOpen(false)}
+            style={{ textDecoration: "none" }}
+          >
+            <CeramicLabel color="var(--ink-soft)">classes</CeramicLabel>
+          </Link>
+          <Link
             href="/shop"
             onClick={() => setOpen(false)}
             style={{ textDecoration: "none" }}
@@ -93,13 +100,6 @@ export function TopNav() {
             style={{ textDecoration: "none" }}
           >
             <CeramicLabel color="var(--ink-soft)">care</CeramicLabel>
-          </Link>
-          <Link
-            href="/classes"
-            onClick={() => setOpen(false)}
-            style={{ textDecoration: "none" }}
-          >
-            <CeramicLabel color="var(--ink-soft)">classes</CeramicLabel>
           </Link>
         </div>
       )}
