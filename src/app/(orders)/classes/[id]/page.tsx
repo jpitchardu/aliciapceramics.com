@@ -4,8 +4,6 @@ import { Photo } from "@/ui/Photo";
 import {
   STUDIO,
   first,
-  hasChoice,
-  money,
   isMulti,
   isSoldOut,
   nextOpen,
@@ -100,19 +98,7 @@ export default async function EventPage({
             }}
             rows={[
               ["when", <When key="when" e={e} />],
-              ...(hasChoice(e)
-                ? ([
-                    [
-                      "pick your piece",
-                      e.pieces
-                        .map(
-                          (p) =>
-                            `${p.name}${p.extra > 0 ? ` (+${money(p.extra)})` : ""}`,
-                        )
-                        .join(" · "),
-                    ],
-                  ] as [string, string][])
-                : []),
+              // the piece choices live in the booking panel's buttons
               ...(e.make
                 ? [["you'll leave with", e.make] as [string, string]]
                 : []),
