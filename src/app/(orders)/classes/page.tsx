@@ -176,7 +176,7 @@ function EventRow({ e }: { e: ClassEvent }) {
             {hasUpgrades(e) ? "from " : ""}
             {money(fromPrice(e))}
           </span>
-          <Label>{isMulti(e) ? "both sessions" : "a seat"}</Label>
+          {isMulti(e) && <Label>both sessions</Label>}
         </div>
         <div style={{ marginTop: 12 }}>
           {out ? (
