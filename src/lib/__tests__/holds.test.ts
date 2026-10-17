@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SquareClient } from "square";
-import { releaseStaleHolds, resetHoldThrottle } from "@/lib/holds";
+import {
+  SOFT_HOLD,
+  heldSeats,
+  releaseStaleHolds,
+  resetHoldThrottle,
+} from "@/lib/holds";
 
 const now = new Date("2026-11-01T12:00:00Z");
 const ago = (min: number) =>
@@ -69,7 +74,7 @@ describe("releaseStaleHolds", () => {
     const change = client.inventory.batchCreateChanges.mock.calls[0][0] as any;
     expect(change.changes[0].adjustment).toMatchObject({
       catalogObjectId: "SEAT",
-      fromState: "SOLD",
+      fromState: "NONE",
       toState: "IN_STOCK",
       quantity: "2",
     });
@@ -108,6 +113,55 @@ describe("releaseStaleHolds", () => {
       await releaseStaleHolds(client as unknown as SquareClient, { now }),
     ).toEqual([]);
     expect(client.inventory.batchCreateChanges).not.toHaveBeenCalled();
+  });
+
+  it("releases a stale soft hold by killing its link, leaving stock alone", async () => {
+    const client = mockClient(
+      [{ id: "OLD", orderId: "O1", createdAt: ago(45) }],
+      [
+        unpaid("O1", {
+          ...SOFT_HOLD,
+          variationIds: "SEAT",
+          variationQuantities: "3",
+        }),
+      ],
+    );
+    const released = await releaseStaleHolds(
+      client as unknown as SquareClient,
+      { now },
+    );
+    expect(released).toEqual([{ linkId: "OLD", orderId: "O1", quantity: 3 }]);
+    expect(client.checkout.paymentLinks.delete).toHaveBeenCalledWith({
+      id: "OLD",
+    });
+    expect(client.orders.update).not.toHaveBeenCalled();
+    expect(client.inventory.batchCreateChanges).not.toHaveBeenCalled();
+  });
+
+  it("counts seats in fresh, unpaid soft holds only", async () => {
+    const soft = (q: string) => ({
+      ...SOFT_HOLD,
+      variationIds: "SEAT",
+      variationQuantities: q,
+    });
+    const client = mockClient(
+      [
+        { id: "A", orderId: "O1", createdAt: ago(5) },
+        { id: "B", orderId: "O2", createdAt: ago(20) },
+        { id: "PAID", orderId: "O3", createdAt: ago(10) },
+        { id: "STALE", orderId: "O4", createdAt: ago(45) },
+        { id: "SHOP", orderId: "O5", createdAt: ago(5) },
+      ],
+      [
+        unpaid("O1", soft("2")),
+        unpaid("O2", soft("1")),
+        { ...unpaid("O3", soft("4")), state: "OPEN" },
+        unpaid("O4", soft("5")),
+        unpaid("O5"),
+      ],
+    );
+    const held = await heldSeats(client as unknown as SquareClient, { now });
+    expect([...held]).toEqual([["SEAT", 3]]);
   });
 
   it("sweeps at most every few minutes unless forced", async () => {

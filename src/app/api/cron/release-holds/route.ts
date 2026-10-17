@@ -3,7 +3,7 @@ import { squareClient } from "@/lib/square";
 import { releaseStaleHolds } from "@/lib/holds";
 
 /*
- * A daily backstop for releasing unpaid holds — the class pages and class
+ * Every 15 minutes, release unpaid holds — the class pages and class
  * checkout also sweep as they're used. Vercel's cron sends the CRON_SECRET
  * as a bearer token when one is set.
  */

@@ -2,15 +2,16 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { track } from "@vercel/analytics/server";
 import { squareClient } from "@/lib/square";
+import { SOFT_HOLD } from "@/lib/holds";
 import { getClass, hasSquare } from "@/lib/classes-square";
 import { isSoldOut, parsePicks, shortDay, first } from "@/lib/classes";
 
 /*
  * Books seats in a class: re-reads the class from Square (price, pieces and
- * seats left are never taken from the browser), holds the seats by moving
- * them from in stock to sold — Square refuses if they're no longer there —
- * and hands back a Square payment link. The shop's webhook puts the seats
- * back if the order is cancelled, from the same metadata the shop uses.
+ * seats left are never taken from the browser — seats in other unpaid
+ * checkouts are already counted out) and hands back a Square payment link.
+ * Stock isn't touched here: the unpaid order holds the seats (a soft hold,
+ * see lib/holds) and Square marks them sold itself once it's paid.
  */
 
 const requestSchema = z.object({
@@ -57,32 +58,6 @@ export async function POST(req: Request) {
   }
   const seats = picks.length;
 
-  try {
-    await squareClient.inventory.batchCreateChanges({
-      idempotencyKey: crypto.randomUUID(),
-      changes: [
-        {
-          type: "ADJUSTMENT",
-          adjustment: {
-            catalogObjectId: e.variationId,
-            locationId,
-            fromState: "IN_STOCK",
-            toState: "SOLD",
-            quantity: String(seats),
-            occurredAt: new Date().toISOString(),
-          },
-        },
-      ],
-    });
-  } catch (err) {
-    console.error("[classes] couldn't hold seats:", err);
-    await fail("hold_error");
-    return NextResponse.json(
-      { error: "those seats just went — please try again" },
-      { status: 409 },
-    );
-  }
-
   // seats making the same piece share a line; square prices each line from
   // the catalog, base ticket plus the piece's modifier
   const byPiece = new Map<string | null, number>();
@@ -102,8 +77,10 @@ export async function POST(req: Request) {
           modifiers: piece ? [{ catalogObjectId: piece }] : undefined,
           note: when,
         })),
-        // read by the square webhook to give the seats back on cancel
+        // the unpaid order is the hold (see lib/holds): counted against
+        // seats left for HOLD_MINUTES; square sells them itself once paid
         metadata: {
+          ...SOFT_HOLD,
           variationIds: e.variationId,
           variationQuantities: String(seats),
         },
@@ -119,25 +96,6 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("[classes] square checkout error:", err);
     await fail("link_error");
-    // give the held seats back
-    await squareClient.inventory
-      .batchCreateChanges({
-        idempotencyKey: crypto.randomUUID(),
-        changes: [
-          {
-            type: "ADJUSTMENT",
-            adjustment: {
-              catalogObjectId: e.variationId,
-              locationId,
-              fromState: "SOLD",
-              toState: "IN_STOCK",
-              quantity: String(seats),
-              occurredAt: new Date().toISOString(),
-            },
-          },
-        ],
-      })
-      .catch((e2) => console.error("[classes] couldn't release seats:", e2));
     return NextResponse.json({ error: "checkout failed" }, { status: 502 });
   }
 }

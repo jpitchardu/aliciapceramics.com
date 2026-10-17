@@ -1,18 +1,23 @@
-import type { SquareClient } from "square";
+import type { Order, SquareClient } from "square";
 
 /*
- * Releasing seats (and shop pieces) nobody paid for.
+ * Holding stock while someone pays, and letting go when they don't.
  *
- * Checkout moves what's being bought from in stock to sold the moment the
- * Square payment link is made, so two people can't buy the last seat. If the
- * buyer walks away, nothing ever puts it back — the link just sits there
- * unpaid. This finds the site's links that are older than HOLD_MINUTES and
- * still unpaid, and for each one:
+ * Two kinds of hold, told apart by the order's metadata:
  *
- *  1. clears the order's metadata, so the order-cancelled webhook (which
- *     restores stock from that metadata) can't give the stock back twice
- *  2. deletes the payment link, which cancels its order and kills the link
- *  3. moves the held quantity from sold back to in stock
+ *  - soft (classes): stock isn't touched at checkout. The unpaid order is
+ *    the hold — seats left are what's in stock minus the seats in the
+ *    site's unpaid orders younger than HOLD_MINUTES (heldSeats). Once paid,
+ *    Square moves them from in stock to sold itself. Releasing one is just
+ *    deleting its payment link, so nobody pays after the hold ran out.
+ *
+ *  - hard (shop): checkout moves the pieces from in stock to sold at once.
+ *    Square then sells them again when the order is paid, so a paid hard
+ *    hold counts twice — the shop should move to soft holds too.
+ *    Releasing one clears the order's metadata (so the order-cancelled
+ *    webhook can't restore it twice), deletes the link, and adds the
+ *    pieces back to in stock. Square won't move SOLD back to IN_STOCK —
+ *    nor via RETURNED_BY_CUSTOMER — so NONE → IN_STOCK is the way back.
  *
  * Links made before RELEASE_SINCE predate this and are left alone — old shop
  * links whose pieces were settled by hand.
@@ -20,13 +25,80 @@ import type { SquareClient } from "square";
 
 export const HOLD_MINUTES = 30;
 export const RELEASE_SINCE = "2026-10-16T00:00:00Z";
+/* the order metadata flag that marks a soft hold */
+export const SOFT_HOLD = { hold: "soft" } as const;
 /* the page and checkout call this often; one sweep per few minutes is plenty */
 const THROTTLE_MS = 5 * 60 * 1000;
 
 let lastSweep = 0;
 
+type Meta = Record<string, string>;
+const metaOf = (o: Order) => (o.metadata ?? {}) as Meta;
+export const isSoftHold = (meta: Meta | undefined) =>
+  meta?.hold === SOFT_HOLD.hold;
+
+/* the variations an order holds and how many of each, from its metadata */
+export function heldUnits(meta: Meta | undefined): [string, number][] {
+  const ids = (meta?.variationIds ?? "").split(",").filter(Boolean);
+  const qtys = (meta?.variationQuantities ?? "").split(",");
+  return ids.map((id, i) => [id, Number(qtys[i]) || 1]);
+}
+
+/* the site's payment links made in [from, to], with their orders */
+async function linksBetween(
+  client: SquareClient,
+  locationId: string,
+  from: number,
+  to: number,
+) {
+  const links: { id: string; orderId: string }[] = [];
+  const page = await client.checkout.paymentLinks.list({ limit: 100 });
+  for await (const link of page) {
+    const made = Date.parse(link.createdAt ?? "");
+    if (!link.id || !link.orderId || Number.isNaN(made)) continue;
+    if (made >= from && made <= to) {
+      links.push({ id: link.id, orderId: link.orderId });
+    }
+  }
+  if (!links.length) return [];
+  const { orders = [] } = await client.orders.batchGet({
+    locationId,
+    orderIds: links.map((l) => l.orderId),
+  });
+  const byId = new Map(orders.map((o) => [o.id, o]));
+  return links.map((l) => ({ ...l, order: byId.get(l.orderId) }));
+}
+
+/*
+ * Seats held by soft-hold checkouts that are unpaid and still inside their
+ * HOLD_MINUTES — variation id → quantity. Never throttled: checkout needs
+ * the live number.
+ */
+export async function heldSeats(
+  client: SquareClient,
+  opts: { now?: Date } = {},
+): Promise<Map<string, number>> {
+  const held = new Map<string, number>();
+  const locationId = process.env.SQUARE_LOCATION_ID;
+  if (!locationId) return held;
+  const now = (opts.now ?? new Date()).getTime();
+  const from = Math.max(
+    Date.parse(RELEASE_SINCE),
+    now - HOLD_MINUTES * 60 * 1000,
+  );
+  for (const { order } of await linksBetween(client, locationId, from, now)) {
+    // a paid order moves on from DRAFT, and its seats are sold
+    if (order?.state !== "DRAFT" || !isSoftHold(metaOf(order))) continue;
+    for (const [id, n] of heldUnits(metaOf(order))) {
+      held.set(id, (held.get(id) ?? 0) + n);
+    }
+  }
+  return held;
+}
+
 export type Released = { linkId: string; orderId: string; quantity: number };
 
+/* lets go of every unpaid hold older than HOLD_MINUTES */
 export async function releaseStaleHolds(
   client: SquareClient,
   opts: { now?: Date; force?: boolean } = {},
@@ -38,34 +110,32 @@ export async function releaseStaleHolds(
   const locationId = process.env.SQUARE_LOCATION_ID;
   if (!locationId) return [];
 
-  const cutoff = now.getTime() - HOLD_MINUTES * 60 * 1000;
-  const since = Date.parse(RELEASE_SINCE);
-  const stale: { id: string; orderId: string }[] = [];
-  const page = await client.checkout.paymentLinks.list({ limit: 100 });
-  for await (const link of page) {
-    const made = Date.parse(link.createdAt ?? "");
-    if (!link.id || !link.orderId || Number.isNaN(made)) continue;
-    if (made >= since && made <= cutoff) {
-      stale.push({ id: link.id, orderId: link.orderId });
-    }
-  }
-  if (!stale.length) return [];
-
-  const { orders = [] } = await client.orders.batchGet({
+  const stale = await linksBetween(
+    client,
     locationId,
-    orderIds: stale.map((s) => s.orderId),
-  });
-  const byId = new Map(orders.map((o) => [o.id, o]));
+    Date.parse(RELEASE_SINCE),
+    now.getTime() - HOLD_MINUTES * 60 * 1000,
+  );
 
   const released: Released[] = [];
-  for (const { id, orderId } of stale) {
-    const order = byId.get(orderId);
+  for (const { id, orderId, order } of stale) {
     // only unpaid orders: a paid one moves on from DRAFT
     if (!order || order.state !== "DRAFT") continue;
-    const meta = (order.metadata ?? {}) as Record<string, string>;
-    const ids = (meta.variationIds ?? "").split(",").filter(Boolean);
-    if (!ids.length) continue;
-    const qtys = (meta.variationQuantities ?? "").split(",");
+    const meta = metaOf(order);
+    const units = heldUnits(meta);
+    if (!units.length) continue;
+    const quantity = units.reduce((s, [, n]) => s + n, 0);
+
+    if (isSoftHold(meta)) {
+      // nothing left the stock — killing the link is the whole release
+      try {
+        await client.checkout.paymentLinks.delete({ id });
+        released.push({ linkId: id, orderId, quantity });
+      } catch (err) {
+        console.error(`[holds] couldn't delete link ${id}:`, err);
+      }
+      continue;
+    }
 
     try {
       await client.orders.update({
@@ -82,23 +152,19 @@ export async function releaseStaleHolds(
       await client.checkout.paymentLinks.delete({ id });
       await client.inventory.batchCreateChanges({
         idempotencyKey: `release-${orderId}`,
-        changes: ids.map((variationId, i) => ({
+        changes: units.map(([variationId, n]) => ({
           type: "ADJUSTMENT",
           adjustment: {
             catalogObjectId: variationId,
             locationId,
-            fromState: "SOLD",
+            fromState: "NONE",
             toState: "IN_STOCK",
-            quantity: qtys[i] || "1",
+            quantity: String(n),
             occurredAt: now.toISOString(),
           },
         })),
       });
-      released.push({
-        linkId: id,
-        orderId,
-        quantity: ids.reduce((s, _, i) => s + (Number(qtys[i]) || 1), 0),
-      });
+      released.push({ linkId: id, orderId, quantity });
     } catch (err) {
       console.error(`[holds] couldn't release order ${orderId}:`, err);
     }
