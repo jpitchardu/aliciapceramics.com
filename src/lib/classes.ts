@@ -265,14 +265,9 @@ export const money = (n: number) => `$${n}`;
 export const nextOpen = (e: ClassEvent, all: readonly ClassEvent[]) =>
   upcoming(all).find((o) => o.id !== e.id && !isSoldOut(o)) ?? null;
 
-/*
- * The class the home page leads with: the soonest one with seats that a
- * newcomer can book — so glaze night, for current students, is skipped.
- */
+/* the class the home page leads with: the soonest one with seats */
 export const featuredClass = (all: readonly ClassEvent[]) =>
-  upcoming(all).find(
-    (e) => !isSoldOut(e) && !/current students/i.test(e.kind),
-  ) ?? null;
+  upcoming(all).find((e) => !isSoldOut(e)) ?? null;
 
 /* ── pieces and prices ───────────────────────────────────────────── */
 

@@ -34,7 +34,11 @@ test.describe("classes preview", () => {
     await expect(
       page.getByRole("heading", { name: "off to square to pay." }),
     ).toBeVisible();
+    // wait on the checkout call itself — on a cold dev server the route
+    // compiles on first hit and outlasts the 5s assertion timeout
+    const checkout = page.waitForResponse("**/api/classes/checkout");
     await page.getByRole("button", { name: /continue to square/ }).click();
+    await checkout;
     await expect(page.getByText(/nothing was charged/)).toBeVisible();
   });
 

@@ -26,9 +26,10 @@ import {
 
 /*
  * Classes first: one photograph of a class, full-bleed, with the next class
- * a newcomer can book laid over it on a paper card (desktop) or set beneath
- * it (phones). The card is opaque paper, so the type reads on any part of
- * the photo — no scrim, no gradient.
+ * that has seats laid over it on a paper card (desktop) or set beneath it
+ * (phones). Everything on the card comes from that class; with nothing to
+ * book, there's no card — just the photo. The card is opaque paper, so the
+ * type reads on any part of the photo — no scrim, no gradient.
  *
  * The photo is cropped to the bottom half of the original. Its focus sits on
  * her hands painting the mug, so object-position is tuned to keep them near
@@ -45,6 +46,8 @@ const priceLabel = (e: ClassEvent) =>
   `${hasUpgrades(e) ? "from " : ""}${money(fromPrice(e))}`;
 const dateLabel = (e: ClassEvent) =>
   isMulti(e) ? datesLabel(e) : whenLabel(first(e));
+/* "saturday nov 14 · 10 am – 12:30 pm · from $85", skipping what's unset */
+const line = (...parts: string[]) => parts.filter(Boolean).join(" · ");
 
 export default async function HomePage() {
   const bypassed = (await cookies()).get(BYPASS_COOKIE)?.value === "1";
@@ -126,26 +129,30 @@ export default async function HomePage() {
         />
 
         {/* ── DESKTOP: the card, on the wall right of her ─────────── */}
-        <div
-          className="hidden lg:block"
-          style={{
-            position: "absolute",
-            top: 32,
-            right: 56,
-            width: 440,
-            textAlign: "right",
-            background: "var(--paper)",
-            padding: "26px 30px",
-          }}
-        >
-          {e ? <DesktopCard e={e} /> : <NoDatesCard />}
-        </div>
+        {e && (
+          <div
+            className="hidden lg:block"
+            style={{
+              position: "absolute",
+              top: 32,
+              right: 56,
+              width: 440,
+              textAlign: "right",
+              background: "var(--paper)",
+              padding: "26px 30px",
+            }}
+          >
+            <DesktopCard e={e} />
+          </div>
+        )}
       </div>
 
       {/* ── MOBILE: the details, under the photo ───────────────────── */}
-      <div className="lg:hidden">
-        {e ? <MobileDetails e={e} /> : <NoDatesMobile />}
-      </div>
+      {e && (
+        <div className="lg:hidden">
+          <MobileDetails e={e} />
+        </div>
+      )}
     </div>
   );
 }
@@ -153,7 +160,7 @@ export default async function HomePage() {
 function DesktopCard({ e }: { e: ClassEvent }) {
   return (
     <>
-      <Label color="var(--ink)">next at the studio · {e.kind}</Label>
+      <Label color="var(--ink)">{line("next at the studio", e.kind)}</Label>
       <h2
         style={{
           margin: "12px 0 0",
@@ -167,7 +174,7 @@ function DesktopCard({ e }: { e: ClassEvent }) {
         {e.title}
       </h2>
       <div style={{ marginTop: 10, fontSize: 16, lineHeight: 1.5 }}>
-        {dateLabel(e)} · {timeLabel(e)} · {priceLabel(e)}
+        {line(dateLabel(e), timeLabel(e), priceLabel(e))}
       </div>
       <div style={{ marginTop: 6 }}>
         <SeatsNote e={e} />
@@ -211,7 +218,7 @@ function MobileDetails({ e }: { e: ClassEvent }) {
           {e.title}
         </h2>
         <div style={{ marginTop: 8, fontSize: 14 }}>
-          {dateLabel(e)} · {timeLabel(e)}
+          {line(dateLabel(e), timeLabel(e))}
         </div>
         <div style={{ marginTop: 4 }}>
           <SeatsNote e={e} />
@@ -223,62 +230,12 @@ function MobileDetails({ e }: { e: ClassEvent }) {
           </QuietLink>
         </div>
       </div>
-      <MobileMore more="more dates →" />
+      <MobileMore />
     </>
   );
 }
 
-/* between seasons: nothing to book yet, so point at the classes page */
-function NoDatesCard() {
-  return (
-    <>
-      <Label color="var(--ink)">classes at the studio</Label>
-      <h2
-        style={{
-          margin: "12px 0 0",
-          fontSize: 28,
-          fontWeight: 700,
-          letterSpacing: "0.09em",
-          textTransform: "uppercase",
-          lineHeight: 1.25,
-        }}
-      >
-        new dates soon
-      </h2>
-      <div style={{ marginTop: 10, fontSize: 16, lineHeight: 1.5 }}>
-        they show up first on instagram.
-      </div>
-      <div style={{ marginTop: 20 }}>
-        <QuietLink href="/classes">every class →</QuietLink>
-      </div>
-    </>
-  );
-}
-
-function NoDatesMobile() {
-  return (
-    <>
-      <div style={{ padding: "24px 24px 0", textAlign: "center" }}>
-        <Label color="var(--ink)">classes at the studio</Label>
-        <h2
-          style={{
-            margin: "10px 0 0",
-            fontSize: 19,
-            fontWeight: 700,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            lineHeight: 1.3,
-          }}
-        >
-          new dates soon
-        </h2>
-      </div>
-      <MobileMore more="every class →" />
-    </>
-  );
-}
-
-function MobileMore({ more }: { more: string }) {
+function MobileMore() {
   return (
     <div
       style={{
@@ -293,7 +250,7 @@ function MobileMore({ more }: { more: string }) {
         color="var(--ink-soft)"
         style={{ borderBottom: "none" }}
       >
-        {more}
+        more dates →
       </QuietLink>
       <QuietLink
         href="/shop"

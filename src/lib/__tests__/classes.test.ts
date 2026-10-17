@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   SAMPLE_EVENTS,
   defaultPiece,
+  featuredClass,
   fromPrice,
   hasUpgrades,
   parsePicks,
@@ -189,5 +190,25 @@ describe("reading classes from square", () => {
     )!;
     expect(e.pieces).toEqual([]);
     expect(e.left).toBe(0);
+  });
+});
+
+describe("the home page's class", () => {
+  it("is the soonest class with seats", () => {
+    expect(featuredClass(SAMPLE_EVENTS)?.id).toBe("glaze-night");
+  });
+
+  it("skips sold-out classes", () => {
+    const full = SAMPLE_EVENTS.map((e) =>
+      e.id === "glaze-night" ? { ...e, left: 0 } : e,
+    );
+    expect(featuredClass(full)?.id).toBe("create-your-own-mug");
+  });
+
+  it("is nothing when there's nothing to book", () => {
+    expect(featuredClass([])).toBeNull();
+    expect(
+      featuredClass(SAMPLE_EVENTS.map((e) => ({ ...e, left: 0 }))),
+    ).toBeNull();
   });
 });

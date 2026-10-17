@@ -34,10 +34,10 @@ test.describe("home page", () => {
     ).toBeVisible();
   });
 
-  test("leads with the soonest class a beginner can book", async ({ page }) => {
+  test("leads with the soonest class that has seats", async ({ page }) => {
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: /create your own mug/i }),
+      page.getByRole("heading", { name: /glaze night/i }),
     ).toBeVisible();
   });
 
@@ -47,7 +47,7 @@ test.describe("home page", () => {
       .getByRole("link", { name: /book a seat/i })
       .first()
       .click();
-    await expect(page).toHaveURL("/classes/create-your-own-mug");
+    await expect(page).toHaveURL("/classes/glaze-night");
   });
 
   test("every class link navigates to /classes", async ({ page }) => {
