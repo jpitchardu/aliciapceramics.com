@@ -85,7 +85,9 @@ export async function POST(req: Request) {
         adjustment: {
           catalogObjectId: variationId,
           locationId,
-          fromState: "SOLD",
+          // square won't move SOLD back (or via RETURNED_BY_CUSTOMER);
+          // NONE → IN_STOCK is the one way to put a held unit back
+          fromState: "NONE",
           toState: "IN_STOCK",
           quantity: quantities[idx] ?? "1",
           occurredAt: new Date().toISOString(),

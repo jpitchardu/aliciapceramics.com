@@ -12,7 +12,8 @@ import type { SquareClient } from "square";
  *  1. clears the order's metadata, so the order-cancelled webhook (which
  *     restores stock from that metadata) can't give the stock back twice
  *  2. deletes the payment link, which cancels its order and kills the link
- *  3. moves the held quantity from sold back to in stock
+ *  3. adds the held quantity back to in stock (Square can't move SOLD back,
+ *     so the sold count keeps the hold; NONE → IN_STOCK restores the seat)
  *
  * Links made before RELEASE_SINCE predate this and are left alone — old shop
  * links whose pieces were settled by hand.
@@ -87,7 +88,9 @@ export async function releaseStaleHolds(
           adjustment: {
             catalogObjectId: variationId,
             locationId,
-            fromState: "SOLD",
+            // square won't move SOLD back (or via RETURNED_BY_CUSTOMER);
+            // NONE → IN_STOCK is the one way to put a held unit back
+            fromState: "NONE",
             toState: "IN_STOCK",
             quantity: qtys[i] || "1",
             occurredAt: now.toISOString(),

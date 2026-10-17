@@ -69,7 +69,7 @@ describe("releaseStaleHolds", () => {
     const change = client.inventory.batchCreateChanges.mock.calls[0][0] as any;
     expect(change.changes[0].adjustment).toMatchObject({
       catalogObjectId: "SEAT",
-      fromState: "SOLD",
+      fromState: "NONE",
       toState: "IN_STOCK",
       quantity: "2",
     });
