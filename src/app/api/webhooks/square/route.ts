@@ -1,6 +1,7 @@
 import { createHmac } from "crypto";
 import { NextResponse } from "next/server";
 import { squareClient } from "@/lib/square";
+import { heldUnits, isSoftHold } from "@/lib/holds";
 
 const SIGNATURE_KEY = process.env.SQUARE_WEBHOOK_SIGNATURE_KEY ?? "";
 const WEBHOOK_URL = `${process.env.NEXT_PUBLIC_SITE_URL}/api/webhooks/square`;
@@ -35,19 +36,15 @@ export async function POST(req: Request) {
   const orderUpdated = (event.data as Record<string, unknown> | undefined)
     ?.object as Record<string, unknown> | undefined;
 
-  const state = (
-    orderUpdated?.order_updated as Record<string, unknown> | undefined
-  )?.state;
+  const updated = orderUpdated?.order_updated as
+    | Record<string, unknown>
+    | undefined;
+  const state = updated?.state;
+  const orderId = updated?.order_id as string | undefined;
 
-  if (state !== "CANCELED") {
-    return NextResponse.json({ ok: true });
-  }
-
-  const orderId = (
-    orderUpdated?.order_updated as Record<string, unknown> | undefined
-  )?.order_id as string | undefined;
-
-  if (!orderId) {
+  // a cancelled order gives its stock back; a paid soft hold takes its stock
+  const paid = state === "OPEN" || state === "COMPLETED";
+  if ((state !== "CANCELED" && !paid) || !orderId) {
     return NextResponse.json({ ok: true });
   }
 
@@ -62,46 +59,61 @@ export async function POST(req: Request) {
   try {
     const { order } = await squareClient.orders.get({ orderId });
     const metadata = order?.metadata as Record<string, string> | undefined;
-    const rawIds = metadata?.variationIds;
-    const rawQuantities = metadata?.variationQuantities;
-
-    if (!rawIds) {
-      return NextResponse.json({ ok: true });
-    }
-
-    const variationIds = rawIds.split(",").filter(Boolean);
-    if (variationIds.length === 0) {
-      return NextResponse.json({ ok: true });
-    }
     // Older orders (placed before quantities were tracked) fall back to 1.
-    const quantities = (rawQuantities ?? "").split(",").filter(Boolean);
+    const units = heldUnits(metadata);
+    if (units.length === 0) {
+      return NextResponse.json({ ok: true });
+    }
+    const soft = isSoftHold(metadata);
 
-    // Reverse the exact IN_STOCK → SOLD adjustment made at checkout so
-    // pieces bought in bulk get all of their stock back, not just one unit.
+    if (paid && soft) {
+      // the seats were only held by the unpaid order — now they're sold.
+      // square sends several updates per order; the key makes this once
+      await squareClient.inventory.batchCreateChanges({
+        idempotencyKey: `sold-${orderId}`,
+        changes: units.map(([variationId, n]) => ({
+          type: "ADJUSTMENT",
+          adjustment: {
+            catalogObjectId: variationId,
+            locationId,
+            fromState: "IN_STOCK",
+            toState: "SOLD",
+            quantity: String(n),
+            occurredAt: new Date().toISOString(),
+          },
+        })),
+      });
+      console.log(`[webhook] sold held seats for order ${orderId}:`, units);
+      return NextResponse.json({ ok: true });
+    }
+    // a paid hard hold was already sold at checkout; a cancelled soft hold
+    // never left the stock
+    if (paid || soft) {
+      return NextResponse.json({ ok: true });
+    }
+
+    // Undo the IN_STOCK → SOLD hold made at checkout, so pieces bought in
+    // bulk get all of their stock back. Square won't move SOLD back to
+    // IN_STOCK, so the units come back as NONE → IN_STOCK.
     await squareClient.inventory.batchCreateChanges({
       idempotencyKey: crypto.randomUUID(),
-      changes: variationIds.map((variationId, idx) => ({
+      changes: units.map(([variationId, n]) => ({
         type: "ADJUSTMENT",
         adjustment: {
           catalogObjectId: variationId,
           locationId,
-          // square won't move SOLD back (or via RETURNED_BY_CUSTOMER);
-          // NONE → IN_STOCK is the one way to put a held unit back
           fromState: "NONE",
           toState: "IN_STOCK",
-          quantity: quantities[idx] ?? "1",
+          quantity: String(n),
           occurredAt: new Date().toISOString(),
         },
       })),
     });
 
-    console.log(
-      `[webhook] restored inventory for order ${orderId}:`,
-      variationIds,
-    );
+    console.log(`[webhook] restored inventory for order ${orderId}:`, units);
   } catch (err) {
-    console.error("[webhook] error restoring inventory:", err);
-    return NextResponse.json({ error: "restore failed" }, { status: 500 });
+    console.error("[webhook] error updating inventory:", err);
+    return NextResponse.json({ error: "inventory failed" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
