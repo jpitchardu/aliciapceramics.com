@@ -11,7 +11,7 @@ import { isSoldOut, parsePicks, shortDay, first } from "@/lib/classes";
  * seats left are never taken from the browser — seats in other unpaid
  * checkouts are already counted out) and hands back a Square payment link.
  * Stock isn't touched here: the unpaid order holds the seats (a soft hold,
- * see lib/holds) and the webhook marks them sold once it's paid.
+ * see lib/holds) and Square marks them sold itself once it's paid.
  */
 
 const requestSchema = z.object({
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
           note: when,
         })),
         // the unpaid order is the hold (see lib/holds): counted against
-        // seats left for HOLD_MINUTES, moved to sold by the webhook once paid
+        // seats left for HOLD_MINUTES; square sells them itself once paid
         metadata: {
           ...SOFT_HOLD,
           variationIds: e.variationId,

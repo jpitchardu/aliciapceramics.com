@@ -42,9 +42,9 @@ export async function POST(req: Request) {
   const state = updated?.state;
   const orderId = updated?.order_id as string | undefined;
 
-  // a cancelled order gives its stock back; a paid soft hold takes its stock
-  const paid = state === "OPEN" || state === "COMPLETED";
-  if ((state !== "CANCELED" && !paid) || !orderId) {
+  // a cancelled order gives back what checkout took out of stock. Paid
+  // orders need nothing: square moves their items to sold itself
+  if (state !== "CANCELED" || !orderId) {
     return NextResponse.json({ ok: true });
   }
 
@@ -64,31 +64,8 @@ export async function POST(req: Request) {
     if (units.length === 0) {
       return NextResponse.json({ ok: true });
     }
-    const soft = isSoftHold(metadata);
-
-    if (paid && soft) {
-      // the seats were only held by the unpaid order — now they're sold.
-      // square sends several updates per order; the key makes this once
-      await squareClient.inventory.batchCreateChanges({
-        idempotencyKey: `sold-${orderId}`,
-        changes: units.map(([variationId, n]) => ({
-          type: "ADJUSTMENT",
-          adjustment: {
-            catalogObjectId: variationId,
-            locationId,
-            fromState: "IN_STOCK",
-            toState: "SOLD",
-            quantity: String(n),
-            occurredAt: new Date().toISOString(),
-          },
-        })),
-      });
-      console.log(`[webhook] sold held seats for order ${orderId}:`, units);
-      return NextResponse.json({ ok: true });
-    }
-    // a paid hard hold was already sold at checkout; a cancelled soft hold
-    // never left the stock
-    if (paid || soft) {
+    // a soft hold (classes) never left the stock — nothing to give back
+    if (isSoftHold(metadata)) {
       return NextResponse.json({ ok: true });
     }
 

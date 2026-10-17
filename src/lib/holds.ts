@@ -8,10 +8,12 @@ import type { Order, SquareClient } from "square";
  *  - soft (classes): stock isn't touched at checkout. The unpaid order is
  *    the hold — seats left are what's in stock minus the seats in the
  *    site's unpaid orders younger than HOLD_MINUTES (heldSeats). Once paid,
- *    the webhook moves them from in stock to sold. Releasing one is just
+ *    Square moves them from in stock to sold itself. Releasing one is just
  *    deleting its payment link, so nobody pays after the hold ran out.
  *
  *  - hard (shop): checkout moves the pieces from in stock to sold at once.
+ *    Square then sells them again when the order is paid, so a paid hard
+ *    hold counts twice — the shop should move to soft holds too.
  *    Releasing one clears the order's metadata (so the order-cancelled
  *    webhook can't restore it twice), deletes the link, and adds the
  *    pieces back to in stock. Square won't move SOLD back to IN_STOCK —
