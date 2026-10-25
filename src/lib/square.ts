@@ -236,6 +236,18 @@ export async function fetchCatalog(): Promise<{
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchItemCategories(item: any): Promise<CatalogObject[]> {
+  const ids = ((item?.itemData?.categories ?? []) as { id?: string }[])
+    .map((c) => c.id)
+    .filter((id): id is string => !!id);
+  if (ids.length === 0) return [];
+  const { objects = [] } = await squareClient.catalog.batchGet({
+    objectIds: ids,
+  });
+  return objects;
+}
+
 export async function fetchPieceById(id: string): Promise<Piece | null> {
   if (!process.env.SQUARE_ACCESS_TOKEN) {
     const { FIXTURE_PIECES } = await import("@/lib/__fixtures__/catalog");
@@ -250,8 +262,11 @@ export async function fetchPieceById(id: string): Promise<Piece | null> {
       });
 
     if (!item) return null;
-    // related objects carry the item's categories, enough to spot an exclusion
-    if (!isShopItem(item, buildShopFilter(relatedObjects))) return null;
+    // Related objects only carry the item's reporting category, not every
+    // category it's in — so "online shop" is usually missing and the piece
+    // would read as unlisted. Fetch the categories it actually names.
+    if (!isShopItem(item, buildShopFilter(await fetchItemCategories(item))))
+      return null;
 
     const images = new Map<string, string>();
     for (const obj of relatedObjects) {
