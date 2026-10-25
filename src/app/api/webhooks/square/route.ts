@@ -1,24 +1,15 @@
-import { createHmac } from "crypto";
 import { NextResponse } from "next/server";
 import { squareClient } from "@/lib/square";
 import { heldUnits, isSoftHold } from "@/lib/holds";
-
-const SIGNATURE_KEY = process.env.SQUARE_WEBHOOK_SIGNATURE_KEY ?? "";
-const WEBHOOK_URL = `${process.env.NEXT_PUBLIC_SITE_URL}/api/webhooks/square`;
-
-function verifySignature(rawBody: string, signature: string | null): boolean {
-  if (!signature || !SIGNATURE_KEY) return false;
-  const expected = createHmac("sha256", SIGNATURE_KEY)
-    .update(WEBHOOK_URL + rawBody)
-    .digest("base64");
-  return expected === signature;
-}
+import { verifySignature, webhookUrls } from "@/lib/square-webhook";
 
 export async function POST(req: Request) {
   const rawBody = await req.text();
   const signature = req.headers.get("x-square-hmacsha256-signature");
 
   if (!verifySignature(rawBody, signature)) {
+    // loud on purpose: a silent 401 here once left cancelled orders unrestocked
+    console.error("[webhook] rejected: signature didn't match", webhookUrls());
     return NextResponse.json({ error: "invalid signature" }, { status: 401 });
   }
 
