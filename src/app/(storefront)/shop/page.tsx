@@ -89,7 +89,8 @@ export default async function ShopPage({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            // minmax(0, …) so a long one-line title can't widen its column
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
             gap: 10,
             padding: "0 16px",
           }}
@@ -126,6 +127,7 @@ export default async function ShopPage({
                       fontWeight: 400,
                       color:
                         p.state === "gone" ? "var(--ink-faint)" : "var(--ink)",
+                      minWidth: 0,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -215,7 +217,7 @@ export default async function ShopPage({
           style={{
             padding: "40px 56px 0",
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             gap: 48,
           }}
         >
