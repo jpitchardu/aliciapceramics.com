@@ -292,11 +292,9 @@ export function BookPanel({ e }: { e: ClassEvent }) {
 /* a row of toggle buttons under a small label */
 function ChoiceGroup({
   label,
-  hint,
   children,
 }: {
   label: string;
-  hint?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -309,18 +307,6 @@ function ChoiceGroup({
       <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
         {children}
       </div>
-      {hint && (
-        <p
-          style={{
-            margin: "8px 0 0",
-            fontSize: 12,
-            lineHeight: 1.5,
-            color: "var(--ink-soft)",
-          }}
-        >
-          {hint}
-        </p>
-      )}
     </div>
   );
 }
@@ -384,10 +370,7 @@ function DrinkChoice({
   const upgrade = (n: number) => (n > 0 ? `+${money(n)}` : "included");
   return (
     <>
-      <ChoiceGroup
-        label={`drink — from ${menu.from}, included`}
-        hint={chosen?.note}
-      >
+      <ChoiceGroup label={`drink — from ${menu.from}, included`}>
         {menu.drinks.map((d) => (
           <PickButton
             key={d.id}
@@ -405,6 +388,39 @@ function DrinkChoice({
           </PickButton>
         ))}
       </ChoiceGroup>
+      {/* the chosen drink, spelled out — easy to miss as a small hint */}
+      <div
+        aria-live="polite"
+        style={{
+          marginTop: 12,
+          padding: "12px 14px",
+          border: "1px solid var(--rule-strong)",
+          borderLeft: "3px solid var(--ink)",
+          background: "var(--paper)",
+        }}
+      >
+        {chosen ? (
+          <>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>
+              {chosen.plain ? chosen.name : `${chosen.name} matcha`}
+            </div>
+            <p
+              style={{
+                margin: "4px 0 0",
+                fontSize: 15,
+                lineHeight: 1.5,
+                color: "var(--ink)",
+              }}
+            >
+              {chosen.note}
+            </p>
+          </>
+        ) : (
+          <p style={{ margin: 0, fontSize: 14, color: "var(--ink-soft)" }}>
+            tap a drink to see what&apos;s in it.
+          </p>
+        )}
+      </div>
       <ChoiceGroup label="iced or hot">
         {TEMPS.map((t) => (
           <PickButton

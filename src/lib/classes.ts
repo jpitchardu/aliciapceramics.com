@@ -212,7 +212,7 @@ export const SAMPLE_EVENTS: ClassEvent[] = [
   },
   {
     id: "matcha-and-clay",
-    title: "hand building class",
+    title: "clay cafe with 333 matcha",
     kind: "beginners welcome",
     sessions: [{ date: "2026-12-12", time: "6 – 8 pm" }],
     duration: "about 2 hours",
