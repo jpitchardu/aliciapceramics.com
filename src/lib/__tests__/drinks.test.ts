@@ -3,9 +3,7 @@ import { SAMPLE_EVENTS, money } from "@/lib/classes";
 import {
   MENU_333,
   collabDetails,
-  drinkExtra,
   drinkLabel,
-  drinkUpgrades,
   encodeDrinks,
   menuFor,
   parseDrinks,
@@ -47,30 +45,11 @@ describe("the 333 matcha menu", () => {
 });
 
 describe("a seat's drink", () => {
-  it("is included, with milk and syrup upgrades on top", () => {
-    expect(drinkExtra(m, { ...honey, milk: "cow" })).toBe(0);
-    expect(drinkExtra(m, honey)).toBe(0.5);
-    expect(drinkExtra(m, plain)).toBe(1.25);
-  });
-
-  it("only takes a syrup on the plain matcha", () => {
-    // a flavored matcha ignores a stray syrup rather than charging for it
-    expect(drinkExtra(m, { ...honey, syrup: "chai" })).toBe(0.5);
-    expect(drinkUpgrades(m, { ...honey, syrup: "chai" })).toHaveLength(1);
-  });
-
   it("reads back plainly", () => {
     expect(drinkLabel(m, honey)).toBe("iced honey, i'm home matcha · oat milk");
     expect(drinkLabel(m, plain)).toBe(
       "hot matcha latte · pistachio milk · earl grey syrup",
     );
-  });
-
-  it("names its upgrades for square, with prices", () => {
-    expect(drinkUpgrades(m, plain)).toEqual([
-      { id: "pistachio", name: "pistachio milk", extra: 0.75 },
-      { id: "earl-grey", name: "earl grey syrup", extra: 0.5 },
-    ]);
   });
 });
 
@@ -92,6 +71,14 @@ describe("drinks in a link", () => {
     // a syrup on a flavored matcha, or one that isn't on the menu
     expect(parseDrinks(m, "chai.iced.oat.chai", 1)).toBeNull();
     expect(parseDrinks(m, "matcha-latte.iced.oat.bubblegum", 1)).toBeNull();
+  });
+});
+
+describe("the menu", () => {
+  it("has no prices on it — every drink is included", () => {
+    for (const o of [...m.drinks, ...m.milks, ...m.syrups]) {
+      expect(o).not.toHaveProperty("extra");
+    }
   });
 });
 

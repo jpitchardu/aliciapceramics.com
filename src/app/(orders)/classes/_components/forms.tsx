@@ -27,7 +27,6 @@ import {
 } from "@/lib/classes";
 import {
   TEMPS,
-  drinkExtra,
   encodeDrinks,
   isChosen,
   isPlain,
@@ -74,9 +73,7 @@ export function BookPanel({ e }: { e: ClassEvent }) {
   };
   const setDrink = (i: number, d: DrinkDraft) =>
     setDrinks((prev) => prev.map((x, j) => (j === i ? d : x)));
-  const sum =
-    total(e, picks) +
-    (menu ? drinks.reduce((t, d) => t + drinkExtra(menu, d), 0) : 0);
+  const sum = total(e, picks);
   const step = {
     width: 40,
     height: 40,
@@ -367,7 +364,6 @@ function DrinkChoice({
 }) {
   const chosen = menu.drinks.find((d) => d.id === draft.drink);
   const plain = isPlain(menu, draft.drink);
-  const upgrade = (n: number) => (n > 0 ? `+${money(n)}` : "included");
   return (
     <>
       <ChoiceGroup label={`drink — from ${menu.from}, included`}>
@@ -437,7 +433,6 @@ function DrinkChoice({
           <PickButton
             key={m.id}
             on={draft.milk === m.id}
-            price={upgrade(m.extra)}
             onClick={() => onChange({ ...draft, milk: m.id })}
           >
             {m.name}
@@ -456,7 +451,6 @@ function DrinkChoice({
             <PickButton
               key={x.id}
               on={draft.syrup === x.id}
-              price={upgrade(x.extra)}
               onClick={() => onChange({ ...draft, syrup: x.id })}
             >
               {x.name}

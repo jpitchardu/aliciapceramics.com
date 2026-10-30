@@ -10,13 +10,7 @@ import {
   whenLabel,
 } from "@/lib/classes";
 import { getClass } from "@/lib/classes-square";
-import {
-  drinkExtra,
-  drinkLabel,
-  encodeDrinks,
-  menuFor,
-  parseDrinks,
-} from "@/lib/drinks";
+import { drinkLabel, encodeDrinks, menuFor, parseDrinks } from "@/lib/drinks";
 import { HOLD_MINUTES } from "@/lib/holds";
 import { BackLink, DateBlock, EventBadge, Label } from "../../_components/bits";
 import { ContinueToSquare } from "../../_components/forms";
@@ -46,8 +40,6 @@ export default async function CheckoutPage({
   const drinks = menu ? parseDrinks(menu, q.drinks, n) : null;
   // a stale or edited link goes back to the class to choose again
   if (!picks || (menu && !drinks)) redirect(`/classes/${e.id}`);
-  const drinkTotal =
-    menu && drinks ? drinks.reduce((t, d) => t + drinkExtra(menu, d), 0) : 0;
 
   // seats making the same piece read back as one line
   const lines = [...new Set(picks)].map((p) => ({
@@ -180,29 +172,26 @@ export default async function CheckoutPage({
           >
             <Label>drinks from {menu.from}</Label>
             <ul style={{ listStyle: "none", margin: "8px 0 0", padding: 0 }}>
-              {drinks.map((d, i) => {
-                const extra = drinkExtra(menu, d);
-                return (
-                  <li
-                    key={i}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      padding: "5px 0",
-                      fontSize: 15,
-                    }}
-                  >
-                    <span>
-                      {n > 1 && `seat ${i + 1} · `}
-                      {drinkLabel(menu, d)}
-                    </span>
-                    <span style={{ color: "var(--ink-soft)", flexShrink: 0 }}>
-                      {extra > 0 ? `+${money(extra)}` : "included"}
-                    </span>
-                  </li>
-                );
-              })}
+              {drinks.map((d, i) => (
+                <li
+                  key={i}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    padding: "5px 0",
+                    fontSize: 15,
+                  }}
+                >
+                  <span>
+                    {n > 1 && `seat ${i + 1} · `}
+                    {drinkLabel(menu, d)}
+                  </span>
+                  <span style={{ color: "var(--ink-soft)", flexShrink: 0 }}>
+                    included
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
         )}
@@ -222,7 +211,7 @@ export default async function CheckoutPage({
             {isMulti(e) ? ", both sessions" : ""}
           </span>
           <span style={{ fontSize: 28, fontWeight: 700 }}>
-            {money(total(e, picks) + drinkTotal)}
+            {money(total(e, picks))}
           </span>
         </div>
       </div>

@@ -1,8 +1,8 @@
 import type { ClassEvent, Collab } from "@/lib/classes";
 
 /*
- * Drinks at a collab class — one per seat, included in the ticket, made to
- * order by the collaborator. The menu lives here rather than in Square
+ * Drinks at a collab class — one per seat, made to order by the
+ * collaborator. Every choice is included in the ticket: nothing costs extra. The menu lives here rather than in Square
  * because a drink is four choices at once (which drink, iced or hot, which
  * milk, an optional syrup), more than a Square modifier list can say.
  *
@@ -10,14 +10,13 @@ import type { ClassEvent, Collab } from "@/lib/classes";
  * attribute in Square; COLLABORATORS fills in the rest of the collab card.
  */
 
-export type MenuItem = { id: string; name: string; note: string };
-export type Extra = { id: string; name: string; extra: number };
+export type Option = { id: string; name: string };
 
 export type DrinkMenu = {
   from: string;
-  drinks: (MenuItem & { plain?: boolean })[];
-  milks: Extra[];
-  syrups: Extra[];
+  drinks: (Option & { note: string; plain?: boolean })[];
+  milks: Option[];
+  syrups: Option[];
 };
 
 export const TEMPS = ["iced", "hot"] as const;
@@ -32,8 +31,6 @@ export type DrinkPick = {
 };
 /* while a seat is still choosing */
 export type DrinkDraft = Partial<DrinkPick> & { milk: string };
-
-const syrup = (id: string, name: string): Extra => ({ id, name, extra: 0.5 });
 
 export const MENU_333: DrinkMenu = {
   from: "333 matcha",
@@ -76,17 +73,17 @@ export const MENU_333: DrinkMenu = {
     },
   ],
   milks: [
-    { id: "cow", name: "cow milk", extra: 0 },
-    { id: "oat", name: "oat milk", extra: 0.5 },
-    { id: "pistachio", name: "pistachio milk", extra: 0.75 },
+    { id: "cow", name: "cow milk" },
+    { id: "oat", name: "oat milk" },
+    { id: "pistachio", name: "pistachio milk" },
   ],
   syrups: [
-    syrup("chai", "chai"),
-    syrup("earl-grey", "earl grey"),
-    syrup("maple-miso", "maple miso"),
-    syrup("toasted-coconut", "toasted coconut"),
-    syrup("honey-vanilla", "honey vanilla"),
-    syrup("english-breakfast", "english breakfast"),
+    { id: "chai", name: "chai" },
+    { id: "earl-grey", name: "earl grey" },
+    { id: "maple-miso", name: "maple miso" },
+    { id: "toasted-coconut", name: "toasted coconut" },
+    { id: "honey-vanilla", name: "honey vanilla" },
+    { id: "english-breakfast", name: "english breakfast" },
   ],
 };
 
@@ -131,13 +128,6 @@ export const newDraft = (m: DrinkMenu): DrinkDraft => ({
 export const isChosen = (d: DrinkDraft): d is DrinkPick =>
   !!d.drink && !!d.temp;
 
-/* what the drink adds to the seat: milk and syrup upgrades */
-export const drinkExtra = (m: DrinkMenu, d: DrinkDraft) =>
-  (m.milks.find((x) => x.id === d.milk)?.extra ?? 0) +
-  (isPlain(m, d.drink)
-    ? (m.syrups.find((x) => x.id === d.syrup)?.extra ?? 0)
-    : 0);
-
 /* "iced honey, i'm home matcha · oat milk" */
 export function drinkLabel(m: DrinkMenu, d: DrinkPick) {
   const drink = m.drinks.find((x) => x.id === d.drink)!;
@@ -152,18 +142,6 @@ export function drinkLabel(m: DrinkMenu, d: DrinkPick) {
   ]
     .filter(Boolean)
     .join(" · ");
-}
-
-/* the upgrades a drink carries, each with its price — for square's lines */
-export function drinkUpgrades(m: DrinkMenu, d: DrinkPick): Extra[] {
-  const out: Extra[] = [];
-  const milk = m.milks.find((x) => x.id === d.milk);
-  if (milk && milk.extra > 0) out.push(milk);
-  const s = isPlain(m, d.drink)
-    ? m.syrups.find((x) => x.id === d.syrup)
-    : undefined;
-  if (s) out.push({ ...s, name: `${s.name} syrup` });
-  return out;
 }
 
 /* ── in links: "honey-im-home.iced.oat." one per seat, comma-joined ── */

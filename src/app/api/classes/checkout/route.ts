@@ -1,19 +1,11 @@
 import { NextResponse } from "next/server";
-import type { Currency } from "square";
 import { z } from "zod";
 import { track } from "@vercel/analytics/server";
 import { squareClient } from "@/lib/square";
 import { SOFT_HOLD } from "@/lib/holds";
 import { getClass, hasSquare } from "@/lib/classes-square";
 import { isSoldOut, parsePicks, shortDay, first } from "@/lib/classes";
-import {
-  drinkLabel,
-  drinkUpgrades,
-  menuFor,
-  parseDrinks,
-  type DrinkMenu,
-  type DrinkPick,
-} from "@/lib/drinks";
+import { drinkLabel, menuFor, parseDrinks } from "@/lib/drinks";
 
 /*
  * Books seats in a class: re-reads the class from Square (price, pieces and
@@ -89,7 +81,7 @@ export async function POST(req: Request) {
   const when = e.sessions.map((s) => shortDay(s.date)).join(" & ");
 
   // with drinks, each seat gets its own line so its drink reads on the
-  // order; the milk and syrup upgrades follow as lines of their own
+  // order — the drink is included, so it adds nothing to the price
   const seatLines =
     menu && drinks
       ? picks.map((piece, i) => ({
@@ -104,7 +96,6 @@ export async function POST(req: Request) {
           modifiers: piece ? [{ catalogObjectId: piece }] : undefined,
           note: when,
         }));
-  const upgradeLines = menu && drinks ? upgradeLinesFor(menu, drinks) : [];
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   try {
@@ -113,7 +104,7 @@ export async function POST(req: Request) {
       order: {
         locationId,
         referenceId: `class ${shortDay(first(e).date)}`.slice(0, 40),
-        lineItems: [...seatLines, ...upgradeLines],
+        lineItems: seatLines,
         // the unpaid order is the hold (see lib/holds): counted against
         // seats left for HOLD_MINUTES; square sells them itself once paid
         metadata: {
@@ -135,25 +126,4 @@ export async function POST(req: Request) {
     await fail("link_error");
     return NextResponse.json({ error: "checkout failed" }, { status: 502 });
   }
-}
-
-/* "oat milk · 333 matcha" × 2 at $0.50 — the drink upgrades, a line each */
-function upgradeLinesFor(menu: DrinkMenu, drinks: DrinkPick[]) {
-  const lines = new Map<string, { name: string; cents: number; n: number }>();
-  for (const d of drinks) {
-    for (const u of drinkUpgrades(menu, d)) {
-      const line = lines.get(u.id) ?? {
-        name: `${u.name} · ${menu.from}`,
-        cents: Math.round(u.extra * 100),
-        n: 0,
-      };
-      line.n += 1;
-      lines.set(u.id, line);
-    }
-  }
-  return [...lines.values()].map((l) => ({
-    name: l.name,
-    quantity: String(l.n),
-    basePriceMoney: { amount: BigInt(l.cents), currency: "USD" as Currency },
-  }));
 }

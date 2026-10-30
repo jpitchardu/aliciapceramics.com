@@ -83,8 +83,8 @@ test.describe("classes preview", () => {
     await expect(seat1.getByText("syrup (optional)")).toHaveCount(0);
     await seat2.getByRole("button", { name: /earl grey/ }).click();
 
-    // 2 × $55, + oat $0.50, + syrup $0.50
-    await expect(page.getByText("$111")).toBeVisible();
+    // the drinks are included: 2 × $55, nothing more
+    await expect(page.getByText("$110")).toBeVisible();
     await page.getByRole("button", { name: "book 2 seats" }).click();
     await expect(
       page.getByText("seat 1 · iced honey, i'm home matcha · oat milk"),
@@ -92,7 +92,8 @@ test.describe("classes preview", () => {
     await expect(
       page.getByText("seat 2 · hot matcha latte · cow milk · earl grey syrup"),
     ).toBeVisible();
-    await expect(page.getByText("$111")).toBeVisible();
+    // the seats line and the total both read $110 — the drinks add nothing
+    await expect(page.getByText("$110")).toHaveCount(2);
   });
 
   test("a drink off the menu goes back to the class", async ({ page }) => {
