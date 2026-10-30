@@ -62,6 +62,46 @@ test.describe("classes preview", () => {
     await expect(page.getByText("$308")).toBeVisible();
   });
 
+  test("a 333 matcha collab orders a drink for every seat", async ({
+    page,
+  }) => {
+    await page.goto("/classes/matcha-and-clay");
+    await expect(page.getByText("who brings what")).toBeVisible();
+    const book = page.getByRole("button", { name: "book 1 seat" });
+    // no drink picked yet — can't book
+    await expect(book).toBeDisabled();
+
+    await page.getByRole("button", { name: "one more seat" }).click();
+    const seat1 = page.getByRole("group", { name: "seat 1" });
+    await seat1.getByRole("button", { name: "honey, i'm home" }).click();
+    await seat1.getByRole("button", { name: "iced" }).click();
+    await seat1.getByRole("button", { name: /oat milk/ }).click();
+    const seat2 = page.getByRole("group", { name: "seat 2" });
+    await seat2.getByRole("button", { name: "matcha latte" }).click();
+    await seat2.getByRole("button", { name: "hot" }).click();
+    // the plain matcha takes a syrup; seat 1's flavored one doesn't
+    await expect(seat1.getByText("syrup (optional)")).toHaveCount(0);
+    await seat2.getByRole("button", { name: /earl grey/ }).click();
+
+    // 2 × $55, + oat $0.50, + syrup $0.50
+    await expect(page.getByText("$111")).toBeVisible();
+    await page.getByRole("button", { name: "book 2 seats" }).click();
+    await expect(
+      page.getByText("seat 1 · iced honey, i'm home matcha · oat milk"),
+    ).toBeVisible();
+    await expect(
+      page.getByText("seat 2 · hot matcha latte · cow milk · earl grey syrup"),
+    ).toBeVisible();
+    await expect(page.getByText("$111")).toBeVisible();
+  });
+
+  test("a drink off the menu goes back to the class", async ({ page }) => {
+    await page.goto(
+      "/classes/matcha-and-clay/checkout?seats=1&drinks=frappuccino.iced.oat.",
+    );
+    await expect(page).toHaveURL(/\/classes\/matcha-and-clay$/);
+  });
+
   test("an edited link goes back to the class", async ({ page }) => {
     await page.goto(
       "/classes/an-evening-at-the-wheel/checkout?seats=1&pieces=not-a-piece",

@@ -2,6 +2,7 @@ import type { CatalogObject } from "square";
 import { squareClient } from "@/lib/square";
 import { EVENTS_CATEGORY_NAME } from "@/lib/config";
 import { heldSeats, releaseStaleHolds } from "@/lib/holds";
+import { collabDetails } from "@/lib/drinks";
 import {
   SAMPLE_EVENTS,
   upcoming,
@@ -150,6 +151,8 @@ export function mapClass(
           trade: "",
           brings: "",
           aliciaBrings: "",
+          // a collaborator we know fills in the rest of the card
+          ...collabDetails(collabWith),
           note: a("collabNote"),
         }
       : undefined,

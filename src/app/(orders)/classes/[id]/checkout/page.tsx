@@ -10,6 +10,13 @@ import {
   whenLabel,
 } from "@/lib/classes";
 import { getClass } from "@/lib/classes-square";
+import {
+  drinkExtra,
+  drinkLabel,
+  encodeDrinks,
+  menuFor,
+  parseDrinks,
+} from "@/lib/drinks";
 import { HOLD_MINUTES } from "@/lib/holds";
 import { BackLink, DateBlock, EventBadge, Label } from "../../_components/bits";
 import { ContinueToSquare } from "../../_components/forms";
@@ -22,7 +29,7 @@ export default async function CheckoutPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ seats?: string; pieces?: string }>;
+  searchParams: Promise<{ seats?: string; pieces?: string; drinks?: string }>;
 }) {
   const e = await getClass((await params).id);
   if (!e) notFound();
@@ -34,8 +41,13 @@ export default async function CheckoutPage({
     e,
     raw.slice(0, n).length === n ? raw.slice(0, n) : [],
   );
+  // a collab with a drink menu needs one drink per seat
+  const menu = menuFor(e);
+  const drinks = menu ? parseDrinks(menu, q.drinks, n) : null;
   // a stale or edited link goes back to the class to choose again
-  if (!picks) redirect(`/classes/${e.id}`);
+  if (!picks || (menu && !drinks)) redirect(`/classes/${e.id}`);
+  const drinkTotal =
+    menu && drinks ? drinks.reduce((t, d) => t + drinkExtra(menu, d), 0) : 0;
 
   // seats making the same piece read back as one line
   const lines = [...new Set(picks)].map((p) => ({
@@ -158,6 +170,42 @@ export default async function CheckoutPage({
             </li>
           ))}
         </ul>
+        {menu && drinks && (
+          <div
+            style={{
+              marginTop: 12,
+              paddingTop: 12,
+              borderTop: "1px solid var(--rule-soft)",
+            }}
+          >
+            <Label>drinks from {menu.from}</Label>
+            <ul style={{ listStyle: "none", margin: "8px 0 0", padding: 0 }}>
+              {drinks.map((d, i) => {
+                const extra = drinkExtra(menu, d);
+                return (
+                  <li
+                    key={i}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      padding: "5px 0",
+                      fontSize: 15,
+                    }}
+                  >
+                    <span>
+                      {n > 1 && `seat ${i + 1} · `}
+                      {drinkLabel(menu, d)}
+                    </span>
+                    <span style={{ color: "var(--ink-soft)", flexShrink: 0 }}>
+                      {extra > 0 ? `+${money(extra)}` : "included"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
         <div
           style={{
             marginTop: 12,
@@ -174,13 +222,17 @@ export default async function CheckoutPage({
             {isMulti(e) ? ", both sessions" : ""}
           </span>
           <span style={{ fontSize: 28, fontWeight: 700 }}>
-            {money(total(e, picks))}
+            {money(total(e, picks) + drinkTotal)}
           </span>
         </div>
       </div>
 
       <div style={{ marginTop: 28 }}>
-        <ContinueToSquare id={e.id} picks={picks} />
+        <ContinueToSquare
+          id={e.id}
+          picks={picks}
+          drinks={drinks ? encodeDrinks(drinks) : undefined}
+        />
       </div>
       <div style={{ marginTop: 10 }}>
         <BackLink href={`/classes/${e.id}`}>← back to the class</BackLink>

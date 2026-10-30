@@ -25,24 +25,58 @@ import {
   type FormatId,
   type PlaceId,
 } from "@/lib/classes";
+import {
+  TEMPS,
+  drinkExtra,
+  encodeDrinks,
+  isChosen,
+  isPlain,
+  menuFor,
+  newDraft,
+  type DrinkDraft,
+  type DrinkMenu,
+} from "@/lib/drinks";
 import { Field, FillButton } from "../../_components/atoms";
 import { Facts, Label, QuietLink, SeatsNote, SquareNote } from "./bits";
 
 const email = z.email();
 
-/* ── the booking panel: price, seats, each seat's piece ─────────── */
+/* ── the booking panel: price, seats, each seat's piece and drink ── */
 export function BookPanel({ e }: { e: ClassEvent }) {
   const router = useRouter();
+  const menu = menuFor(e);
   const [picks, setPicks] = useState<(string | null)[]>([defaultPiece(e)]);
+  const [drinks, setDrinks] = useState<DrinkDraft[]>(
+    menu ? [newDraft(menu)] : [],
+  );
   const n = picks.length;
   const multi = isMulti(e);
   const upgrades = hasUpgrades(e);
-  const setSeats = (next: number) =>
+  const perSeat = hasChoice(e) || !!menu;
+  const drinksDone = drinks.every(isChosen);
+  const setSeats = (next: number) => {
     setPicks((prev) =>
       next > prev.length
         ? [...prev, ...Array(next - prev.length).fill(defaultPiece(e))]
         : prev.slice(0, next),
     );
+    if (menu)
+      setDrinks((prev) =>
+        next > prev.length
+          ? [
+              ...prev,
+              ...Array.from({ length: next - prev.length }, () =>
+                newDraft(menu),
+              ),
+            ]
+          : prev.slice(0, next),
+      );
+  };
+  const setDrink = (i: number, d: DrinkDraft) =>
+    setDrinks((prev) => prev.map((x, j) => (j === i ? d : x)));
+  const sum =
+    total(e, picks) +
+    (menu ? drinks.reduce((t, d) => t + drinkExtra(menu, d), 0) : 0);
   const step = {
     width: 40,
     height: 40,
@@ -60,6 +94,10 @@ export function BookPanel({ e }: { e: ClassEvent }) {
   const book = () => {
     const q = new URLSearchParams({ seats: String(n) });
     if (hasChoice(e)) q.set("pieces", picks.join(","));
+    if (menu) {
+      if (!drinks.every(isChosen)) return;
+      q.set("drinks", encodeDrinks(drinks));
+    }
     router.push(`/classes/${e.id}/checkout?${q}`);
   };
 
@@ -161,7 +199,7 @@ export function BookPanel({ e }: { e: ClassEvent }) {
         </p>
       </div>
 
-      {hasChoice(e) && (
+      {perSeat && (
         <div style={{ marginTop: 22 }}>
           {picks.map((pick, i) => (
             <fieldset
@@ -175,57 +213,35 @@ export function BookPanel({ e }: { e: ClassEvent }) {
               }}
             >
               <legend style={{ padding: 0, float: "left", width: "100%" }}>
-                <Label>
-                  {n === 1 ? "your piece" : `seat ${i + 1} — their piece`}
+                <Label color="var(--ink)">
+                  {n === 1 ? "your seat" : `seat ${i + 1}`}
                 </Label>
               </legend>
-              <div
-                style={{
-                  clear: "both",
-                  paddingTop: 10,
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 8,
-                }}
-              >
-                {e.pieces.map((p) => {
-                  const on = pick === p.id;
-                  return (
-                    <button
+              {hasChoice(e) && (
+                <ChoiceGroup label={n === 1 ? "your piece" : "their piece"}>
+                  {e.pieces.map((p) => (
+                    <PickButton
                       key={p.id}
-                      type="button"
-                      aria-pressed={on}
+                      on={pick === p.id}
+                      price={p.extra > 0 ? `+${money(p.extra)}` : "included"}
                       onClick={() =>
                         setPicks((prev) =>
                           prev.map((x, j) => (j === i ? p.id : x)),
                         )
                       }
-                      style={{
-                        fontFamily: "var(--serif)",
-                        fontSize: 13,
-                        padding: "9px 13px",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        border: `1px solid ${on ? "var(--ink)" : "var(--rule-strong)"}`,
-                        background: on ? "var(--ink)" : "transparent",
-                        color: on ? "var(--paper)" : "var(--ink)",
-                      }}
                     >
                       {p.name}
-                      <span
-                        style={{
-                          marginLeft: 8,
-                          color: on
-                            ? "rgba(237,227,208,0.8)"
-                            : "var(--ink-soft)",
-                        }}
-                      >
-                        {p.extra > 0 ? `+${money(p.extra)}` : "included"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                    </PickButton>
+                  ))}
+                </ChoiceGroup>
+              )}
+              {menu && (
+                <DrinkChoice
+                  menu={menu}
+                  draft={drinks[i]}
+                  onChange={(d) => setDrink(i, d)}
+                />
+              )}
             </fieldset>
           ))}
         </div>
@@ -243,19 +259,196 @@ export function BookPanel({ e }: { e: ClassEvent }) {
       >
         <Label>total</Label>
         <div aria-live="polite" style={{ fontSize: 26 }}>
-          {money(total(e, picks))}
+          {money(sum)}
         </div>
       </div>
 
       <FillButton
         type="button"
         style={{ marginTop: 18, width: "100%" }}
+        disabled={!drinksDone}
         onClick={book}
       >
         book {n} {n === 1 ? "seat" : "seats"}
       </FillButton>
+      {!drinksDone && (
+        <p
+          style={{
+            margin: "10px 0 0",
+            fontSize: 12,
+            color: "var(--ink-soft)",
+            textAlign: "center",
+          }}
+        >
+          pick a drink and iced or hot for{" "}
+          {n === 1 ? "your seat" : "every seat"} to book.
+        </p>
+      )}
       <SquareNote style={{ marginTop: 16 }} />
     </div>
+  );
+}
+
+/* a row of toggle buttons under a small label */
+function ChoiceGroup({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={label}
+      style={{ clear: "both", paddingTop: 14 }}
+    >
+      <Label>{label}</Label>
+      <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {children}
+      </div>
+      {hint && (
+        <p
+          style={{
+            margin: "8px 0 0",
+            fontSize: 12,
+            lineHeight: 1.5,
+            color: "var(--ink-soft)",
+          }}
+        >
+          {hint}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* one choice — a toggle, so it's announced as on or off */
+function PickButton({
+  on,
+  price,
+  onClick,
+  children,
+}: {
+  on: boolean;
+  price?: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={on}
+      onClick={onClick}
+      style={{
+        fontFamily: "var(--serif)",
+        fontSize: 13,
+        padding: "9px 13px",
+        cursor: "pointer",
+        textAlign: "left",
+        border: `1px solid ${on ? "var(--ink)" : "var(--rule-strong)"}`,
+        background: on ? "var(--ink)" : "transparent",
+        color: on ? "var(--paper)" : "var(--ink)",
+      }}
+    >
+      {children}
+      {price && (
+        <span
+          style={{
+            marginLeft: 8,
+            color: on ? "rgba(237,227,208,0.8)" : "var(--ink-soft)",
+          }}
+        >
+          {price}
+        </span>
+      )}
+    </button>
+  );
+}
+
+/* one seat's drink: which one, iced or hot, the milk, and — on the plain
+ * matcha only — a syrup */
+function DrinkChoice({
+  menu,
+  draft,
+  onChange,
+}: {
+  menu: DrinkMenu;
+  draft: DrinkDraft;
+  onChange: (d: DrinkDraft) => void;
+}) {
+  const chosen = menu.drinks.find((d) => d.id === draft.drink);
+  const plain = isPlain(menu, draft.drink);
+  const upgrade = (n: number) => (n > 0 ? `+${money(n)}` : "included");
+  return (
+    <>
+      <ChoiceGroup
+        label={`drink — from ${menu.from}, included`}
+        hint={chosen?.note}
+      >
+        {menu.drinks.map((d) => (
+          <PickButton
+            key={d.id}
+            on={draft.drink === d.id}
+            onClick={() =>
+              // a syrup only goes on the plain matcha
+              onChange({
+                ...draft,
+                drink: d.id,
+                syrup: d.plain ? draft.syrup : null,
+              })
+            }
+          >
+            {d.name}
+          </PickButton>
+        ))}
+      </ChoiceGroup>
+      <ChoiceGroup label="iced or hot">
+        {TEMPS.map((t) => (
+          <PickButton
+            key={t}
+            on={draft.temp === t}
+            onClick={() => onChange({ ...draft, temp: t })}
+          >
+            {t}
+          </PickButton>
+        ))}
+      </ChoiceGroup>
+      <ChoiceGroup label="milk">
+        {menu.milks.map((m) => (
+          <PickButton
+            key={m.id}
+            on={draft.milk === m.id}
+            price={upgrade(m.extra)}
+            onClick={() => onChange({ ...draft, milk: m.id })}
+          >
+            {m.name}
+          </PickButton>
+        ))}
+      </ChoiceGroup>
+      {plain && (
+        <ChoiceGroup label="syrup (optional)">
+          <PickButton
+            on={!draft.syrup}
+            onClick={() => onChange({ ...draft, syrup: null })}
+          >
+            none
+          </PickButton>
+          {menu.syrups.map((x) => (
+            <PickButton
+              key={x.id}
+              on={draft.syrup === x.id}
+              price={upgrade(x.extra)}
+              onClick={() => onChange({ ...draft, syrup: x.id })}
+            >
+              {x.name}
+            </PickButton>
+          ))}
+        </ChoiceGroup>
+      )}
+    </>
   );
 }
 
@@ -263,9 +456,12 @@ export function BookPanel({ e }: { e: ClassEvent }) {
 export function ContinueToSquare({
   id,
   picks,
+  drinks,
 }: {
   id: string;
   picks: (string | null)[];
+  /* one drink per seat, as in the link — collab classes with a menu */
+  drinks?: string;
 }) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
@@ -276,7 +472,7 @@ export function ContinueToSquare({
       const res = await fetch("/api/classes/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, pieces: picks }),
+        body: JSON.stringify({ id, pieces: picks, drinks }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {

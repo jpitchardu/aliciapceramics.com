@@ -17,6 +17,8 @@
  * samples below stand in.
  */
 
+import { collabDetails } from "@/lib/drinks";
+
 export type Session = {
   /* calendar day, YYYY-MM-DD (Dallas) */
   date: string;
@@ -208,6 +210,31 @@ export const SAMPLE_EVENTS: ClassEvent[] = [
     aside:
       "ten seats for this one rather than six — two pairs of hands means we can take more of you.",
   },
+  {
+    id: "matcha-and-clay",
+    title: "hand building class",
+    kind: "beginners welcome",
+    sessions: [{ date: "2026-12-12", time: "6 – 8 pm" }],
+    duration: "about 2 hours",
+    price: 55,
+    seats: 10,
+    left: 8,
+    photo: "/assets/piece-cream.png",
+    pieces: [],
+    make: "one piece you make in the class, ready in about 2 weeks once it's glazed and fired",
+    blurb:
+      "i'll give you a pound of clay to make a mug or any shape you're feeling — we'll use the pinch pot method. your drink is made to order while you work.",
+    facts: [BRING_NOTHING],
+    collab: {
+      with: "333 matcha",
+      handle: "",
+      trade: "",
+      brings: "",
+      aliciaBrings: "",
+      ...collabDetails("333 matcha"),
+      note: "every seat comes with a drink from 333 matcha — pick yours when you book.",
+    },
+  },
 ];
 
 /* soonest first */
@@ -259,7 +286,9 @@ export const clampSeats = (e: ClassEvent, n: unknown) => {
   return Math.max(1, Math.min(e.left, v));
 };
 
-export const money = (n: number) => `$${n}`;
+/* "$85", or "$85.50" once drink upgrades bring in cents */
+export const money = (n: number) =>
+  Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`;
 
 /* the soonest open event that isn't this one — "the next one like it" */
 export const nextOpen = (e: ClassEvent, all: readonly ClassEvent[]) =>
