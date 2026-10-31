@@ -218,6 +218,7 @@ function Mast({ e }: { e: ClassEvent }) {
             flexWrap: "wrap",
           }}
         >
+          {e.kind && <Label color="var(--ink-soft)">{e.kind}</Label>}
           <span style={{ fontSize: 15, color: "var(--ink-soft)" }}>
             {(isMulti(e) ? [e.duration] : [whenLabel(first(e)), timeLabel(e)])
               .filter(Boolean)

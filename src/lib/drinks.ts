@@ -94,7 +94,7 @@ type Collaborator = Pick<Collab, "trade" | "brings" | "aliciaBrings"> & {
 /* keyed by the "collab with" name, lowercased with only letters and digits */
 export const COLLABORATORS: Record<string, Collaborator> = {
   "333matcha": {
-    trade: "a matcha bar",
+    trade: "",
     brings: "a matcha drink for every seat, made to order",
     aliciaBrings: "the clay, the tools and the firing",
     menu: MENU_333,
