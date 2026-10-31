@@ -80,6 +80,7 @@ export default async function EventPage({
             className="cl-blurb"
             style={{
               margin: "24px 0 0",
+              whiteSpace: "pre-line",
               lineHeight: 1.65,
               color: "var(--ink-soft)",
             }}
@@ -206,8 +207,6 @@ function Mast({ e }: { e: ClassEvent }) {
             <EventBadge quiet>sold out</EventBadge>
           ) : isMulti(e) ? (
             <EventBadge>two sessions</EventBadge>
-          ) : e.collab ? (
-            <EventBadge>a collaboration</EventBadge>
           ) : null}
         </div>
         <div
@@ -219,12 +218,8 @@ function Mast({ e }: { e: ClassEvent }) {
             flexWrap: "wrap",
           }}
         >
-          {e.kind && <Label color="var(--ink-soft)">{e.kind}</Label>}
           <span style={{ fontSize: 15, color: "var(--ink-soft)" }}>
-            {(isMulti(e)
-              ? [e.duration]
-              : [whenLabel(first(e)), timeLabel(e), e.duration]
-            )
+            {(isMulti(e) ? [e.duration] : [whenLabel(first(e)), timeLabel(e)])
               .filter(Boolean)
               .join(" · ")}
           </span>
