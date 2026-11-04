@@ -24,6 +24,7 @@ import {
   QuietLink,
   SeatsNote,
 } from "./_components/bits";
+import { ClassListSignup } from "./_components/ClassListSignup";
 
 /*
  * The landing: upcoming dated classes, soonest first, with the private
@@ -85,6 +86,10 @@ export default async function ClassesPage({
       ) : (
         <QuietMonth />
       )}
+      <ClassListSignup
+        from="classes"
+        style={{ margin: "48px auto 0", maxWidth: 480 }}
+      />
       <PrivateInvite />
     </div>
   );

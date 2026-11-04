@@ -26,6 +26,7 @@ import {
   TextLink,
 } from "../_components/bits";
 import { BookPanel } from "../_components/forms";
+import { ClassListSignup } from "../_components/ClassListSignup";
 import { getClass, getClasses } from "@/lib/classes-square";
 
 // seats change as people book — always read fresh
@@ -115,15 +116,20 @@ export default async function EventPage({
         <div className="cl-sticky">
           {out ? (
             <>
-              <FollowInstagram
+              <ClassListSignup
+                from={e.id}
                 title={
                   e.seats
                     ? `all ${e.seats} seats are taken.`
                     : "every seat is taken."
                 }
               >
-                new dates — and any seat that opens up — go up on instagram
-                first. follow along so you don&apos;t miss the next one.
+                leave your email and i&apos;ll let you know the moment the next
+                class goes up.
+              </ClassListSignup>
+              <FollowInstagram style={{ marginTop: 16 }}>
+                any seat that opens up goes on instagram first — follow along so
+                you don&apos;t miss it.
               </FollowInstagram>
               <NextOne e={e} all={all} />
             </>
